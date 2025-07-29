@@ -16,7 +16,7 @@ interface SigninFormProps {
   role: "borrower" | "lender"
 }
 
-export function SigninForm({ role }: SigninFormProps) {
+export function SignInForm({ role }: SigninFormProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
