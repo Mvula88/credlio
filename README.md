@@ -1,30 +1,96 @@
-# Supabase project setup
+# Credlio - Peer-to-Peer Lending Platform
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A modern peer-to-peer lending platform built with Next.js, TypeScript, Supabase, and Stripe.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/credlio/v0-supabase-project-setup)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/7ROmJzidwYJ)
+## Features
 
-## Overview
+- **User Authentication**: Secure authentication with role-based access (Lender/Borrower)
+- **Loan Management**: Create loan requests, make offers, track payments
+- **Payment Processing**: Integrated with Stripe for secure payment handling
+- **Admin Dashboard**: Comprehensive admin tools for platform management
+- **Country-Specific Features**: Support for multiple countries with localized settings
+- **Risk Management**: Borrower risk assessment and tracking
+- **Real-time Notifications**: Stay updated with loan and payment activities
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Tech Stack
+
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Radix UI components
+- **Backend**: Supabase (PostgreSQL, Authentication, Real-time)
+- **Payments**: Stripe
+- **Package Manager**: pnpm
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- pnpm (install with `npm install -g pnpm`)
+- Supabase account
+- Stripe account
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/credlio.git
+cd credlio
+```
+
+2. Install dependencies:
+```bash
+pnpm install
+```
+
+3. Set up environment variables:
+Create a `.env.local` file with your credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+STRIPE_SECRET_KEY=your-stripe-secret-key
+STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
+```
+
+4. Run the development server:
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application.
+
+## Database Setup
+
+Run the SQL scripts in the `/scripts` folder in your Supabase SQL editor to set up the database schema and policies.
 
 ## Deployment
 
-Your project is live at:
+### Deploy to Vercel
 
-**[https://vercel.com/credlio/v0-supabase-project-setup](https://vercel.com/credlio/v0-supabase-project-setup)**
+1. Push your code to GitHub
+2. Import your repository in Vercel
+3. Add environment variables in Vercel project settings
+4. Deploy
 
-## Build your app
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
-Continue building your app on:
+## Project Structure
 
-**[https://v0.dev/chat/projects/7ROmJzidwYJ](https://v0.dev/chat/projects/7ROmJzidwYJ)**
+```
+├── app/              # Next.js app directory
+├── components/       # React components
+├── lib/             # Utility functions and configurations
+├── hooks/           # Custom React hooks
+├── scripts/         # Database setup scripts
+├── public/          # Static assets
+└── styles/          # Global styles
+```
 
-## How It Works
+## Contributing
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is private and proprietary.
