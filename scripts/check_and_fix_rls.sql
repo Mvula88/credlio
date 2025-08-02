@@ -1,119 +1,61 @@
--- Check which tables have RLS enabled and which need it
+-- =====================================================
+-- CHECK AND FIX RLS COMPLETELY
+-- =====================================================
 
--- 1. Check current RLS status for all tables
-SELECT 
-    tablename,
-    CASE 
-        WHEN c.relrowsecurity = true THEN '✅ Enabled'
-        ELSE '❌ Disabled'
-    END as rls_status,
-    CASE 
-        WHEN tablename IN (
-            'profiles', 'borrower_profiles', 'loan_requests', 'loan_offers',
-            'notifications', 'subscription_plans', 'subscription_usage', 
-            'stripe_customers', 'stripe_subscriptions', 'borrower_invitations',
-            'recent_searches', 'countries', 'payment_proof_uploads', 
-            'smart_tags', 'reputation_badges', 'profile_views', 
-            'borrower_risk_history', 'active_loans', 'loan_payments'
-        ) THEN 'Yes - Contains user data'
-        WHEN tablename IN ('currencies', 'roles') THEN 'No - Public reference data'
-        ELSE 'Maybe - Check usage'
-    END as needs_rls
-FROM pg_tables t
-JOIN pg_class c ON c.relname = t.tablename
-WHERE schemaname = 'public'
-ORDER BY needs_rls DESC, tablename;
+-- 1. Check if RLS is enabled on profiles table
+SELECT tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public' AND tablename = 'profiles';
 
--- 2. Tables that MUST have RLS (user-specific data)
--- These contain private user information or user-specific records
-DO $$
+-- 2. If RLS is not enabled, enable it
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- 3. Drop ALL existing policies to start completely fresh
+DO $$ 
 DECLARE
-    tbl TEXT;
-    tables_needing_rls TEXT[] := ARRAY[
-        'profiles',
-        'borrower_profiles', 
-        'loan_requests',
-        'loan_offers',
-        'notifications',
-        'subscription_plans',
-        'subscription_usage',
-        'stripe_customers',
-        'stripe_subscriptions',
-        'borrower_invitations',
-        'recent_searches',
-        'payment_proof_uploads',
-        'smart_tags',
-        'reputation_badges',
-        'profile_views',
-        'borrower_risk_history',
-        'active_loans',
-        'loan_payments'
-    ];
+    pol record;
 BEGIN
-    FOREACH tbl IN ARRAY tables_needing_rls
+    FOR pol IN 
+        SELECT policyname 
+        FROM pg_policies 
+        WHERE tablename = 'profiles'
     LOOP
-        -- Check if table exists and RLS is not enabled
-        IF EXISTS (
-            SELECT 1 FROM pg_tables 
-            WHERE tablename = tbl 
-            AND schemaname = 'public'
-        ) AND NOT EXISTS (
-            SELECT 1 FROM pg_class 
-            WHERE relname = tbl 
-            AND relrowsecurity = true
-        ) THEN
-            EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', tbl);
-            RAISE NOTICE 'Enabled RLS on table: %', tbl;
-        END IF;
+        EXECUTE format('DROP POLICY IF EXISTS %I ON profiles', pol.policyname);
     END LOOP;
 END $$;
 
--- 3. Tables that DON'T need RLS (public/reference data)
--- These are lookup tables that all users can read
-/*
-Tables that DON'T need RLS:
-- currencies: Public currency reference data
-- roles: Public role definitions
-- countries: Public country list (though has RLS for admin features)
-*/
+-- 4. Create simple, working policies
+-- Allow authenticated users to insert their own profile
+CREATE POLICY "allow_insert_own_profile" ON profiles
+    FOR INSERT TO authenticated
+    WITH CHECK (auth.uid() = auth_user_id);
 
--- 4. Check for tables with RLS but no policies (common mistake)
-SELECT 
-    c.relname as table_name,
-    COUNT(pol.polname) as policy_count,
-    CASE 
-        WHEN COUNT(pol.polname) = 0 THEN '⚠️ RLS enabled but NO POLICIES!'
-        ELSE '✅ Has ' || COUNT(pol.polname) || ' policies'
-    END as status
-FROM pg_class c
-LEFT JOIN pg_policy pol ON c.oid = pol.polrelid
-WHERE c.relrowsecurity = true
-GROUP BY c.relname
-ORDER BY policy_count, c.relname;
+-- Allow users to view their own profile  
+CREATE POLICY "allow_select_own_profile" ON profiles
+    FOR SELECT TO authenticated
+    USING (auth.uid() = auth_user_id);
 
--- 5. Summary message
-DO $$
-DECLARE
-    rls_enabled_count INTEGER;
-    no_policy_count INTEGER;
-BEGIN
-    SELECT COUNT(*) INTO rls_enabled_count
-    FROM pg_class c
-    JOIN pg_tables t ON c.relname = t.tablename
-    WHERE c.relrowsecurity = true
-    AND t.schemaname = 'public';
-    
-    SELECT COUNT(*) INTO no_policy_count
-    FROM pg_class c
-    LEFT JOIN pg_policy pol ON c.oid = pol.polrelid
-    WHERE c.relrowsecurity = true
-    GROUP BY c.relname
-    HAVING COUNT(pol.polname) = 0;
-    
-    RAISE NOTICE '';
-    RAISE NOTICE '=== RLS Summary ===';
-    RAISE NOTICE 'Tables with RLS enabled: %', rls_enabled_count;
-    RAISE NOTICE 'Tables with RLS but no policies: %', no_policy_count;
-    RAISE NOTICE '';
-    RAISE NOTICE 'If you see tables with RLS but no policies, they need policies added!';
-END $$;
+-- Allow users to update their own profile
+CREATE POLICY "allow_update_own_profile" ON profiles
+    FOR UPDATE TO authenticated
+    USING (auth.uid() = auth_user_id)
+    WITH CHECK (auth.uid() = auth_user_id);
+
+-- 5. TEMPORARY: If signup still fails, create a service role bypass
+-- This allows the backend to insert profiles during signup
+CREATE POLICY "service_role_bypass" ON profiles
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- 6. Verify final state
+SELECT 'RLS Status:' as info;
+SELECT tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public' AND tablename = 'profiles';
+
+SELECT 'Active Policies:' as info;
+SELECT policyname, cmd, roles, qual, with_check
+FROM pg_policies
+WHERE tablename = 'profiles'
+ORDER BY policyname;

@@ -168,25 +168,41 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
       if (authError) throw authError
 
       if (authData.user) {
-        // Create profile with all secure data
+        // Update the automatically created profile with additional data
+        // The trigger creates the basic profile, we just update it with more details
         const { error: profileError } = await supabase
           .from("profiles")
-          .insert({
-            id: authData.user.id,
-            auth_user_id: authData.user.id,
-            email: formData.email,
-            full_name: formData.fullName,
-            username: username,
+          .update({
             phone: formData.phone,
-            role: role,
             national_id_hash: idHash,
             id_type: formData.idType,
             date_of_birth: formData.dateOfBirth,
             country_id: countryId,  // Use the UUID instead of country code
             id_verified: false
           })
+          .eq('auth_user_id', authData.user.id)
 
-        if (profileError) throw profileError
+        if (profileError) {
+          // If update fails, try insert (fallback for cases where trigger didn't fire)
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .insert({
+              id: authData.user.id,
+              auth_user_id: authData.user.id,
+              email: formData.email,
+              full_name: formData.fullName,
+              username: username,
+              phone: formData.phone,
+              role: role,
+              national_id_hash: idHash,
+              id_type: formData.idType,
+              date_of_birth: formData.dateOfBirth,
+              country_id: countryId,
+              id_verified: false
+            })
+          
+          if (insertError) throw insertError
+        }
 
         // Store identity verification record
         await supabase
