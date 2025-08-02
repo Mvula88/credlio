@@ -134,6 +134,20 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         throw new Error("An account already exists with this ID number. Please sign in instead.")
       }
 
+      // Fetch country UUID from country code
+      let countryId = formData.country
+      if (formData.country && formData.country.length === 2) {
+        const { data: countryData } = await supabase
+          .from("countries")
+          .select("id")
+          .eq("code", formData.country)
+          .single()
+        
+        if (countryData) {
+          countryId = countryData.id
+        }
+      }
+
       // Generate unique username
       const username = await generateUniqueUsername(formData.country)
       
@@ -168,7 +182,7 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
             national_id_hash: idHash,
             id_type: formData.idType,
             date_of_birth: formData.dateOfBirth,
-            country_id: formData.country,
+            country_id: countryId,  // Use the UUID instead of country code
             id_verified: false
           })
 
