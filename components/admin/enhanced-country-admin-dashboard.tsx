@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 import type { Country, SupportedCountry } from "@/lib/types/bureau"
 import type { CountryStatistics, Profile } from "@/lib/types/auth"
-import { formatCurrencyForCountry } from "@/lib/services/geolocation"
+import { formatCurrencyForCountry } from "@/lib/services/geolocation-client"
 
 // Import modular widgets
 import { ComplaintsWidget } from "./country-widgets/complaints-widget"

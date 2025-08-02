@@ -9,7 +9,7 @@ import { Loader2, CheckCircle, CreditCard, Calendar, AlertCircle } from "lucide-
 import { SubscriptionPlans } from "@/components/subscriptions/subscription-plans"
 import type { Profile } from "@/lib/types/auth"
 import type { LenderSubscription } from "@/lib/types/bureau"
-import { formatCurrencyForCountry } from "@/lib/services/geolocation"
+import { formatCurrencyForCountry } from "@/lib/services/geolocation-client"
 
 export default function LenderSubscriptionPage() {
   const [loading, setLoading] = useState(true)

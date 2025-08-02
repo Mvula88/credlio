@@ -21,7 +21,7 @@ import {
   ArrowDownRight
 } from "lucide-react"
 import type { SupportedCountry } from "@/lib/types/bureau"
-import { formatCurrencyForCountry } from "@/lib/services/geolocation"
+import { formatCurrencyForCountry } from "@/lib/services/geolocation-client"
 
 interface RevenueAnalyticsWidgetProps {
   country: SupportedCountry

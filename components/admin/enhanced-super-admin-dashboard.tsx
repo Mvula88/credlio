@@ -40,7 +40,7 @@ import {
 } from "lucide-react"
 import type { Country, SupportedCountry } from "@/lib/types/bureau"
 import type { CountryStatistics } from "@/lib/types/auth"
-import { formatCurrencyForCountry } from "@/lib/services/geolocation"
+import { formatCurrencyForCountry } from "@/lib/services/geolocation-client"
 
 interface GlobalStatistics {
   totalUsers: number

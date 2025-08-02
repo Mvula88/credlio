@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Check, X, Loader2, CreditCard, Info } from "lucide-react"
-import { formatCurrencyForCountry } from "@/lib/services/geolocation"
+import { formatCurrencyForCountry } from "@/lib/services/geolocation-client"
 import type { SupportedCountry } from "@/lib/types/bureau"
 
 interface SubscriptionPlan {
