@@ -5,7 +5,15 @@ import type { Database } from "@/lib/types/database"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient<Database>({ req, res })
+  
+  // Check if Supabase environment variables are configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    // Skip middleware if Supabase is not configured
+    return res
+  }
+
+  try {
+    const supabase = createMiddlewareClient<Database>({ req, res })
 
   // Refresh session if expired - required for Server Components
   const {
@@ -51,6 +59,10 @@ export async function middleware(req: NextRequest) {
   }
 
   return res
+  } catch (error) {
+    console.error("Middleware error:", error)
+    return res
+  }
 }
 
 export const config = {

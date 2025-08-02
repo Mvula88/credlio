@@ -1,8 +1,10 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,31 +12,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Eye, EyeOff } from "lucide-react"
+import { signUpSchema, type SignUpInput } from "@/lib/validations/auth"
 
-interface SignupFormProps {
+interface SecureSignupFormProps {
   role: "borrower" | "lender"
 }
 
-export function SignupForm({ role }: SignupFormProps) {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phoneNumber: "",
-    email: "",
-    password: "",
-    countryId: "",
-  })
+export function SecureSignupForm({ role }: SecureSignupFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [countries, setCountries] = useState<Array<{ id: string; code: string; name: string }>>([])
+  const [loadingCountries, setLoadingCountries] = useState(true)
 
   const router = useRouter()
   const supabase = createClientComponentClient()
 
-  const [countries, setCountries] = useState<Array<{ id: string; code: string; name: string }>>([])  
-  const [loadingCountries, setLoadingCountries] = useState(true)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+  })
 
   // Fetch countries from database
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchCountries = async () => {
       try {
         const { data, error } = await supabase
@@ -46,24 +51,27 @@ export function SignupForm({ role }: SignupFormProps) {
         if (data) setCountries(data)
       } catch (err) {
         console.error("Error fetching countries:", err)
+        setError("Failed to load countries")
       } finally {
         setLoadingCountries(false)
       }
     }
 
     fetchCountries()
-  }, [])
+  }, [supabase])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (data: SignUpInput) => {
     setLoading(true)
     setError("")
 
     try {
       // Create user account
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
       if (authError) throw authError
@@ -72,10 +80,10 @@ export function SignupForm({ role }: SignupFormProps) {
         // Create profile in database
         const { error: profileError } = await supabase.from("profiles").insert({
           auth_user_id: authData.user.id,
-          full_name: formData.fullName,
-          phone_number: formData.phoneNumber,
-          email: formData.email,
-          country_id: formData.countryId,
+          full_name: data.fullName,
+          phone_number: data.phoneNumber,
+          email: data.email,
+          country_id: data.countryId,
         })
 
         if (profileError) throw profileError
@@ -86,8 +94,12 @@ export function SignupForm({ role }: SignupFormProps) {
           role_name: role,
         })
 
-        if (profileError) throw profileError
+        if (roleError) throw roleError
 
+        // Show success message
+        setError("")
+        alert("Account created successfully! Please check your email to verify your account.")
+        
         // Redirect to appropriate login page
         if (role === "borrower") {
           router.push("/login/borrower")
@@ -103,6 +115,8 @@ export function SignupForm({ role }: SignupFormProps) {
     }
   }
 
+  const countryValue = watch("countryId")
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -110,7 +124,7 @@ export function SignupForm({ role }: SignupFormProps) {
         <CardDescription>Sign up as a {role} to get started with Credlio</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -122,10 +136,12 @@ export function SignupForm({ role }: SignupFormProps) {
             <Input
               id="fullName"
               type="text"
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              required
+              {...register("fullName")}
+              placeholder="John Doe"
             />
+            {errors.fullName && (
+              <p className="text-sm text-red-500">{errors.fullName.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -133,10 +149,12 @@ export function SignupForm({ role }: SignupFormProps) {
             <Input
               id="phoneNumber"
               type="tel"
-              value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              required
+              {...register("phoneNumber")}
+              placeholder="+1234567890"
             />
+            {errors.phoneNumber && (
+              <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -144,10 +162,12 @@ export function SignupForm({ role }: SignupFormProps) {
             <Input
               id="email"
               type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
+              {...register("email")}
+              placeholder="john@example.com"
             />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -156,9 +176,8 @@ export function SignupForm({ role }: SignupFormProps) {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
+                {...register("password")}
+                placeholder="••••••••"
               />
               <Button
                 type="button"
@@ -170,13 +189,19 @@ export function SignupForm({ role }: SignupFormProps) {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Must be at least 8 characters with uppercase, lowercase, and numbers
+            </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="country">Country</Label>
             <Select 
-              value={formData.countryId} 
-              onValueChange={(value) => setFormData({ ...formData, countryId: value })}
+              value={countryValue} 
+              onValueChange={(value) => setValue("countryId", value, { shouldValidate: true })}
               disabled={loadingCountries}
             >
               <SelectTrigger>
@@ -190,9 +215,12 @@ export function SignupForm({ role }: SignupFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {errors.countryId && (
+              <p className="text-sm text-red-500">{errors.countryId.message}</p>
+            )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading || loadingCountries}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Account
           </Button>
