@@ -7,8 +7,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import type { LoanPayment } from "@/lib/types"
@@ -50,7 +63,9 @@ export function PaymentInitiateForm({ payment, borrowerProfileId }: PaymentIniti
       <Card>
         <CardHeader>
           <CardTitle>Payment Status: {payment.payment_status}</CardTitle>
-          <CardDescription>This payment is already {payment.payment_status}. No action is required.</CardDescription>
+          <CardDescription>
+            This payment is already {payment.payment_status}. No action is required.
+          </CardDescription>
         </CardHeader>
       </Card>
     )
@@ -77,7 +92,12 @@ export function PaymentInitiateForm({ payment, borrowerProfileId }: PaymentIniti
 
           <div className="space-y-2">
             <Label htmlFor="paymentMethod">Payment Method</Label>
-            <Select name="paymentMethod" value={paymentMethod} onValueChange={setPaymentMethod} required>
+            <Select
+              name="paymentMethod"
+              value={paymentMethod}
+              onValueChange={setPaymentMethod}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
@@ -89,7 +109,9 @@ export function PaymentInitiateForm({ payment, borrowerProfileId }: PaymentIniti
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            {state.errors?.paymentMethod && <p className="text-sm text-red-500">{state.errors.paymentMethod}</p>}
+            {state.errors?.paymentMethod && (
+              <p className="text-sm text-red-500">{state.errors.paymentMethod}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -106,7 +128,12 @@ export function PaymentInitiateForm({ payment, borrowerProfileId }: PaymentIniti
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes (Optional)</Label>
-            <Textarea id="notes" name="notes" placeholder="Any additional information about this payment" rows={3} />
+            <Textarea
+              id="notes"
+              name="notes"
+              placeholder="Any additional information about this payment"
+              rows={3}
+            />
             {state.errors?.notes && <p className="text-sm text-red-500">{state.errors.notes}</p>}
           </div>
 

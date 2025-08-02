@@ -20,7 +20,10 @@ type AcceptOfferState = {
   success: boolean
 }
 
-export async function acceptOfferAction(prevState: AcceptOfferState, formData: FormData): Promise<AcceptOfferState> {
+export async function acceptOfferAction(
+  prevState: AcceptOfferState,
+  formData: FormData
+): Promise<AcceptOfferState> {
   const supabase = createServerSupabaseClient()
 
   const validatedFields = AcceptOfferSchema.safeParse({
@@ -39,7 +42,8 @@ export async function acceptOfferAction(prevState: AcceptOfferState, formData: F
     }
   }
 
-  const { offerId, borrowerProfileId, loanRequestId, lenderProfileId, countryId } = validatedFields.data
+  const { offerId, borrowerProfileId, loanRequestId, lenderProfileId, countryId } =
+    validatedFields.data
 
   try {
     // Call the database function
@@ -50,11 +54,15 @@ export async function acceptOfferAction(prevState: AcceptOfferState, formData: F
 
     if (rpcError) {
       console.error("RPC error accepting offer:", rpcError)
-      return { message: rpcError.message || "Failed to accept offer due to database error.", success: false }
+      return {
+        message: rpcError.message || "Failed to accept offer due to database error.",
+        success: false,
+      }
     }
 
     if (!rpcData || !rpcData[0] || !rpcData[0].success) {
-      const errorMessage = rpcData && rpcData[0] ? rpcData[0].message : "Failed to accept offer. Please try again."
+      const errorMessage =
+        rpcData && rpcData[0] ? rpcData[0].message : "Failed to accept offer. Please try again."
       return { message: errorMessage, success: false }
     }
 
@@ -109,7 +117,10 @@ type RejectOfferState = {
   success: boolean
 }
 
-export async function rejectOfferAction(prevState: RejectOfferState, formData: FormData): Promise<RejectOfferState> {
+export async function rejectOfferAction(
+  prevState: RejectOfferState,
+  formData: FormData
+): Promise<RejectOfferState> {
   const supabase = createServerSupabaseClient()
 
   const validatedFields = RejectOfferSchema.safeParse({
@@ -127,7 +138,8 @@ export async function rejectOfferAction(prevState: RejectOfferState, formData: F
       success: false,
     }
   }
-  const { offerId, borrowerProfileId, loanRequestId, lenderProfileId, countryId } = validatedFields.data
+  const { offerId, borrowerProfileId, loanRequestId, lenderProfileId, countryId } =
+    validatedFields.data
 
   try {
     // RLS policy "loan_offers_borrower_update_status" should protect this update.

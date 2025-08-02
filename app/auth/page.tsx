@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic"
 
-import { AuthForm } from "@/components/auth/auth-form"
+import { redirect } from "next/navigation"
 
 export default function AuthPage() {
-  return <AuthForm />
+  // Redirect to the new secure signin page
+  redirect("/auth/signin")
 }

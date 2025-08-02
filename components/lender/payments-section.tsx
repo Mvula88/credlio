@@ -5,7 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { PaymentConfirmationForm } from "@/components/lender/payment-confirmation-form"
 import { CheckCircle, Clock, FileText } from "lucide-react"
 import type { LoanPayment } from "@/lib/types"
@@ -39,7 +45,7 @@ export function PaymentsSection({
           <CardDescription>Manage and track payments from your borrowers</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="mb-6 grid grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Pending Confirmation</CardTitle>
@@ -71,22 +77,24 @@ export function PaymentsSection({
 
           <Tabs defaultValue="pending" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="pending">Pending Confirmation ({pendingPayments.length})</TabsTrigger>
+              <TabsTrigger value="pending">
+                Pending Confirmation ({pendingPayments.length})
+              </TabsTrigger>
               <TabsTrigger value="scheduled">Scheduled ({scheduledPayments.length})</TabsTrigger>
               <TabsTrigger value="completed">Completed ({completedPayments.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="pending">
               {pendingPayments.length === 0 ? (
-                <p className="text-center py-4 text-gray-500">No payments pending confirmation</p>
+                <p className="py-4 text-center text-gray-500">No payments pending confirmation</p>
               ) : (
                 <div className="space-y-3">
                   {pendingPayments.map((payment) => (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-yellow-100">
+                        <div className="rounded-full bg-yellow-100 p-2">
                           <Clock className="h-5 w-5 text-yellow-600" />
                         </div>
                         <div>
@@ -114,16 +122,16 @@ export function PaymentsSection({
             </TabsContent>
             <TabsContent value="scheduled">
               {scheduledPayments.length === 0 ? (
-                <p className="text-center py-4 text-gray-500">No scheduled payments</p>
+                <p className="py-4 text-center text-gray-500">No scheduled payments</p>
               ) : (
                 <div className="space-y-3">
                   {scheduledPayments.map((payment) => (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-blue-100">
+                        <div className="rounded-full bg-blue-100 p-2">
                           <Clock className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
@@ -140,7 +148,11 @@ export function PaymentsSection({
                       </div>
                       <div className="flex items-center gap-3">
                         <Badge variant="secondary">Scheduled</Badge>
-                        <Button size="sm" variant="outline" onClick={() => handleViewDetails(payment)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleViewDetails(payment)}
+                        >
                           Details
                         </Button>
                       </div>
@@ -151,16 +163,16 @@ export function PaymentsSection({
             </TabsContent>
             <TabsContent value="completed">
               {completedPayments.length === 0 ? (
-                <p className="text-center py-4 text-gray-500">No completed payments</p>
+                <p className="py-4 text-center text-gray-500">No completed payments</p>
               ) : (
                 <div className="space-y-3">
                   {completedPayments.map((payment) => (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-green-100">
+                        <div className="rounded-full bg-green-100 p-2">
                           <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
@@ -171,13 +183,20 @@ export function PaymentsSection({
                             }).format(payment.amount_due)}
                           </p>
                           <p className="text-sm text-gray-500">
-                            Paid on {new Date(payment.payment_date || payment.updated_at).toLocaleDateString()}
+                            Paid on{" "}
+                            {new Date(
+                              payment.payment_date || payment.updated_at
+                            ).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <Badge variant="default">Completed</Badge>
-                        <Button size="sm" variant="outline" onClick={() => handleViewDetails(payment)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleViewDetails(payment)}
+                        >
                           Details
                         </Button>
                       </div>
@@ -192,20 +211,22 @@ export function PaymentsSection({
 
       {/* Payment Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           {selectedPayment && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex justify-between items-center">
+                <DialogTitle className="flex items-center justify-between">
                   <span>Payment Details</span>
                   <PaymentStatusBadge status={selectedPayment.payment_status} />
                 </DialogTitle>
-                <DialogDescription>Due on {new Date(selectedPayment.due_date).toLocaleDateString()}</DialogDescription>
+                <DialogDescription>
+                  Due on {new Date(selectedPayment.due_date).toLocaleDateString()}
+                </DialogDescription>
               </DialogHeader>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <h3 className="font-medium mb-2">Payment Information</h3>
+                  <h3 className="mb-2 font-medium">Payment Information</h3>
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-500">Amount Due</p>
@@ -219,7 +240,9 @@ export function PaymentsSection({
                     {selectedPayment.payment_method && (
                       <div>
                         <p className="text-sm text-gray-500">Payment Method</p>
-                        <p className="font-medium capitalize">{selectedPayment.payment_method.replace(/_/g, " ")}</p>
+                        <p className="font-medium capitalize">
+                          {selectedPayment.payment_method.replace(/_/g, " ")}
+                        </p>
                       </div>
                     )}
                     {selectedPayment.transaction_reference && (
@@ -231,7 +254,9 @@ export function PaymentsSection({
                     {selectedPayment.payment_date && (
                       <div>
                         <p className="text-sm text-gray-500">Payment Date</p>
-                        <p className="font-medium">{new Date(selectedPayment.payment_date).toLocaleDateString()}</p>
+                        <p className="font-medium">
+                          {new Date(selectedPayment.payment_date).toLocaleDateString()}
+                        </p>
                       </div>
                     )}
                     {selectedPayment.notes && (
@@ -242,7 +267,7 @@ export function PaymentsSection({
                     )}
                   </div>
 
-                  <h3 className="font-medium mt-6 mb-2">Borrower Information</h3>
+                  <h3 className="mb-2 mt-6 font-medium">Borrower Information</h3>
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-500">Borrower ID</p>
@@ -257,7 +282,10 @@ export function PaymentsSection({
 
                 <div>
                   {selectedPayment.payment_status === "pending_confirmation" && (
-                    <PaymentConfirmationForm payment={selectedPayment} lenderProfileId={lenderProfileId} />
+                    <PaymentConfirmationForm
+                      payment={selectedPayment}
+                      lenderProfileId={lenderProfileId}
+                    />
                   )}
 
                   {selectedPayment.payment_status === "scheduled" && (
@@ -270,8 +298,8 @@ export function PaymentsSection({
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-gray-600">
-                          The borrower will need to make this payment directly to you and then record it on the
-                          platform. You'll be notified when they do.
+                          The borrower will need to make this payment directly to you and then
+                          record it on the platform. You'll be notified when they do.
                         </p>
                       </CardContent>
                     </Card>
@@ -281,15 +309,20 @@ export function PaymentsSection({
                     <Card className="bg-green-50">
                       <CardHeader>
                         <CardTitle className="text-green-800">Payment Completed</CardTitle>
-                        <CardDescription className="text-green-700">This payment has been confirmed.</CardDescription>
+                        <CardDescription className="text-green-700">
+                          This payment has been confirmed.
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-green-700">
                           Payment was confirmed on{" "}
-                          {new Date(selectedPayment.payment_date || selectedPayment.updated_at).toLocaleDateString()}.
+                          {new Date(
+                            selectedPayment.payment_date || selectedPayment.updated_at
+                          ).toLocaleDateString()}
+                          .
                         </p>
                         <Button variant="outline" className="mt-4">
-                          <FileText className="h-4 w-4 mr-2" />
+                          <FileText className="mr-2 h-4 w-4" />
                           View Receipt
                         </Button>
                       </CardContent>
@@ -300,10 +333,14 @@ export function PaymentsSection({
                     <Card className="bg-red-50">
                       <CardHeader>
                         <CardTitle className="text-red-800">Payment Failed</CardTitle>
-                        <CardDescription className="text-red-700">This payment was marked as failed.</CardDescription>
+                        <CardDescription className="text-red-700">
+                          This payment was marked as failed.
+                        </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-red-700">Reason: {selectedPayment.notes || "Not specified"}</p>
+                        <p className="text-sm text-red-700">
+                          Reason: {selectedPayment.notes || "Not specified"}
+                        </p>
                       </CardContent>
                     </Card>
                   )}

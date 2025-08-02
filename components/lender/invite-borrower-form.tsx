@@ -7,7 +7,15 @@ import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import {
   Dialog,
   DialogContent,
@@ -122,7 +130,8 @@ export function InviteBorrowerForm() {
         <DialogHeader>
           <DialogTitle>Invite a Borrower</DialogTitle>
           <DialogDescription>
-            Create an invitation link to send to a borrower you're working with outside the platform.
+            Create an invitation link to send to a borrower you're working with outside the
+            platform.
           </DialogDescription>
         </DialogHeader>
 
@@ -186,7 +195,9 @@ export function InviteBorrowerForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>This message will be included in the WhatsApp share.</FormDescription>
+                    <FormDescription>
+                      This message will be included in the WhatsApp share.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -204,7 +215,9 @@ export function InviteBorrowerForm() {
                           type="number"
                           placeholder="5000"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -223,7 +236,9 @@ export function InviteBorrowerForm() {
                           type="number"
                           placeholder="12"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -242,7 +257,9 @@ export function InviteBorrowerForm() {
                           type="number"
                           placeholder="5.5"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -262,11 +279,11 @@ export function InviteBorrowerForm() {
           <div className="space-y-4">
             <div className="rounded-md bg-muted p-4">
               <p className="text-sm font-medium">Invitation created successfully!</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Share this invitation link with {form.getValues("borrowerName")}:
               </p>
-              <div className="flex items-center mt-2">
-                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm flex-1 overflow-x-auto">
+              <div className="mt-2 flex items-center">
+                <code className="relative flex-1 overflow-x-auto rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
                   {window.location.origin}/invite/{invitationCode}
                 </code>
                 <Button variant="outline" size="sm" onClick={handleCopyLink} className="ml-2">

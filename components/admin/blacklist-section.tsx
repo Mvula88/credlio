@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
@@ -25,7 +32,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Database } from "@/lib/types/database"
 
@@ -45,11 +58,13 @@ export function AdminBlacklistSection() {
         setLoading(true)
         const { data, error } = await supabase
           .from("blacklist")
-          .select(`
+          .select(
+            `
             *,
             profiles:reported_user_id(id, full_name, email, avatar_url),
             reporter:reporter_id(id, full_name, email, avatar_url)
-          `)
+          `
+          )
           .order("created_at", { ascending: false })
 
         if (error) throw error
@@ -82,7 +97,9 @@ export function AdminBlacklistSection() {
       if (error) throw error
 
       // Update local state
-      setBlacklistEntries((prev) => prev.map((entry) => (entry.id === id ? { ...entry, status: "resolved" } : entry)))
+      setBlacklistEntries((prev) =>
+        prev.map((entry) => (entry.id === id ? { ...entry, status: "resolved" } : entry))
+      )
 
       // If we're viewing the details of this entry, update it
       if (selectedEntry?.id === id) {
@@ -109,19 +126,19 @@ export function AdminBlacklistSection() {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
+        <CardHeader className="flex flex-col justify-between space-y-2 sm:flex-row sm:items-center sm:space-y-0">
           <div>
             <CardTitle>Blacklisted Borrowers</CardTitle>
             <CardDescription>Review and manage blacklisted users on the platform</CardDescription>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 placeholder="Search blacklist..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[200px] lg:w-[300px]"
+                className="w-full pl-8 sm:w-[200px] lg:w-[300px]"
               />
             </div>
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
@@ -149,11 +166,11 @@ export function AdminBlacklistSection() {
           )}
 
           {loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="flex h-40 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
             </div>
           ) : filteredEntries.length > 0 ? (
-            <div className="rounded-md border overflow-hidden">
+            <div className="overflow-hidden rounded-md border">
               <Table>
                 <TableHeader className="bg-gray-50">
                   <TableRow>
@@ -176,12 +193,16 @@ export function AdminBlacklistSection() {
                               alt={entry.profiles?.full_name || "User"}
                             />
                             <AvatarFallback>
-                              {entry.profiles?.full_name ? getInitials(entry.profiles.full_name) : "U"}
+                              {entry.profiles?.full_name
+                                ? getInitials(entry.profiles.full_name)
+                                : "U"}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium">{entry.profiles?.full_name || "Unknown"}</div>
-                            <div className="text-xs text-gray-500 hidden sm:block">
+                            <div className="font-medium">
+                              {entry.profiles?.full_name || "Unknown"}
+                            </div>
+                            <div className="hidden text-xs text-gray-500 sm:block">
                               {entry.profiles?.email || "No email"}
                             </div>
                           </div>
@@ -195,7 +216,9 @@ export function AdminBlacklistSection() {
                               alt={entry.reporter?.full_name || "Reporter"}
                             />
                             <AvatarFallback>
-                              {entry.reporter?.full_name ? getInitials(entry.reporter.full_name) : "R"}
+                              {entry.reporter?.full_name
+                                ? getInitials(entry.reporter.full_name)
+                                : "R"}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm">{entry.reporter?.full_name || "Unknown"}</span>
@@ -204,11 +227,14 @@ export function AdminBlacklistSection() {
                       <TableCell className="max-w-[200px] truncate" title={entry.reason}>
                         {entry.reason}
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell text-sm text-gray-500">
+                      <TableCell className="hidden text-sm text-gray-500 sm:table-cell">
                         {new Date(entry.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={entry.status === "active" ? "destructive" : "outline"} className="capitalize">
+                        <Badge
+                          variant={entry.status === "active" ? "destructive" : "outline"}
+                          className="capitalize"
+                        >
                           {entry.status}
                         </Badge>
                       </TableCell>
@@ -229,7 +255,9 @@ export function AdminBlacklistSection() {
                             {entry.status === "active" && (
                               <>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleRemoveFromBlacklist(entry.id)}>
+                                <DropdownMenuItem
+                                  onClick={() => handleRemoveFromBlacklist(entry.id)}
+                                >
                                   <CheckCircle className="mr-2 h-4 w-4" />
                                   Remove from Blacklist
                                 </DropdownMenuItem>
@@ -244,7 +272,7 @@ export function AdminBlacklistSection() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-10 border rounded-md bg-gray-50">
+            <div className="rounded-md border bg-gray-50 py-10 text-center">
               <p className="text-gray-500">No blacklisted borrowers found</p>
               {searchTerm && (
                 <Button variant="link" onClick={() => setSearchTerm("")}>
@@ -273,12 +301,18 @@ export function AdminBlacklistSection() {
                     alt={selectedEntry.profiles?.full_name || "User"}
                   />
                   <AvatarFallback>
-                    {selectedEntry.profiles?.full_name ? getInitials(selectedEntry.profiles.full_name) : "U"}
+                    {selectedEntry.profiles?.full_name
+                      ? getInitials(selectedEntry.profiles.full_name)
+                      : "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-medium text-lg">{selectedEntry.profiles?.full_name || "Unknown User"}</h3>
-                  <p className="text-sm text-gray-500">{selectedEntry.profiles?.email || "No email"}</p>
+                  <h3 className="text-lg font-medium">
+                    {selectedEntry.profiles?.full_name || "Unknown User"}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {selectedEntry.profiles?.email || "No email"}
+                  </p>
                 </div>
                 <Badge
                   variant={selectedEntry.status === "active" ? "destructive" : "outline"}
@@ -288,22 +322,24 @@ export function AdminBlacklistSection() {
                 </Badge>
               </div>
 
-              <div className="bg-gray-50 p-4 rounded-md">
-                <h4 className="font-medium mb-2">Reason for Blacklisting</h4>
-                <p className="text-gray-700 whitespace-pre-line">{selectedEntry.reason}</p>
+              <div className="rounded-md bg-gray-50 p-4">
+                <h4 className="mb-2 font-medium">Reason for Blacklisting</h4>
+                <p className="whitespace-pre-line text-gray-700">{selectedEntry.reason}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">Reported By</h4>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="mt-1 flex items-center gap-2">
                     <Avatar className="h-6 w-6">
                       <AvatarImage
                         src={selectedEntry.reporter?.avatar_url || "/placeholder.svg"}
                         alt={selectedEntry.reporter?.full_name || "Reporter"}
                       />
                       <AvatarFallback>
-                        {selectedEntry.reporter?.full_name ? getInitials(selectedEntry.reporter.full_name) : "R"}
+                        {selectedEntry.reporter?.full_name
+                          ? getInitials(selectedEntry.reporter.full_name)
+                          : "R"}
                       </AvatarFallback>
                     </Avatar>
                     <span>{selectedEntry.reporter?.full_name || "Unknown"}</span>
@@ -323,15 +359,20 @@ export function AdminBlacklistSection() {
 
               {selectedEntry.evidence_url && (
                 <div>
-                  <h4 className="font-medium mb-2">Evidence</h4>
+                  <h4 className="mb-2 font-medium">Evidence</h4>
                   <a
                     href={selectedEntry.evidence_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline flex items-center"
+                    className="flex items-center text-blue-600 hover:underline"
                   >
                     View attached evidence
-                    <svg className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="ml-1 h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -347,7 +388,11 @@ export function AdminBlacklistSection() {
 
           <DialogFooter>
             {selectedEntry?.status === "active" && (
-              <Button variant="outline" onClick={() => handleRemoveFromBlacklist(selectedEntry.id)} className="mr-auto">
+              <Button
+                variant="outline"
+                onClick={() => handleRemoveFromBlacklist(selectedEntry.id)}
+                className="mr-auto"
+              >
                 <CheckCircle className="mr-2 h-4 w-4" />
                 Remove from Blacklist
               </Button>

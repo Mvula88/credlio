@@ -30,7 +30,9 @@ export async function POST(request: NextRequest) {
 
     // Get price ID
     const priceId =
-      planType === "basic" ? process.env.STRIPE_PRICE_BASIC_USD?.trim() : process.env.STRIPE_PRICE_PREMIUM_USD?.trim()
+      planType === "basic"
+        ? process.env.STRIPE_PRICE_ID_TIER_1?.trim()
+        : process.env.STRIPE_PRICE_ID_TIER_2?.trim()
 
     if (!priceId) {
       return NextResponse.json({ error: "Price configuration missing" }, { status: 500 })
@@ -47,15 +49,16 @@ export async function POST(request: NextRequest) {
         },
       ],
       subscription_data: {
-        trial_period_days: 1,
+        trial_period_days: 1, // 1-day free trial
         metadata: {
           user_id: session.user.id,
           plan_type: planType,
         },
       },
+      payment_method_collection: "always", // Ensure card is collected upfront
       // Redirect to checkout success page with session ID
-      success_url: `https://credlio.com/lender/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://credlio.com/lender-disclaimer`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/lender/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/lender-disclaimer`,
       customer_email: session.user.email || undefined,
       metadata: {
         user_id: session.user.id,

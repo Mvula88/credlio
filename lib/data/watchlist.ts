@@ -30,7 +30,12 @@ export async function addToWatchlist({
   media_type,
   tmdb_id,
   poster_path,
-}: { title: string; media_type: string; tmdb_id: number; poster_path: string | null }) {
+}: {
+  title: string
+  media_type: string
+  tmdb_id: number
+  poster_path: string | null
+}) {
   const supabase = createServerSupabaseClient()
 
   try {

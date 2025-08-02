@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button"
 import { createClient } from "@supabase/supabase-js"
 import { toast } from "@/hooks/use-toast"
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface WatchlistButtonProps {
   borrowerId: string
@@ -142,12 +145,12 @@ export function WatchlistButton({
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : isWatched ? (
         <>
-          <Heart className="h-4 w-4 mr-2 fill-current" />
+          <Heart className="mr-2 h-4 w-4 fill-current" />
           Watching
         </>
       ) : (
         <>
-          <HeartOff className="h-4 w-4 mr-2" />
+          <HeartOff className="mr-2 h-4 w-4" />
           Watch
         </>
       )}

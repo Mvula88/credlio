@@ -23,26 +23,26 @@ export function PaymentReceipt({ payment, borrowerName, lenderName }: PaymentRec
 
   return (
     <div className="print:shadow-none">
-      <div className="flex justify-between items-center mb-4 print:hidden">
+      <div className="mb-4 flex items-center justify-between print:hidden">
         <h2 className="text-xl font-bold">Payment Receipt</h2>
         <div className="space-x-2">
           <Button variant="outline" size="sm" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" /> Print Receipt
+            <Printer className="mr-2 h-4 w-4" /> Print Receipt
           </Button>
           <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" /> Download PDF
+            <Download className="mr-2 h-4 w-4" /> Download PDF
           </Button>
         </div>
       </div>
 
       <Card className="border-2 print:border-0 print:shadow-none">
         <CardContent className="p-6">
-          <div className="text-center mb-6">
+          <div className="mb-6 text-center">
             <h1 className="text-2xl font-bold">Payment Receipt</h1>
             <p className="text-gray-500">Credlio Loan Payment</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="mb-6 grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-medium text-gray-700">Receipt Number:</h3>
               <p>{payment.transaction_reference || payment.id.substring(0, 8)}</p>
@@ -53,7 +53,7 @@ export function PaymentReceipt({ payment, borrowerName, lenderName }: PaymentRec
             </div>
           </div>
 
-          <div className="border-t border-b py-4 my-4">
+          <div className="my-4 border-b border-t py-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="font-medium text-gray-700">From:</h3>
@@ -72,8 +72,8 @@ export function PaymentReceipt({ payment, borrowerName, lenderName }: PaymentRec
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2">Description</th>
-                  <th className="text-right py-2">Amount</th>
+                  <th className="py-2 text-left">Description</th>
+                  <th className="py-2 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -81,9 +81,11 @@ export function PaymentReceipt({ payment, borrowerName, lenderName }: PaymentRec
                   <td className="py-3">
                     Loan Payment - Due {new Date(payment.due_date).toLocaleDateString()}
                     <br />
-                    <span className="text-sm text-gray-500">Loan ID: {payment.loan_request_id.substring(0, 8)}</span>
+                    <span className="text-sm text-gray-500">
+                      Loan ID: {payment.loan_request_id.substring(0, 8)}
+                    </span>
                   </td>
-                  <td className="text-right py-3 font-medium">
+                  <td className="py-3 text-right font-medium">
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: payment.currency_code,
@@ -93,8 +95,8 @@ export function PaymentReceipt({ payment, borrowerName, lenderName }: PaymentRec
               </tbody>
               <tfoot>
                 <tr className="border-t">
-                  <th className="text-left py-3">Total Paid</th>
-                  <th className="text-right py-3 font-bold">
+                  <th className="py-3 text-left">Total Paid</th>
+                  <th className="py-3 text-right font-bold">
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: payment.currency_code,
@@ -106,12 +108,12 @@ export function PaymentReceipt({ payment, borrowerName, lenderName }: PaymentRec
           </div>
 
           <div className="border-t pt-4">
-            <h3 className="font-medium text-gray-700 mb-1">Payment Method:</h3>
+            <h3 className="mb-1 font-medium text-gray-700">Payment Method:</h3>
             <p>{payment.payment_method || "Not specified"}</p>
 
             {payment.notes && (
               <div className="mt-3">
-                <h3 className="font-medium text-gray-700 mb-1">Notes:</h3>
+                <h3 className="mb-1 font-medium text-gray-700">Notes:</h3>
                 <p className="text-gray-600">{payment.notes}</p>
               </div>
             )}

@@ -80,7 +80,9 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
       <Card>
         <CardHeader>
           <CardTitle>Payment Status: {payment.payment_status}</CardTitle>
-          <CardDescription>This payment is already {payment.payment_status}. No action is required.</CardDescription>
+          <CardDescription>
+            This payment is already {payment.payment_status}. No action is required.
+          </CardDescription>
         </CardHeader>
       </Card>
     )
@@ -141,9 +143,15 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
             </ol>
           </div>
           <div className="mt-2 flex justify-between text-sm">
-            <span className={paymentStep === "method" ? "font-medium text-primary" : ""}>Payment Method</span>
-            <span className={paymentStep === "details" ? "font-medium text-primary" : ""}>Payment Details</span>
-            <span className={paymentStep === "confirm" ? "font-medium text-primary" : ""}>Confirm</span>
+            <span className={paymentStep === "method" ? "font-medium text-primary" : ""}>
+              Payment Method
+            </span>
+            <span className={paymentStep === "details" ? "font-medium text-primary" : ""}>
+              Payment Details
+            </span>
+            <span className={paymentStep === "confirm" ? "font-medium text-primary" : ""}>
+              Confirm
+            </span>
           </div>
         </div>
 
@@ -176,7 +184,9 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
                     >
                       <FileText className="mb-3 h-6 w-6" />
                       <span className="font-medium">Bank Transfer</span>
-                      <span className="text-xs text-muted-foreground">Direct bank to bank transfer</span>
+                      <span className="text-xs text-muted-foreground">
+                        Direct bank to bank transfer
+                      </span>
                     </Label>
                   </div>
 
@@ -231,7 +241,12 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
                   </div>
 
                   <div>
-                    <RadioGroupItem value="cash" id="cash" className="peer sr-only" aria-label="Cash" />
+                    <RadioGroupItem
+                      value="cash"
+                      id="cash"
+                      className="peer sr-only"
+                      aria-label="Cash"
+                    />
                     <Label
                       htmlFor="cash"
                       className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
@@ -283,25 +298,25 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
 
               <div className="space-y-2">
                 <Label htmlFor="receiptUpload">Upload Receipt (Optional)</Label>
-                <div className="flex items-center justify-center w-full">
+                <div className="flex w-full items-center justify-center">
                   <label
                     htmlFor="receiptUpload"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    className="flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-gray-50 hover:bg-gray-100"
                   >
                     {receiptPreview ? (
-                      <div className="relative w-full h-full">
+                      <div className="relative h-full w-full">
                         <img
                           src={receiptPreview || "/placeholder.svg"}
                           alt="Receipt preview"
-                          className="object-contain w-full h-full p-2"
+                          className="h-full w-full object-contain p-2"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
-                          <p className="text-white text-sm">Click to change</p>
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity hover:opacity-100">
+                          <p className="text-sm text-white">Click to change</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 mb-3 text-gray-400" />
+                      <div className="flex flex-col items-center justify-center pb-6 pt-5">
+                        <Upload className="mb-3 h-8 w-8 text-gray-400" />
                         <p className="mb-2 text-sm text-gray-500">
                           <span className="font-semibold">Click to upload</span> or drag and drop
                         </p>
@@ -327,7 +342,9 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
                   placeholder="Any additional information about this payment"
                   rows={3}
                 />
-                {state.errors?.notes && <p className="text-sm text-red-500">{state.errors.notes}</p>}
+                {state.errors?.notes && (
+                  <p className="text-sm text-red-500">{state.errors.notes}</p>
+                )}
               </div>
 
               <div className="flex justify-between pt-4">
@@ -344,7 +361,7 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
           {paymentStep === "confirm" && (
             <div className="space-y-4">
               <div className="rounded-lg border p-4">
-                <h3 className="font-medium mb-2">Payment Summary</h3>
+                <h3 className="mb-2 font-medium">Payment Summary</h3>
                 <dl className="space-y-2">
                   <div className="flex justify-between">
                     <dt className="text-gray-500">Amount:</dt>
@@ -375,8 +392,9 @@ export function EnhancedPaymentForm({ payment, borrowerProfileId }: EnhancedPaym
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  By submitting this payment, you confirm that you have made the payment as described above. The lender
-                  will need to confirm receipt before the payment is marked as completed.
+                  By submitting this payment, you confirm that you have made the payment as
+                  described above. The lender will need to confirm receipt before the payment is
+                  marked as completed.
                 </AlertDescription>
               </Alert>
 

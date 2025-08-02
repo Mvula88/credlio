@@ -14,8 +14,8 @@ export function Shell({ children, className, variant = "default" }: ShellProps) 
         "min-h-screen bg-background",
         variant === "default" && "container mx-auto px-4 py-8",
         variant === "sidebar" && "flex min-h-screen",
-        variant === "centered" && "flex items-center justify-center min-h-screen",
-        className,
+        variant === "centered" && "flex min-h-screen items-center justify-center",
+        className
       )}
     >
       {children}
@@ -38,7 +38,11 @@ interface ShellTitleProps {
 }
 
 export function ShellTitle({ children, className }: ShellTitleProps) {
-  return <h1 className={cn("text-2xl font-semibold leading-none tracking-tight", className)}>{children}</h1>
+  return (
+    <h1 className={cn("text-2xl font-semibold leading-none tracking-tight", className)}>
+      {children}
+    </h1>
+  )
 }
 
 interface ShellDescriptionProps {

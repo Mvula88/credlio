@@ -14,7 +14,10 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface Notification {
   id: string
@@ -73,11 +76,16 @@ export function NotificationBell() {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const { error } = await supabase.from("notifications").update({ read: true }).eq("id", notificationId)
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read: true })
+        .eq("id", notificationId)
 
       if (error) throw error
 
-      setNotifications((prev) => prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)))
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+      )
       setUnreadCount((prev) => Math.max(0, prev - 1))
     } catch (error) {
       console.error("Error marking notification as read:", error)
@@ -137,7 +145,7 @@ export function NotificationBell() {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
@@ -156,7 +164,9 @@ export function NotificationBell() {
         <DropdownMenuSeparator />
 
         {loading ? (
-          <div className="p-4 text-center text-sm text-muted-foreground">Loading notifications...</div>
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            Loading notifications...
+          </div>
         ) : notifications.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">No notifications yet</div>
         ) : (
@@ -164,19 +174,23 @@ export function NotificationBell() {
             {notifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
-                className={`flex flex-col items-start p-3 cursor-pointer ${!notification.read ? "bg-blue-50" : ""}`}
+                className={`flex cursor-pointer flex-col items-start p-3 ${!notification.read ? "bg-blue-50" : ""}`}
                 onClick={() => !notification.read && markAsRead(notification.id)}
               >
-                <div className="flex items-start justify-between w-full">
-                  <div className="flex items-start space-x-2 flex-1">
+                <div className="flex w-full items-start justify-between">
+                  <div className="flex flex-1 items-start space-x-2">
                     <span className="text-lg">{getNotificationIcon(notification.type)}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{notification.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{formatDate(notification.created_at)}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{notification.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{notification.message}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {formatDate(notification.created_at)}
+                      </p>
                     </div>
                   </div>
-                  {!notification.read && <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1" />}
+                  {!notification.read && (
+                    <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                  )}
                 </div>
               </DropdownMenuItem>
             ))}

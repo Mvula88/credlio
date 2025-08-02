@@ -57,7 +57,8 @@ export function AcceptOfferButton({
   }, [state, toast])
 
   const canAccept =
-    offer.offer_status === "pending_borrower_acceptance" && loanRequestStatus === "pending_lender_acceptance"
+    offer.offer_status === "pending_borrower_acceptance" &&
+    loanRequestStatus === "pending_lender_acceptance"
 
   return (
     <form action={formAction}>
@@ -65,7 +66,8 @@ export function AcceptOfferButton({
       <input type="hidden" name="borrowerProfileId" value={borrowerProfileId} />
       <input type="hidden" name="loanRequestId" value={loanRequestId} />
       <input type="hidden" name="lenderProfileId" value={offer.lender_profile_id} />
-      <input type="hidden" name="countryId" value={offer.country_id} /> {/* Assuming offer has country_id */}
+      <input type="hidden" name="countryId" value={offer.country_id} />{" "}
+      {/* Assuming offer has country_id */}
       <SubmitButton disabled={!canAccept}>Accept Offer</SubmitButton>
     </form>
   )

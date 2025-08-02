@@ -13,9 +13,9 @@ export default function SuccessPage() {
 
   // Show loading while redirecting
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-green-600 mb-4">Payment Successful!</h1>
+        <h1 className="mb-4 text-2xl font-bold text-green-600">Payment Successful!</h1>
         <p className="text-gray-600">Redirecting to your dashboard...</p>
       </div>
     </div>

@@ -13,7 +13,11 @@ export async function checkSubscription() {
     }
 
     // Get user profile
-    const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .single()
 
     if (!profile) {
       return false
@@ -22,7 +26,8 @@ export async function checkSubscription() {
     // Check for active subscription
     const { data: subscription } = await supabase
       .from("user_subscriptions")
-      .select(`
+      .select(
+        `
         status,
         trial_ends_at,
         expires_at,
@@ -30,7 +35,8 @@ export async function checkSubscription() {
           name,
           has_marketplace_access
         )
-      `)
+      `
+      )
       .eq("profile_id", profile.id)
       .in("status", ["active", "trialing"])
       .single()
@@ -72,7 +78,11 @@ export async function getUserSubscription() {
     }
 
     // Get user profile
-    const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .single()
 
     if (!profile) {
       return null
@@ -81,7 +91,8 @@ export async function getUserSubscription() {
     // Get subscription details
     const { data: subscription } = await supabase
       .from("user_subscriptions")
-      .select(`
+      .select(
+        `
         *,
         subscription_plans (
           name,
@@ -90,7 +101,8 @@ export async function getUserSubscription() {
           has_marketplace_access,
           has_smart_matching
         )
-      `)
+      `
+      )
       .eq("profile_id", profile.id)
       .in("status", ["active", "trialing"])
       .single()

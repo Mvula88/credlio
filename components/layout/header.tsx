@@ -1,190 +1,252 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { createSupabaseClient } from "@/lib/supabase/client"
+import { useAuth } from "@/hooks/use-auth"
+import { useCountryAccess } from "@/hooks/use-country-access"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Menu, X, User, Settings, LogOut, ChevronDown } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Menu, X, User, Settings, LogOut, ChevronDown, Shield, Globe } from "lucide-react"
+import { CountryInfoBadge, TravelBanner } from "@/components/country/country-info-badge"
 
 export function Header() {
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
-  const supabase = createSupabaseClient()
-
-  useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
-        setUser(user)
-        const { data: profile } = await supabase.from("profiles").select("*").eq("auth_user_id", user.id).single()
-        setProfile(profile)
-      }
-    }
-    getUser()
-  }, [supabase])
+  const { user, profile, signOut } = useAuth()
+  const { profile: countryProfile, isTraveling } = useCountryAccess()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setProfile(null)
+    await signOut()
     router.push("/")
   }
 
+  const getDashboardLink = () => {
+    switch (profile?.role) {
+      case "borrower":
+        return "/borrower/dashboard"
+      case "lender":
+        return "/lender/dashboard"
+      case "admin":
+        return "/admin/dashboard"
+      default:
+        return "/dashboard"
+    }
+  }
+
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">Credlio</span>
-            </Link>
-          </div>
+    <>
+      {/* Travel Banner */}
+      {countryProfile?.is_traveling &&
+        countryProfile.home_country &&
+        countryProfile.detected_country && (
+          <TravelBanner
+            homeCountry={countryProfile.home_country}
+            currentCountry={countryProfile.detected_country}
+            onUpdateCountry={() => router.push("/settings/location")}
+          />
+        )}
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/about" className="text-gray-600 hover:text-gray-900">
-              About
-            </Link>
-            <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900">
-              How It Works
-            </Link>
-            <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-              Contact
-            </Link>
-            <Link href="/help" className="text-gray-600 hover:text-gray-900">
-              Help
-            </Link>
-          </nav>
+      <header className="border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+                  <span className="text-sm font-bold text-white">C</span>
+                </div>
+                <span className="text-xl font-bold text-gray-900">Credlio</span>
+              </Link>
+            </div>
 
-          {/* User Menu or Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2">
-                    <User className="h-4 w-4" />
-                    <span>{profile?.full_name || user.email}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings" className="flex items-center">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                      Sign In <ChevronDown className="ml-1 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login/borrower">Sign In as Borrower</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/login/lender">Sign In as Lender</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button>
-                      Sign Up <ChevronDown className="ml-1 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                      <Link href="/signup/borrower">Sign Up as Borrower</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/signup/lender">Sign Up as Lender</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <div className="flex flex-col space-y-4">
-              <Link href="/about" className="text-gray-600 hover:text-gray-900">
-                About
+            {/* Desktop Navigation */}
+            <nav className="hidden items-center space-x-8 md:flex">
+              <Link href="/" className="text-gray-600 hover:text-gray-900">
+                For Lenders
+              </Link>
+              <Link href="/borrower" className="text-gray-600 hover:text-gray-900">
+                For Borrowers
               </Link>
               <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900">
                 How It Works
               </Link>
-              <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-                Contact
-              </Link>
               <Link href="/help" className="text-gray-600 hover:text-gray-900">
                 Help
               </Link>
+            </nav>
+
+            {/* User Menu or Auth Buttons */}
+            <div className="hidden items-center space-x-4 md:flex">
+              {/* Country Badge */}
+              {countryProfile?.country && (
+                <CountryInfoBadge country={countryProfile.country} size="sm" variant="outline" />
+              )}
 
               {user ? (
-                <div className="pt-4 border-t space-y-2">
-                  <Link href="/settings" className="flex items-center text-gray-600">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </Link>
-                  <button onClick={handleSignOut} className="flex items-center text-gray-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>{profile?.full_name || user.email}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href={getDashboardLink()} className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    {profile?.role === "admin" && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin/dashboard" className="flex items-center">
+                            <Shield className="mr-2 h-4 w-4" />
+                            Admin Panel
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/super-admin/dashboard" className="flex items-center">
+                            <Globe className="mr-2 h-4 w-4" />
+                            Super Admin
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {profile?.role === "country_admin" && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/country" className="flex items-center">
+                          <Globe className="mr-2 h-4 w-4" />
+                          Country Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <div className="pt-4 border-t space-y-2">
-                  <div className="text-sm font-medium text-gray-500">Sign In</div>
-                  <Link href="/login/borrower" className="block text-gray-600">
-                    As Borrower
-                  </Link>
-                  <Link href="/login/lender" className="block text-gray-600">
-                    As Lender
-                  </Link>
-                  <div className="text-sm font-medium text-gray-500 pt-2">Sign Up</div>
-                  <Link href="/signup/borrower" className="block text-gray-600">
-                    As Borrower
-                  </Link>
-                  <Link href="/signup/lender" className="block text-gray-600">
-                    As Lender
-                  </Link>
+                <div className="flex items-center space-x-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">
+                        Sign In <ChevronDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem asChild>
+                        <Link href="/auth/signin">Sign In</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button>
+                        Sign Up <ChevronDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem asChild>
+                        <Link href="/auth/signup">Sign Up</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
             </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
-        )}
-      </div>
-    </header>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="border-t py-4 md:hidden">
+              <div className="flex flex-col space-y-4">
+                <Link href="/" className="text-gray-600 hover:text-gray-900">
+                  For Lenders
+                </Link>
+                <Link href="/borrower" className="text-gray-600 hover:text-gray-900">
+                  For Borrowers
+                </Link>
+                <Link href="/how-it-works" className="text-gray-600 hover:text-gray-900">
+                  How It Works
+                </Link>
+                <Link href="/help" className="text-gray-600 hover:text-gray-900">
+                  Help
+                </Link>
+
+                {user ? (
+                  <div className="space-y-2 border-t pt-4">
+                    <Link href={getDashboardLink()} className="flex items-center text-gray-600">
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    {profile?.role === "admin" && (
+                      <>
+                        <Link href="/admin/dashboard" className="flex items-center text-gray-600">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                        <Link
+                          href="/super-admin/dashboard"
+                          className="flex items-center text-gray-600"
+                        >
+                          <Globe className="mr-2 h-4 w-4" />
+                          Super Admin
+                        </Link>
+                      </>
+                    )}
+                    {profile?.role === "country_admin" && (
+                      <Link href="/admin/country" className="flex items-center text-gray-600">
+                        <Globe className="mr-2 h-4 w-4" />
+                        Country Admin
+                      </Link>
+                    )}
+                    <Link href="/settings" className="flex items-center text-gray-600">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
+                    <button onClick={handleSignOut} className="flex items-center text-gray-600">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2 border-t pt-4">
+                    <Link href="/auth/signin" className="block font-medium text-blue-600">
+                      Sign In
+                    </Link>
+                    <Link href="/auth/signup" className="block font-medium text-blue-600">
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+    </>
   )
 }

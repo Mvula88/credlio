@@ -5,11 +5,14 @@ import { getUserBadgesSimple } from "./badges"
 
 // Fetches loan requests for the marketplace.
 // RLS policies `_lender_select` and `_country_admin_select` depend on user context.
-export async function getMarketplaceLoanRequests(countryId: string): Promise<LoanRequestWithTaggedBorrower[]> {
+export async function getMarketplaceLoanRequests(
+  countryId: string
+): Promise<LoanRequestWithTaggedBorrower[]> {
   const supabase = createServerSupabaseClient() // Use user-context client
   const { data, error } = await supabase
     .from("loan_requests")
-    .select(`
+    .select(
+      `
       id,
       requested_at,
       loan_amount,
@@ -23,7 +26,8 @@ export async function getMarketplaceLoanRequests(countryId: string): Promise<Loa
         trust_score,
         is_blacklisted
       )
-    `)
+    `
+    )
     .eq("status", "pending_lender_acceptance")
     .eq("country_id", countryId)
     .order("requested_at", { ascending: false })
@@ -50,18 +54,24 @@ export async function getMarketplaceLoanRequests(countryId: string): Promise<Loa
             : null,
         }
       }
-      return { ...request, borrower: request.borrower ? ({ ...request.borrower } as ProfileWithBadges) : null }
-    }),
+      return {
+        ...request,
+        borrower: request.borrower ? ({ ...request.borrower } as ProfileWithBadges) : null,
+      }
+    })
   )
   return loanRequestsWithTagsAndBadges as LoanRequestWithTaggedBorrower[]
 }
 
 // NEW FUNCTION: Get a single loan request by ID
-export async function getLoanRequestById(requestId: string): Promise<LoanRequestWithTaggedBorrower | null> {
+export async function getLoanRequestById(
+  requestId: string
+): Promise<LoanRequestWithTaggedBorrower | null> {
   const supabase = createServerSupabaseClient()
   const { data, error } = await supabase
     .from("loan_requests")
-    .select(`
+    .select(
+      `
       id,
       requested_at,
       loan_amount,
@@ -80,7 +90,8 @@ export async function getLoanRequestById(requestId: string): Promise<LoanRequest
         phone_number,
         created_at
       )
-    `)
+    `
+    )
     .eq("id", requestId)
     .single()
 

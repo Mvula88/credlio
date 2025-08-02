@@ -5,7 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Users, DollarSign, FileText, TrendingUp, Globe, MapPin } from "lucide-react"
 
 interface AdminStats {
@@ -28,7 +34,10 @@ interface AdminDashboardProps {
   initialCountry?: string
 }
 
-export default function SimpleAdminDashboard({ initialView = "super_admin", initialCountry }: AdminDashboardProps) {
+export default function SimpleAdminDashboard({
+  initialView = "super_admin",
+  initialCountry,
+}: AdminDashboardProps) {
   const [currentView, setCurrentView] = useState<"super_admin" | "country_admin">(initialView)
   const [selectedCountry, setSelectedCountry] = useState<string>(initialCountry || "")
   const [stats, setStats] = useState<AdminStats | null>(null)
@@ -117,9 +126,9 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p className="text-gray-600">Loading admin dashboard...</p>
         </div>
       </div>
@@ -128,25 +137,26 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 mb-4">⚠️</div>
-          <p className="text-red-600 mb-4">{error}</p>
+          <div className="mb-4 text-red-500">⚠️</div>
+          <p className="mb-4 text-red-600">{error}</p>
           <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     )
   }
 
-  const selectedCountryName = countries.find((c) => c.code === selectedCountry)?.name || selectedCountry
+  const selectedCountryName =
+    countries.find((c) => c.code === selectedCountry)?.name || selectedCountry
 
   return (
     <div className="space-y-6">
       {/* Admin Role Switcher */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">
+          <p className="mt-1 text-gray-600">
             {currentView === "super_admin"
               ? "Global platform management"
               : `Managing ${selectedCountryName || "Select a country"}`}
@@ -191,7 +201,7 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
               <SelectContent>
                 {countries.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex w-full items-center justify-between">
                       <span>{country.name}</span>
                       <Badge variant="secondary" className="ml-2">
                         {country.userCount} users
@@ -206,7 +216,7 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -227,7 +237,9 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalLoans || 0}</div>
-            <p className="text-xs text-muted-foreground">{stats?.pendingLoans || 0} pending approval</p>
+            <p className="text-xs text-muted-foreground">
+              {stats?.pendingLoans || 0} pending approval
+            </p>
           </CardContent>
         </Card>
 
@@ -270,7 +282,9 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
           <Card>
             <CardHeader>
               <CardTitle>
-                {currentView === "super_admin" ? "Platform Overview" : `${selectedCountryName} Overview`}
+                {currentView === "super_admin"
+                  ? "Platform Overview"
+                  : `${selectedCountryName} Overview`}
               </CardTitle>
               <CardDescription>
                 {currentView === "super_admin"
@@ -279,7 +293,7 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <h4 className="font-medium">Quick Stats</h4>
                   <div className="space-y-1 text-sm">
@@ -323,13 +337,16 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
             <CardHeader>
               <CardTitle>User Management</CardTitle>
               <CardDescription>
-                Manage users {currentView === "country_admin" ? `in ${selectedCountryName}` : "across all countries"}
+                Manage users{" "}
+                {currentView === "country_admin"
+                  ? `in ${selectedCountryName}`
+                  : "across all countries"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">User management interface coming soon</p>
+              <div className="py-8 text-center">
+                <Users className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <p className="mb-4 text-gray-600">User management interface coming soon</p>
                 <Button variant="outline">View All Users</Button>
               </div>
             </CardContent>
@@ -346,9 +363,9 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">Loan management interface coming soon</p>
+              <div className="py-8 text-center">
+                <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <p className="mb-4 text-gray-600">Loan management interface coming soon</p>
                 <Button variant="outline">View All Loans</Button>
               </div>
             </CardContent>
@@ -360,13 +377,14 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
             <CardHeader>
               <CardTitle>Payment Management</CardTitle>
               <CardDescription>
-                Monitor and manage payments {currentView === "country_admin" ? `in ${selectedCountryName}` : "globally"}
+                Monitor and manage payments{" "}
+                {currentView === "country_admin" ? `in ${selectedCountryName}` : "globally"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">Payment management interface coming soon</p>
+              <div className="py-8 text-center">
+                <DollarSign className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                <p className="mb-4 text-gray-600">Payment management interface coming soon</p>
                 <Button variant="outline">View All Payments</Button>
               </div>
             </CardContent>
@@ -382,7 +400,7 @@ export default function SimpleAdminDashboard({ initialView = "super_admin", init
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">Current Settings</h4>
+                  <h4 className="mb-2 font-medium">Current Settings</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Admin Mode:</span>

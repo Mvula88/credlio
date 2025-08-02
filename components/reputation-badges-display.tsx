@@ -1,7 +1,18 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
-import { Award, Crown, Medal, Shield, Star, Trophy, Zap, Target, Heart, CheckCircle2 } from "lucide-react"
+import {
+  Award,
+  Crown,
+  Medal,
+  Shield,
+  Star,
+  Trophy,
+  Zap,
+  Target,
+  Heart,
+  CheckCircle2,
+} from "lucide-react"
 
 interface ReputationBadge {
   id: string
@@ -131,7 +142,11 @@ export function ReputationBadgesDisplay({
             <Badge
               variant="outline"
               className={`${getBadgeColor(badge.badge_type)} flex items-center gap-1 ${
-                size === "sm" ? "text-xs px-2 py-1" : size === "lg" ? "text-sm px-3 py-2" : "text-xs px-2 py-1"
+                size === "sm"
+                  ? "px-2 py-1 text-xs"
+                  : size === "lg"
+                    ? "px-3 py-2 text-sm"
+                    : "px-2 py-1 text-xs"
               }`}
             >
               {getBadgeIcon(badge.badge_name, badge.icon_name)}
@@ -139,17 +154,17 @@ export function ReputationBadgesDisplay({
             </Badge>
 
             {/* Tooltip on hover */}
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 whitespace-nowrap">
+            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 transform whitespace-nowrap rounded-lg bg-black px-3 py-2 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <div className="font-medium">{formatBadgeName(badge.badge_name)}</div>
               <div className="text-gray-300">{badge.description}</div>
               <div className="text-gray-400">Earned: {formatDate(badge.earned_at)}</div>
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+              <div className="absolute left-1/2 top-full -translate-x-1/2 transform border-4 border-transparent border-t-black"></div>
             </div>
           </div>
         ))}
 
         {remainingCount > 0 && (
-          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-600">
+          <Badge variant="outline" className="bg-gray-50 text-xs text-gray-600">
             +{remainingCount} more
           </Badge>
         )}
@@ -164,7 +179,7 @@ export function ReputationBadgesDisplay({
                 {formatBadgeName(badge.badge_name)}
               </div>
               <div className="text-gray-600">{badge.description}</div>
-              <div className="text-gray-400 text-xs ml-auto">{formatDate(badge.earned_at)}</div>
+              <div className="ml-auto text-xs text-gray-400">{formatDate(badge.earned_at)}</div>
             </div>
           ))}
         </div>

@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import type { LoanPayment } from "@/lib/types"
@@ -48,7 +55,10 @@ function FailButton() {
   )
 }
 
-export function PaymentConfirmationForm({ payment, lenderProfileId }: PaymentConfirmationFormProps) {
+export function PaymentConfirmationForm({
+  payment,
+  lenderProfileId,
+}: PaymentConfirmationFormProps) {
   const [confirmState, confirmAction] = useFormState(confirmPaymentAction, initialConfirmState)
   const [failState, failAction] = useFormState(markPaymentAsFailedAction, initialFailState)
   const { toast } = useToast()
@@ -131,7 +141,9 @@ export function PaymentConfirmationForm({ payment, lenderProfileId }: PaymentCon
                   placeholder="Any additional information about this payment confirmation"
                   rows={2}
                 />
-                {confirmState.errors?.notes && <p className="text-sm text-red-500">{confirmState.errors.notes}</p>}
+                {confirmState.errors?.notes && (
+                  <p className="text-sm text-red-500">{confirmState.errors.notes}</p>
+                )}
               </div>
 
               {confirmState.message && !confirmState.success && (
@@ -163,7 +175,9 @@ export function PaymentConfirmationForm({ payment, lenderProfileId }: PaymentCon
                   rows={3}
                   required
                 />
-                {failState.errors?.notes && <p className="text-sm text-red-500">{failState.errors.notes}</p>}
+                {failState.errors?.notes && (
+                  <p className="text-sm text-red-500">{failState.errors.notes}</p>
+                )}
               </div>
 
               {failState.message && !failState.success && (

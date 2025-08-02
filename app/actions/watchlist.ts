@@ -8,7 +8,7 @@ export async function toggleWatchlistAction(
   lenderProfileId: string,
   borrowerProfileId: string,
   countryId: string,
-  isCurrentlyInWatchlist: boolean,
+  isCurrentlyInWatchlist: boolean
 ) {
   try {
     const actionType = isCurrentlyInWatchlist ? "REMOVED_FROM_WATCHLIST" : "ADDED_TO_WATCHLIST"

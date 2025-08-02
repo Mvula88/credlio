@@ -1,12 +1,12 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 
-export default async function PaymentPage({
-  params,
-}: {
-  params: { paymentId: string }
-}) {
+export default async function PaymentPage({ params }: { params: { paymentId: string } }) {
   const supabase = createServerSupabaseClient()
-  const { data: payment, error } = await supabase.from("payments").select("*").eq("id", params.paymentId).single()
+  const { data: payment, error } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("id", params.paymentId)
+    .single()
 
   if (error) {
     console.error(error)

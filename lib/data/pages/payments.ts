@@ -14,13 +14,15 @@ export async function getPaymentsForPages(context: GetServerSidePropsContext) {
 
   const { data: payments, error } = await supabase
     .from("loan_payments")
-    .select(`
+    .select(
+      `
       *,
       loan:loans(
         borrower:profiles!loans_borrower_id_fkey(full_name),
         lender:profiles!loans_lender_id_fkey(full_name)
       )
-    `)
+    `
+    )
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -31,19 +33,24 @@ export async function getPaymentsForPages(context: GetServerSidePropsContext) {
   return payments || []
 }
 
-export async function getPaymentByIdForPages(paymentId: string, context: GetServerSidePropsContext) {
+export async function getPaymentByIdForPages(
+  paymentId: string,
+  context: GetServerSidePropsContext
+) {
   const supabase = createPagesSupabaseClient(context)
 
   const { data: payment, error } = await supabase
     .from("loan_payments")
-    .select(`
+    .select(
+      `
       *,
       loan:loans(
         *,
         borrower:profiles!loans_borrower_id_fkey(*),
         lender:profiles!loans_lender_id_fkey(*)
       )
-    `)
+    `
+    )
     .eq("id", paymentId)
     .single()
 

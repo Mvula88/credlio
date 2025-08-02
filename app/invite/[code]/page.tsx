@@ -21,7 +21,9 @@ const InvitePage = async ({ params }: { params: { code: string } }) => {
 
   const { email, organization_id } = data
 
-  redirect(`/auth/sign-up?email=${email}&organization_id=${organization_id}&invite_code=${params.code}`)
+  redirect(
+    `/auth/sign-up?email=${email}&organization_id=${organization_id}&invite_code=${params.code}`
+  )
 }
 
 export default InvitePage

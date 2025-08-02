@@ -23,14 +23,14 @@ import { createPagesSupabaseClient, createApiSupabaseClient, supabaseServer } fr
 
 // In getServerSideProps
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const supabase = createPagesSupabaseClient(context)
-  // ... your logic
+const supabase = createPagesSupabaseClient(context)
+// ... your logic
 }
 
 // In API Routes
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const supabase = createApiSupabaseClient(req, res)
-  // ... your logic
+const supabase = createApiSupabaseClient(req, res)
+// ... your logic
 }
 \`\`\`
 

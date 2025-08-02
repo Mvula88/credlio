@@ -17,7 +17,8 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
   const failedPayments = payments.filter((p) => p.payment_status === "failed").length
 
   // Calculate completion percentage
-  const completionPercentage = totalPayments > 0 ? Math.round((completedPayments / totalPayments) * 100) : 0
+  const completionPercentage =
+    totalPayments > 0 ? Math.round((completedPayments / totalPayments) * 100) : 0
 
   return (
     <Card>
@@ -27,7 +28,7 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Completion</span>
             <span className="text-sm font-medium">{completionPercentage}%</span>
           </div>
@@ -36,7 +37,7 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
-            <div className="bg-green-100 p-2 rounded-full">
+            <div className="rounded-full bg-green-100 p-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
             </div>
             <div>
@@ -46,7 +47,7 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="bg-yellow-100 p-2 rounded-full">
+            <div className="rounded-full bg-yellow-100 p-2">
               <Clock className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
@@ -56,7 +57,7 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="bg-blue-100 p-2 rounded-full">
+            <div className="rounded-full bg-blue-100 p-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -81,7 +82,7 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="bg-red-100 p-2 rounded-full">
+            <div className="rounded-full bg-red-100 p-2">
               <AlertCircle className="h-5 w-5 text-red-600" />
             </div>
             <div>
@@ -93,14 +94,19 @@ export function PaymentStatusCard({ payments }: PaymentStatusCardProps) {
 
         <div className="pt-2">
           <div className="text-sm text-gray-500">
-            <span className="font-medium">Next payment:</span> {(() => {
+            <span className="font-medium">Next payment:</span>{" "}
+            {(() => {
               const nextPayment = payments
                 .filter((p) => p.payment_status === "scheduled")
                 .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
 
               return nextPayment ? (
                 <span>
-                  Due on <span className="font-medium">{new Date(nextPayment.due_date).toLocaleDateString()}</span> (
+                  Due on{" "}
+                  <span className="font-medium">
+                    {new Date(nextPayment.due_date).toLocaleDateString()}
+                  </span>{" "}
+                  (
                   {new Intl.NumberFormat("en-US", {
                     style: "currency",
                     currency: nextPayment.currency_code,

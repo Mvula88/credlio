@@ -5,7 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { AlertCircle, Users, CreditCard, AlertTriangle, TrendingUp } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, Tooltip } from "recharts"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts"
 import type { Database } from "@/lib/types/database"
 
 export function AdminStatsSection() {
@@ -114,12 +123,16 @@ export function AdminStatsSection() {
           if (paymentError) throw paymentError
 
           const loanVolume =
-            loans?.reduce((sum, loan) => (loan.status === "funded" ? sum + (loan.amount || 0) : sum), 0) || 0
+            loans?.reduce(
+              (sum, loan) => (loan.status === "funded" ? sum + (loan.amount || 0) : sum),
+              0
+            ) || 0
 
           const paymentVolume =
             payments?.reduce(
-              (sum, payment) => (payment.status === "completed" ? sum + (payment.amount || 0) : sum),
-              0,
+              (sum, payment) =>
+                payment.status === "completed" ? sum + (payment.amount || 0) : sum,
+              0
             ) || 0
 
           months.push({
@@ -151,7 +164,7 @@ export function AdminStatsSection() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -191,7 +204,9 @@ export function AdminStatsSection() {
             <TrendingUp className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : `$${stats.loanVolume.toLocaleString()}`}</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : `$${stats.loanVolume.toLocaleString()}`}
+            </div>
             <p className="text-xs text-gray-500">Total funded amount</p>
           </CardContent>
         </Card>
@@ -205,11 +220,14 @@ export function AdminStatsSection() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex justify-center items-center h-80">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="flex h-80 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
             </div>
           ) : (
-            <div className="h-80 w-full" style={{ "--chart-1": "216, 100%, 50%", "--chart-2": "142, 76%, 36%" } as any}>
+            <div
+              className="h-80 w-full"
+              style={{ "--chart-1": "216, 100%, 50%", "--chart-2": "142, 76%, 36%" } as any}
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -224,7 +242,12 @@ export function AdminStatsSection() {
                     name="Loans Created"
                     activeDot={{ r: 8 }}
                   />
-                  <Line type="monotone" dataKey="payments" stroke="hsl(var(--chart-2))" name="Payments Made" />
+                  <Line
+                    type="monotone"
+                    dataKey="payments"
+                    stroke="hsl(var(--chart-2))"
+                    name="Payments Made"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>

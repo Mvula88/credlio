@@ -51,7 +51,11 @@ export function LenderProvider({ children }: LenderProviderProps) {
       }
 
       // Get user profile
-      const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", user.id).single()
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .single()
 
       if (!profile) {
         setSubscription({
@@ -67,7 +71,8 @@ export function LenderProvider({ children }: LenderProviderProps) {
       // Get user subscription
       const { data: userSub } = await supabase
         .from("user_subscriptions")
-        .select(`
+        .select(
+          `
           status,
           trial_ends_at,
           expires_at,
@@ -76,7 +81,8 @@ export function LenderProvider({ children }: LenderProviderProps) {
             has_marketplace_access,
             has_smart_matching
           )
-        `)
+        `
+        )
         .eq("profile_id", profile.id)
         .eq("status", "active")
         .or("status.eq.trialing")
@@ -119,7 +125,9 @@ export function LenderProvider({ children }: LenderProviderProps) {
   }, [])
 
   return (
-    <LenderContext.Provider value={{ subscription, loading, refreshSubscription }}>{children}</LenderContext.Provider>
+    <LenderContext.Provider value={{ subscription, loading, refreshSubscription }}>
+      {children}
+    </LenderContext.Provider>
   )
 }
 

@@ -24,7 +24,11 @@ export default async function LenderDashboardPage() {
   const user = session.user
 
   // Get user profile - create if doesn't exist
-  let { data: profile } = await supabase.from("profiles").select("*").eq("auth_user_id", user.id).single()
+  let { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("auth_user_id", user.id)
+    .single()
 
   if (!profile) {
     const { data: newProfile, error: profileError } = await supabase
@@ -57,21 +61,25 @@ export default async function LenderDashboardPage() {
   // Get lender's offers (with error handling)
   const { data: offers } = await supabase
     .from("loan_offers")
-    .select(`
+    .select(
+      `
       *,
       loan_requests(*)
-    `)
+    `
+    )
     .eq("lender_id", user.id)
     .order("created_at", { ascending: false })
 
   // Get active loans (accepted offers) (with error handling)
   const { data: activeLoans } = await supabase
     .from("loan_offers")
-    .select(`
+    .select(
+      `
       *,
       loan_requests(*),
       loan_payments(*)
-    `)
+    `
+    )
     .eq("lender_id", user.id)
     .eq("status", "accepted")
 
@@ -88,8 +96,8 @@ export default async function LenderDashboardPage() {
   const totalOffers = offers?.length || 0
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto space-y-6 p-6">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Lender Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {profile?.full_name || user.email}</p>
@@ -100,7 +108,7 @@ export default async function LenderDashboardPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Offered</CardTitle>
@@ -154,7 +162,10 @@ export default async function LenderDashboardPage() {
           {availableRequests && availableRequests.length > 0 ? (
             <div className="space-y-4">
               {availableRequests.map((request) => (
-                <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={request.id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
                   <div className="space-y-1">
                     <p className="font-medium">${request.amount.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">{request.purpose}</p>
@@ -162,7 +173,7 @@ export default async function LenderDashboardPage() {
                       {request.interest_rate}% interest • {request.term_months} months
                     </p>
                   </div>
-                  <div className="text-right space-y-2">
+                  <div className="space-y-2 text-right">
                     <Badge variant="secondary">Available</Badge>
                     <div>
                       <Link href={`/lender/requests/${request.id}`}>
@@ -176,7 +187,7 @@ export default async function LenderDashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
+            <div className="py-8 text-center">
               <p className="text-muted-foreground">No loan requests available at the moment</p>
             </div>
           )}
@@ -193,7 +204,10 @@ export default async function LenderDashboardPage() {
           {offers && offers.length > 0 ? (
             <div className="space-y-4">
               {offers.slice(0, 5).map((offer) => (
-                <div key={offer.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={offer.id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
                   <div className="space-y-1">
                     <p className="font-medium">${offer.amount.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">{offer.loan_requests?.purpose}</p>
@@ -201,7 +215,7 @@ export default async function LenderDashboardPage() {
                       Offered {new Date(offer.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="text-right space-y-2">
+                  <div className="space-y-2 text-right">
                     <Badge
                       variant={
                         offer.status === "accepted"
@@ -223,8 +237,8 @@ export default async function LenderDashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No offers made yet</p>
+            <div className="py-8 text-center">
+              <p className="mb-4 text-muted-foreground">No offers made yet</p>
               <Link href="/lender/requests">
                 <Button>Browse Loan Requests</Button>
               </Link>

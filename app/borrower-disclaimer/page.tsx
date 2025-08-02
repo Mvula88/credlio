@@ -59,11 +59,11 @@ export default function BorrowerDisclaimerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center p-8">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+              <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-600" />
               <p className="text-gray-600">Verifying your account...</p>
             </div>
           </CardContent>
@@ -74,14 +74,17 @@ export default function BorrowerDisclaimerPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
         <Card className="w-full max-w-md">
           <CardContent className="p-8">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-            <Button onClick={() => router.push("/auth/signin?role=borrower")} className="w-full mt-4">
+            <Button
+              onClick={() => router.push("/auth/signin?role=borrower")}
+              className="mt-4 w-full"
+            >
               Go to Sign In
             </Button>
           </CardContent>
@@ -95,7 +98,7 @@ export default function BorrowerDisclaimerPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 px-4 py-12 sm:px-6 lg:px-8">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
@@ -104,7 +107,9 @@ export default function BorrowerDisclaimerPage() {
           <CardTitle className="text-2xl font-bold text-gray-900">
             Welcome to Credlio, {user.user_metadata?.full_name || user.email}!
           </CardTitle>
-          <CardDescription className="text-gray-600">Important information before you continue</CardDescription>
+          <CardDescription className="text-gray-600">
+            Important information before you continue
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Alert className="border-orange-200 bg-orange-50">
@@ -118,33 +123,36 @@ export default function BorrowerDisclaimerPage() {
             <h3 className="text-lg font-semibold text-gray-900">What Credlio Does:</h3>
             <ul className="space-y-2 text-gray-700">
               <li className="flex items-start">
-                <ArrowRight className="h-4 w-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
+                <ArrowRight className="mr-2 mt-1 h-4 w-4 flex-shrink-0 text-blue-500" />
                 Connects borrowers with individual lenders
               </li>
               <li className="flex items-start">
-                <ArrowRight className="h-4 w-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
+                <ArrowRight className="mr-2 mt-1 h-4 w-4 flex-shrink-0 text-blue-500" />
                 Provides a reputation system to build trust
               </li>
               <li className="flex items-start">
-                <ArrowRight className="h-4 w-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
+                <ArrowRight className="mr-2 mt-1 h-4 w-4 flex-shrink-0 text-blue-500" />
                 Facilitates loan requests and offers
               </li>
               <li className="flex items-start">
-                <ArrowRight className="h-4 w-4 text-blue-500 mt-1 mr-2 flex-shrink-0" />
+                <ArrowRight className="mr-2 mt-1 h-4 w-4 flex-shrink-0 text-blue-500" />
                 Tracks payment history and reputation
               </li>
             </ul>
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-blue-800 text-sm">
-              As a borrower, you can create loan requests that will be visible to our network of lenders. Individual
-              lenders will review your requests and may choose to make offers based on your reputation and loan details.
+          <div className="rounded-lg bg-blue-50 p-4">
+            <p className="text-sm text-blue-800">
+              As a borrower, you can create loan requests that will be visible to our network of
+              lenders. Individual lenders will review your requests and may choose to make offers
+              based on your reputation and loan details.
             </p>
           </div>
 
           <Link href="/dashboard/borrower" className="w-full">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Continue to Dashboard</Button>
+            <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
+              Continue to Dashboard
+            </Button>
           </Link>
         </CardContent>
       </Card>

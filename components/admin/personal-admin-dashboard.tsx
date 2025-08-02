@@ -6,7 +6,13 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Crown, Globe, BarChart3, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Database } from "@/lib/types/database"
 
@@ -121,8 +127,8 @@ export function PersonalAdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex h-40 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
       </div>
     )
   }
@@ -130,20 +136,23 @@ export function PersonalAdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Crown className="h-8 w-8 text-yellow-500" />
             Personal Admin Dashboard
           </h1>
-          <p className="text-gray-600 mt-1">Your complete control center for Credlio</p>
+          <p className="mt-1 text-gray-600">Your complete control center for Credlio</p>
         </div>
 
         {/* View Mode Selector */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium">View Mode:</label>
-            <Select value={viewMode} onValueChange={(value: "super_admin" | "country_admin") => setViewMode(value)}>
+            <Select
+              value={viewMode}
+              onValueChange={(value: "super_admin" | "country_admin") => setViewMode(value)}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
@@ -301,13 +310,16 @@ export function PersonalAdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">Access Control</h4>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <h4 className="mb-2 font-medium">Access Control</h4>
+                  <p className="mb-3 text-sm text-gray-600">
                     You have full super admin access to all countries and features.
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {countries.map((country) => (
-                      <div key={country.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div
+                        key={country.id}
+                        className="flex items-center justify-between rounded-lg border p-3"
+                      >
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{country.code}</Badge>
                           <span className="font-medium">{country.name}</span>
@@ -330,7 +342,7 @@ export function PersonalAdminDashboard() {
 
 function SuperAdminOverview({ countries }: { countries: Country[] }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Countries</CardTitle>
@@ -398,24 +410,26 @@ function CountryAdminOverview({
           <CardDescription>Regional statistics and management</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="text-center p-4 border rounded-lg">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="rounded-lg border p-4 text-center">
               <div className="text-2xl font-bold text-blue-600">{stats?.total_users || 0}</div>
               <div className="text-sm text-gray-600">Total Users</div>
             </div>
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{stats?.active_borrowers || 0}</div>
+            <div className="rounded-lg border p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {stats?.active_borrowers || 0}
+              </div>
               <div className="text-sm text-gray-600">Active Borrowers</div>
             </div>
-            <div className="text-center p-4 border rounded-lg">
+            <div className="rounded-lg border p-4 text-center">
               <div className="text-2xl font-bold text-purple-600">{stats?.active_lenders || 0}</div>
               <div className="text-sm text-gray-600">Active Lenders</div>
             </div>
-            <div className="text-center p-4 border rounded-lg">
+            <div className="rounded-lg border p-4 text-center">
               <div className="text-2xl font-bold text-orange-600">{stats?.total_loans || 0}</div>
               <div className="text-sm text-gray-600">Total Loans</div>
             </div>
-            <div className="text-center p-4 border rounded-lg">
+            <div className="rounded-lg border p-4 text-center">
               <div className="text-2xl font-bold text-red-600">{stats?.total_payments || 0}</div>
               <div className="text-sm text-gray-600">Total Payments</div>
             </div>

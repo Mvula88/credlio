@@ -13,7 +13,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user profile
-    const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .single()
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 })
@@ -32,7 +36,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the Free Trial plan
-    const { data: freePlan } = await supabase.from("subscription_plans").select("id").eq("name", "Free Trial").single()
+    const { data: freePlan } = await supabase
+      .from("subscription_plans")
+      .select("id")
+      .eq("name", "Free Trial")
+      .single()
 
     if (!freePlan) {
       return NextResponse.json({ error: "Free trial plan not found" }, { status: 404 })

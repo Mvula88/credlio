@@ -25,7 +25,11 @@ export default async function BorrowerDashboardPage() {
   const user = session.user
 
   // Get user profile - create if doesn't exist
-  let { data: profile } = await supabase.from("profiles").select("*").eq("auth_user_id", user.id).single()
+  let { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("auth_user_id", user.id)
+    .single()
 
   if (!profile) {
     const { data: newProfile, error: profileError } = await supabase
@@ -58,30 +62,35 @@ export default async function BorrowerDashboardPage() {
   // Get borrower's loan requests (with error handling)
   const { data: loanRequests } = await supabase
     .from("loan_requests")
-    .select(`
+    .select(
+      `
       *,
       loan_offers(count)
-    `)
+    `
+    )
     .eq("borrower_id", user.id)
     .order("created_at", { ascending: false })
 
   // Get active loans (with error handling)
   const { data: activeLoans } = await supabase
     .from("loan_requests")
-    .select(`
+    .select(
+      `
       *,
       loan_payments(*)
-    `)
+    `
+    )
     .eq("borrower_id", user.id)
     .eq("status", "active")
 
   const totalRequested = loanRequests?.reduce((sum, req) => sum + req.amount, 0) || 0
   const activeLoansCount = activeLoans?.length || 0
-  const totalOffers = loanRequests?.reduce((sum, req) => sum + (req.loan_offers?.[0]?.count || 0), 0) || 0
+  const totalOffers =
+    loanRequests?.reduce((sum, req) => sum + (req.loan_offers?.[0]?.count || 0), 0) || 0
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="container mx-auto space-y-6 p-6">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Borrower Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {profile?.full_name || user.email}</p>
@@ -92,7 +101,7 @@ export default async function BorrowerDashboardPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Requested</CardTitle>
@@ -144,7 +153,10 @@ export default async function BorrowerDashboardPage() {
           {loanRequests && loanRequests.length > 0 ? (
             <div className="space-y-4">
               {loanRequests.slice(0, 5).map((request) => (
-                <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={request.id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
                   <div className="space-y-1">
                     <p className="font-medium">${request.amount.toLocaleString()}</p>
                     <p className="text-sm text-muted-foreground">{request.purpose}</p>
@@ -152,7 +164,7 @@ export default async function BorrowerDashboardPage() {
                       Created {new Date(request.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="text-right space-y-2">
+                  <div className="space-y-2 text-right">
                     <Badge
                       variant={
                         request.status === "active"
@@ -166,14 +178,16 @@ export default async function BorrowerDashboardPage() {
                     >
                       {request.status}
                     </Badge>
-                    <p className="text-sm text-muted-foreground">{request.loan_offers?.[0]?.count || 0} offers</p>
+                    <p className="text-sm text-muted-foreground">
+                      {request.loan_offers?.[0]?.count || 0} offers
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No loan requests yet</p>
+            <div className="py-8 text-center">
+              <p className="mb-4 text-muted-foreground">No loan requests yet</p>
               <Link href="/borrower/loans/create">
                 <Button>Create Your First Request</Button>
               </Link>
@@ -194,14 +208,15 @@ export default async function BorrowerDashboardPage() {
               {activeLoans.map((loan) => {
                 const totalPaid =
                   loan.loan_payments?.reduce(
-                    (sum: number, payment: any) => (payment.status === "confirmed" ? sum + payment.amount : sum),
-                    0,
+                    (sum: number, payment: any) =>
+                      payment.status === "confirmed" ? sum + payment.amount : sum,
+                    0
                   ) || 0
                 const progress = (totalPaid / loan.amount) * 100
 
                 return (
-                  <div key={loan.id} className="p-4 border rounded-lg space-y-3">
-                    <div className="flex justify-between items-start">
+                  <div key={loan.id} className="space-y-3 rounded-lg border p-4">
+                    <div className="flex items-start justify-between">
                       <div>
                         <p className="font-medium">${loan.amount.toLocaleString()}</p>
                         <p className="text-sm text-muted-foreground">{loan.purpose}</p>

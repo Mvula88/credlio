@@ -28,7 +28,11 @@ export async function createInvitation(formData: InvitationFormData) {
   }
 
   // Get lender profile ID
-  const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", session.user.id).single()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("auth_user_id", session.user.id)
+    .single()
 
   if (!profile) {
     return { error: "Profile not found", success: false }
@@ -107,7 +111,11 @@ export async function cancelInvitation(invitationId: string) {
   }
 
   // Get lender profile ID
-  const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", session.user.id).single()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("auth_user_id", session.user.id)
+    .single()
 
   if (!profile) {
     return { error: "Profile not found", success: false }
@@ -144,7 +152,8 @@ export async function getInvitationByCode(code: string) {
 
   const { data: invitation, error } = await supabase
     .from("borrower_invitations")
-    .select(`
+    .select(
+      `
       *,
       lender:lender_profile_id (
         id,
@@ -153,7 +162,8 @@ export async function getInvitationByCode(code: string) {
         phone_number,
         profile_image_url
       )
-    `)
+    `
+    )
     .eq("invitation_code", code)
     .single()
 

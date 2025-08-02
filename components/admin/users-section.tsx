@@ -2,11 +2,27 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { AlertCircle, Search, UserX, Shield, Edit, Trash2, MoreHorizontal, Filter } from "lucide-react"
+import {
+  AlertCircle,
+  Search,
+  UserX,
+  Shield,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  Filter,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -25,7 +41,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Database } from "@/lib/types/database"
@@ -55,14 +77,16 @@ export function UsersSection() {
         setLoading(true)
         const { data, error } = await supabase
           .from("profiles")
-          .select(`
+          .select(
+            `
             *,
             user_profile_roles (
               user_roles (
                 name
               )
             )
-          `)
+          `
+          )
           .order("created_at", { ascending: false })
 
         if (error) throw error
@@ -125,7 +149,9 @@ export function UsersSection() {
       setSelectedUser(null)
 
       // Update user status locally
-      setUsers((prev) => prev.map((user) => (user.id === selectedUser.id ? { ...user, is_blacklisted: true } : user)))
+      setUsers((prev) =>
+        prev.map((user) => (user.id === selectedUser.id ? { ...user, is_blacklisted: true } : user))
+      )
     } catch (err: any) {
       setError(err.message)
     }
@@ -136,7 +162,10 @@ export function UsersSection() {
 
     try {
       // Delete user profile
-      const { error: profileError } = await supabase.from("profiles").delete().eq("id", selectedUser.id)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", selectedUser.id)
 
       if (profileError) throw profileError
 
@@ -184,8 +213,10 @@ export function UsersSection() {
       // Update users list locally
       setUsers((prev) =>
         prev.map((user) =>
-          user.id === selectedUser.id ? { ...user, full_name: editForm.full_name, email: editForm.email } : user,
-        ),
+          user.id === selectedUser.id
+            ? { ...user, full_name: editForm.full_name, email: editForm.email }
+            : user
+        )
       )
     } catch (err: any) {
       setError(err.message)
@@ -228,19 +259,19 @@ export function UsersSection() {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
+        <CardHeader className="flex flex-col justify-between space-y-2 sm:flex-row sm:items-center sm:space-y-0">
           <div>
             <CardTitle>User Management</CardTitle>
             <CardDescription>View and manage all users on the platform</CardDescription>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[200px] lg:w-[300px]"
+                className="w-full pl-8 sm:w-[200px] lg:w-[300px]"
               />
             </div>
           </div>
@@ -254,7 +285,7 @@ export function UsersSection() {
             </Alert>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger className="w-full sm:w-[150px]">
                 <div className="flex items-center">
@@ -286,11 +317,11 @@ export function UsersSection() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="flex h-40 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
             </div>
           ) : filteredUsers.length > 0 ? (
-            <div className="rounded-md border overflow-hidden">
+            <div className="overflow-hidden rounded-md border">
               <Table>
                 <TableHeader className="bg-gray-50">
                   <TableRow>
@@ -307,12 +338,17 @@ export function UsersSection() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={user.avatar_url || "/placeholder.svg"} alt={user.full_name || "User"} />
+                            <AvatarImage
+                              src={user.avatar_url || "/placeholder.svg"}
+                              alt={user.full_name || "User"}
+                            />
                             <AvatarFallback>{getInitials(user.full_name)}</AvatarFallback>
                           </Avatar>
                           <div>
                             <div className="font-medium">{user.full_name || "Unnamed User"}</div>
-                            <div className="text-xs text-gray-500 hidden sm:block">{user.email || "No email"}</div>
+                            <div className="hidden text-xs text-gray-500 sm:block">
+                              {user.email || "No email"}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
@@ -321,10 +357,10 @@ export function UsersSection() {
                           variant="outline"
                           className={
                             getUserRole(user) === "Admin"
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
+                              ? "border-purple-200 bg-purple-50 text-purple-700"
                               : getUserRole(user) === "Lender"
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
-                                : "bg-green-50 text-green-700 border-green-200"
+                                ? "border-blue-200 bg-blue-50 text-blue-700"
+                                : "border-green-200 bg-green-50 text-green-700"
                           }
                         >
                           {getUserRole(user)}
@@ -334,12 +370,15 @@ export function UsersSection() {
                         {user.is_blacklisted ? (
                           <Badge variant="destructive">Blacklisted</Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <Badge
+                            variant="outline"
+                            className="border-green-200 bg-green-50 text-green-700"
+                          >
                             Active
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell text-sm text-gray-500">
+                      <TableCell className="hidden text-sm text-gray-500 sm:table-cell">
                         {new Date(user.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
@@ -393,7 +432,7 @@ export function UsersSection() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-10 border rounded-md bg-gray-50">
+            <div className="rounded-md border bg-gray-50 py-10 text-center">
               <p className="text-gray-500">No users found</p>
               {(searchTerm || roleFilter !== "all" || statusFilter !== "all") && (
                 <Button
@@ -418,8 +457,8 @@ export function UsersSection() {
           <DialogHeader>
             <DialogTitle>Blacklist User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to blacklist {selectedUser?.full_name}? This action will prevent them from using the
-              platform.
+              Are you sure you want to blacklist {selectedUser?.full_name}? This action will prevent
+              them from using the platform.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -440,7 +479,11 @@ export function UsersSection() {
             <Button variant="outline" onClick={() => setBlacklistDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleBlacklistUser} disabled={!blacklistReason.trim()}>
+            <Button
+              variant="destructive"
+              onClick={handleBlacklistUser}
+              disabled={!blacklistReason.trim()}
+            >
               Blacklist User
             </Button>
           </DialogFooter>
@@ -453,7 +496,8 @@ export function UsersSection() {
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to permanently delete {selectedUser?.full_name}? This action cannot be undone.
+              Are you sure you want to permanently delete {selectedUser?.full_name}? This action
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -502,7 +546,10 @@ export function UsersSection() {
               <label htmlFor="role" className="text-sm font-medium">
                 Role
               </label>
-              <Select value={editForm.role} onValueChange={(value) => setEditForm({ ...editForm, role: value })}>
+              <Select
+                value={editForm.role}
+                onValueChange={(value) => setEditForm({ ...editForm, role: value })}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>

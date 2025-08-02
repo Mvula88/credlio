@@ -4,13 +4,15 @@ const PaymentReceiptPage = async ({ params }: { params: { paymentId: string } })
   const supabase = createServerSupabaseClient()
   const { data: payment, error } = await supabase
     .from("payments")
-    .select(`
+    .select(
+      `
       *,
       loan:loan_id (
         *,
         borrower:borrower_id (*)
       )
-    `)
+    `
+    )
     .eq("id", params.paymentId)
     .single()
 
@@ -25,7 +27,7 @@ const PaymentReceiptPage = async ({ params }: { params: { paymentId: string } })
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Payment Receipt</h1>
+      <h1 className="mb-4 text-2xl font-bold">Payment Receipt</h1>
 
       <div className="mb-4">
         <strong>Payment ID:</strong> {payment.id}

@@ -1,37 +1,22 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server-client"
+import { getActiveLoanDetails } from '@/app/actions/active-loans';
+import { LoanDetailsView } from '@/components/lender/loan-details-view';
+import { notFound } from 'next/navigation';
 
-export default async function LoanDetails({ params }: { params: { loanId: string } }) {
-  const supabase = createServerSupabaseClient()
+export default async function LoanDetailsPage({ 
+  params 
+}: { 
+  params: { loanId: string } 
+}) {
+  try {
+    const { loan, payments } = await getActiveLoanDetails(params.loanId);
+    
+    if (!loan) {
+      notFound();
+    }
 
-  const { data: loan, error } = await supabase
-    .from("loans")
-    .select(`
-      *,
-      borrower (
-        *
-      )
-    `)
-    .eq("id", params.loanId)
-    .single()
-
-  if (error) {
-    console.error(error)
-    return <div>Error loading loan</div>
+    return <LoanDetailsView loan={loan} payments={payments} />;
+  } catch (error) {
+    console.error('Error loading loan details:', error);
+    notFound();
   }
-
-  if (!loan) {
-    return <div>Loan not found</div>
-  }
-
-  return (
-    <div>
-      <h1>Loan Details</h1>
-      <p>Loan ID: {loan.id}</p>
-      <p>Amount: {loan.amount}</p>
-      <p>Interest Rate: {loan.interest_rate}</p>
-      <p>Term: {loan.term}</p>
-      <p>Borrower Name: {loan.borrower?.name}</p>
-      {/* Display other loan details here */}
-    </div>
-  )
 }

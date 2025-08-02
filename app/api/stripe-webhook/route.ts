@@ -30,7 +30,11 @@ export async function POST(request: NextRequest) {
         if (metadata?.profileId && metadata?.planType) {
           // Get the subscription plan
           const planName = metadata.planType === "basic" ? "Basic" : "Premium"
-          const { data: plan } = await supabase.from("subscription_plans").select("id").eq("name", planName).single()
+          const { data: plan } = await supabase
+            .from("subscription_plans")
+            .select("id")
+            .eq("name", planName)
+            .single()
 
           if (plan) {
             // Create subscription record with trial

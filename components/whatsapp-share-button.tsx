@@ -39,7 +39,7 @@ export function WhatsAppShareButton({
 
   return (
     <Button onClick={handleShare} className={className} variant={variant}>
-      <Share className="w-4 h-4 mr-2" />
+      <Share className="mr-2 h-4 w-4" />
       Share via WhatsApp
     </Button>
   )

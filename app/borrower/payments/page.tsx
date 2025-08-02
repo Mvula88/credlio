@@ -9,7 +9,11 @@ const BorrowerPaymentsPage = async () => {
   return (
     <div>
       <h1>Borrower Payments</h1>
-      {session ? <p>Welcome, {session.user.email}!</p> : <p>Please sign in to view your payments.</p>}
+      {session ? (
+        <p>Welcome, {session.user.email}!</p>
+      ) : (
+        <p>Please sign in to view your payments.</p>
+      )}
     </div>
   )
 }

@@ -18,6 +18,9 @@ export async function GET() {
       database: "connected",
     })
   } catch (error) {
-    return NextResponse.json({ status: "unhealthy", error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      { status: "unhealthy", error: "Internal server error" },
+      { status: 500 }
+    )
   }
 }

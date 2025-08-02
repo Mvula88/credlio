@@ -187,7 +187,13 @@ export type LoanPayment = {
   due_date: string
   amount_paid?: number | null
   payment_date?: string | null
-  payment_status: "scheduled" | "pending_confirmation" | "completed" | "failed" | "overdue" | "reversed"
+  payment_status:
+    | "scheduled"
+    | "pending_confirmation"
+    | "completed"
+    | "failed"
+    | "overdue"
+    | "reversed"
   payment_method?: string | null
   transaction_reference?: string | null
   notes?: string | null

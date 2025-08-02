@@ -99,7 +99,10 @@ async function runSqlScripts() {
 
 async function viewTables() {
   try {
-    const { data, error } = await supabase.from("pg_tables").select("tablename").eq("schemaname", "public")
+    const { data, error } = await supabase
+      .from("pg_tables")
+      .select("tablename")
+      .eq("schemaname", "public")
 
     if (error) throw error
 
@@ -139,7 +142,7 @@ async function confirmReset() {
       } else {
         console.log("Database reset cancelled")
       }
-    },
+    }
   )
 }
 

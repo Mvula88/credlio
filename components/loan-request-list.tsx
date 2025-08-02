@@ -1,5 +1,12 @@
 import type { LoanRequestWithTaggedBorrower } from "@/lib/types"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { WatchlistButton } from "./watchlist-button"
@@ -16,7 +23,7 @@ interface LoanRequestListProps {
 export async function LoanRequestList({ loanRequests, lenderProfileId }: LoanRequestListProps) {
   if (!loanRequests || loanRequests.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         <h3 className="text-lg font-medium text-gray-900">No loan requests in the marketplace</h3>
         <p className="mt-1 text-sm text-gray-500">Check back later for new requests.</p>
       </div>
@@ -28,7 +35,7 @@ export async function LoanRequestList({ loanRequests, lenderProfileId }: LoanReq
     loanRequests.map(async (request) => {
       if (!request.borrower?.id) return false
       return isInWatchlist(lenderProfileId, request.borrower.id)
-    }),
+    })
   )
 
   return (
@@ -39,15 +46,21 @@ export async function LoanRequestList({ loanRequests, lenderProfileId }: LoanReq
         return (
           <Card key={request.id} className="flex flex-col">
             <CardHeader>
-              <div className="flex justify-between items-start">
+              <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
                     <CardTitle>{request.borrower?.full_name || "N/A"}</CardTitle>
                     {request.borrower?.badges && request.borrower.badges.length > 0 && (
-                      <ReputationBadgesDisplay badges={request.borrower.badges} size="sm" maxDisplay={3} />
+                      <ReputationBadgesDisplay
+                        badges={request.borrower.badges}
+                        size="sm"
+                        maxDisplay={3}
+                      />
                     )}
                   </div>
-                  <CardDescription>Requested on {new Date(request.requested_at).toLocaleDateString()}</CardDescription>
+                  <CardDescription>
+                    Requested on {new Date(request.requested_at).toLocaleDateString()}
+                  </CardDescription>
                 </div>
                 <Badge variant={getTrustScoreVariant(request.borrower?.trust_score)}>
                   Trust Score: {request.borrower?.trust_score || "N/A"}
@@ -66,7 +79,7 @@ export async function LoanRequestList({ loanRequests, lenderProfileId }: LoanReq
                   currency: request.currency_code,
                 }).format(request.loan_amount)}
               </p>
-              <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+              <p className="mt-2 line-clamp-3 text-sm text-gray-600">
                 <span className="font-semibold">Purpose:</span> {request.purpose || "Not specified"}
               </p>
             </CardContent>
@@ -91,7 +104,9 @@ export async function LoanRequestList({ loanRequests, lenderProfileId }: LoanReq
   )
 }
 
-function getTrustScoreVariant(score: number | null | undefined): "default" | "secondary" | "destructive" {
+function getTrustScoreVariant(
+  score: number | null | undefined
+): "default" | "secondary" | "destructive" {
   if (score === null || score === undefined) return "secondary"
   if (score > 70) return "default"
   if (score < 40) return "destructive"

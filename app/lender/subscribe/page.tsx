@@ -19,12 +19,14 @@ export default async function LenderSubscribePage() {
   // Get user profile and check if they're a lender
   const { data: profile } = await supabase
     .from("profiles")
-    .select(`
+    .select(
+      `
       *,
       user_profile_roles(
         user_roles(role_name)
       )
-    `)
+    `
+    )
     .eq("auth_user_id", user.id)
     .single()
 

@@ -42,8 +42,8 @@ export function DeleteAccountButton() {
             Delete Your Account
           </DialogTitle>
           <DialogDescription>
-            This action cannot be undone. This will permanently delete your account and remove all your data from our
-            servers.
+            This action cannot be undone. This will permanently delete your account and remove all
+            your data from our servers.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -63,7 +63,11 @@ export function DeleteAccountButton() {
           <Button variant="outline" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleDeleteAccount} disabled={!isConfirmed || isLoading}>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={!isConfirmed || isLoading}
+          >
             {isLoading ? "Deleting..." : "Delete Account"}
           </Button>
         </DialogFooter>

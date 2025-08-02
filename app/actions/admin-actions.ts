@@ -18,14 +18,21 @@ export async function blacklistUser(userId: string, reason: string) {
     }
 
     // Check if user is admin (this would use your RLS policies)
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
 
     if (!profile || profile.role !== "admin") {
       return { success: false, error: "Not authorized" }
     }
 
     // Now use admin client for the actual blacklisting
-    const { error } = await supabaseAdmin.from("profiles").update({ is_blacklisted: true }).eq("id", userId)
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ is_blacklisted: true })
+      .eq("id", userId)
 
     if (error) {
       console.error("Error blacklisting user:", error)
@@ -61,7 +68,11 @@ export async function getAllUsers() {
       return { success: false, error: "Not authenticated", data: [] }
     }
 
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
 
     if (!profile || profile.role !== "admin") {
       return { success: false, error: "Not authorized", data: [] }

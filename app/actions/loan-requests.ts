@@ -30,7 +30,7 @@ type LoanRequestState = {
 
 export async function createLoanRequestAction(
   prevState: LoanRequestState,
-  formData: FormData,
+  formData: FormData
 ): Promise<LoanRequestState> {
   const supabase = createServerSupabaseClient()
 
@@ -51,7 +51,8 @@ export async function createLoanRequestAction(
     }
   }
 
-  const { borrowerProfileId, countryId, loanAmount, currencyCode, purpose, repaymentTerms } = validatedFields.data
+  const { borrowerProfileId, countryId, loanAmount, currencyCode, purpose, repaymentTerms } =
+    validatedFields.data
 
   try {
     // RLS policy `loan_requests_borrower_insert` will be enforced by Supabase
@@ -82,7 +83,8 @@ export async function createLoanRequestAction(
       // Check for specific RLS violation error if possible
       if (error.message.includes("violates row-level security policy")) {
         return {
-          message: "Permission denied. Ensure you are a borrower and submitting for your own profile and country.",
+          message:
+            "Permission denied. Ensure you are a borrower and submitting for your own profile and country.",
           errors: { general: ["RLS policy violation."] },
           success: false,
         }
@@ -109,6 +111,10 @@ export async function createLoanRequestAction(
     return { message: "Loan request submitted successfully!", errors: null, success: true }
   } catch (e: any) {
     console.error("Unexpected error creating loan request:", e)
-    return { message: "An unexpected error occurred.", errors: { general: [e.message] }, success: false }
+    return {
+      message: "An unexpected error occurred.",
+      errors: { general: [e.message] },
+      success: false,
+    }
   }
 }

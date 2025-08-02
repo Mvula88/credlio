@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from("loan_payments")
-      .select(`
+      .select(
+        `
         *,
         loan_request:loan_requests (
           id,
@@ -29,7 +30,8 @@ export async function GET(request: NextRequest) {
             full_name
           )
         )
-      `)
+      `
+      )
       .limit(limit)
       .order("due_date", { ascending: true })
 

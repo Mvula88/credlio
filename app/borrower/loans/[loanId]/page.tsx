@@ -28,7 +28,9 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
     redirect("/onboarding")
   }
 
-  const isBorrower = profile.user_profile_roles.some((roleEntry: any) => roleEntry.user_roles.role_name === "borrower")
+  const isBorrower = profile.user_profile_roles.some(
+    (roleEntry: any) => roleEntry.user_roles.role_name === "borrower"
+  )
 
   if (!isBorrower) {
     redirect("/")
@@ -46,16 +48,21 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
   const payments = await getLoanPayments(loanRequest.id)
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <Link href="/borrower/dashboard" className="flex items-center text-blue-600 hover:underline mb-6">
-        <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
+    <div className="container mx-auto px-4 py-8">
+      <Link
+        href="/borrower/dashboard"
+        className="mb-6 flex items-center text-blue-600 hover:underline"
+      >
+        <ArrowLeft className="mr-1 h-4 w-4" /> Back to Dashboard
       </Link>
 
       <header className="mb-8">
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Loan Details</h1>
-            <p className="text-gray-600">{loanRequest.purpose || "Loan #" + loanRequest.id.substring(0, 8)}</p>
+            <p className="text-gray-600">
+              {loanRequest.purpose || "Loan #" + loanRequest.id.substring(0, 8)}
+            </p>
           </div>
           <Badge
             variant={
@@ -72,7 +79,7 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         <div className="md:col-span-2">
           <Card>
             <CardHeader>
@@ -92,7 +99,9 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Requested On</h3>
-                  <p className="text-lg font-semibold">{new Date(loanRequest.requested_at).toLocaleDateString()}</p>
+                  <p className="text-lg font-semibold">
+                    {new Date(loanRequest.requested_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
 
@@ -115,7 +124,7 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
             </CardHeader>
             <CardContent>
               {payments.length === 0 ? (
-                <p className="text-center py-6 text-gray-500">No payment schedule available yet.</p>
+                <p className="py-6 text-center text-gray-500">No payment schedule available yet.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
@@ -130,7 +139,9 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
                     <tbody>
                       {payments.map((payment) => (
                         <tr key={payment.id} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3">{new Date(payment.due_date).toLocaleDateString()}</td>
+                          <td className="px-4 py-3">
+                            {new Date(payment.due_date).toLocaleDateString()}
+                          </td>
                           <td className="px-4 py-3">
                             {new Intl.NumberFormat("en-US", {
                               style: "currency",
@@ -188,7 +199,8 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
               <div>
                 <h3 className="text-sm font-medium text-gray-500">Payments Completed</h3>
                 <p className="text-lg font-semibold">
-                  {payments.filter((p) => p.payment_status === "completed").length} / {payments.length}
+                  {payments.filter((p) => p.payment_status === "completed").length} /{" "}
+                  {payments.length}
                 </p>
               </div>
 
@@ -201,7 +213,7 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
                   }).format(
                     payments
                       .filter((p) => p.payment_status === "completed" && p.amount_paid)
-                      .reduce((sum, p) => sum + (p.amount_paid || 0), 0),
+                      .reduce((sum, p) => sum + (p.amount_paid || 0), 0)
                   )}
                 </p>
               </div>
@@ -213,7 +225,9 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
                     style: "currency",
                     currency: loanRequest.currency_code,
                   }).format(
-                    payments.filter((p) => p.payment_status !== "completed").reduce((sum, p) => sum + p.amount_due, 0),
+                    payments
+                      .filter((p) => p.payment_status !== "completed")
+                      .reduce((sum, p) => sum + p.amount_due, 0)
                   )}
                 </p>
               </div>
@@ -222,16 +236,20 @@ export default async function BorrowerLoanDetailPage({ params }: { params: { loa
 
           {/* Show next payment card if there are scheduled payments */}
           {payments.filter((p) => p.payment_status === "scheduled").length > 0 && (
-            <Card className="mt-6 bg-blue-50 border-blue-200">
+            <Card className="mt-6 border-blue-200 bg-blue-50">
               <CardHeader>
                 <CardTitle className="text-blue-800">Next Payment</CardTitle>
-                <CardDescription className="text-blue-700">Your next scheduled payment.</CardDescription>
+                <CardDescription className="text-blue-700">
+                  Your next scheduled payment.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {(() => {
                   const nextPayment = payments
                     .filter((p) => p.payment_status === "scheduled")
-                    .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())[0]
+                    .sort(
+                      (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+                    )[0]
 
                   if (!nextPayment) return null
 

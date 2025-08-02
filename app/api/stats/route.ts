@@ -1,52 +1,94 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase/admin-client"
 import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 
-// Fix dynamic server usage
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Check if user is admin
+    const { searchParams } = new URL(request.url)
+    const isPublic = searchParams.get("public") === "true"
+    
     const supabase = createServerSupabaseClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    if (isPublic) {
+      // Public stats for landing page
+      const [
+        { count: totalUsers },
+        { data: loansData },
+        { count: totalCountries },
+      ] = await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("active_loans").select("amount"),
+        supabase.from("countries").select("*", { count: "exact", head: true }),
+      ])
 
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+      // Calculate total amount tracked
+      const totalLoansTracked = loansData?.reduce((sum, loan) => sum + (loan.amount || 0), 0) || 0
 
-    if (!profile || profile.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
+      // Calculate success rate
+      const { count: completedLoans } = await supabase
+        .from("active_loans")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "completed")
 
-    // Get platform statistics using admin client
-    const [
-      { count: totalUsers },
-      { count: totalLoans },
-      { count: activeLoans },
-      { count: completedPayments },
-      { count: blacklistedUsers },
-    ] = await Promise.all([
-      supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("loan_requests").select("*", { count: "exact", head: true }),
-      supabaseAdmin.from("loan_requests").select("*", { count: "exact", head: true }).eq("status", "funded"),
-      supabaseAdmin.from("loan_payments").select("*", { count: "exact", head: true }).eq("payment_status", "completed"),
-      supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }).eq("is_blacklisted", true),
-    ])
+      const { count: totalLoans } = await supabase
+        .from("active_loans")
+        .select("*", { count: "exact", head: true })
 
-    return NextResponse.json({
-      stats: {
+      const successRate = totalLoans ? Math.round((completedLoans || 0) / totalLoans * 100) : 95
+
+      return NextResponse.json({
         totalUsers: totalUsers || 0,
-        totalLoans: totalLoans || 0,
-        activeLoans: activeLoans || 0,
-        completedPayments: completedPayments || 0,
-        blacklistedUsers: blacklistedUsers || 0,
-      },
-    })
+        totalLoansTracked: totalLoansTracked || 0,
+        totalCountries: totalCountries || 16,
+        successRate: successRate || 95,
+      })
+    } else {
+      // Admin stats (requires authentication)
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("auth_user_id", user.id)
+        .single()
+
+      if (!profile || profile.role !== "admin") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
+
+      // Get detailed admin statistics
+      const [
+        { count: totalUsers },
+        { count: totalLoans },
+        { count: activeLoans },
+        { count: blacklistedUsers },
+      ] = await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("loan_requests").select("*", { count: "exact", head: true }),
+        supabase
+          .from("active_loans")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "active"),
+        supabase
+          .from("borrower_profiles")
+          .select("*", { count: "exact", head: true })
+          .eq("is_risky", true),
+      ])
+
+      return NextResponse.json({
+        stats: {
+          totalUsers: totalUsers || 0,
+          totalLoans: totalLoans || 0,
+          activeLoans: activeLoans || 0,
+          blacklistedUsers: blacklistedUsers || 0,
+        },
+      })
+    }
   } catch (error) {
     console.error("Stats API Error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

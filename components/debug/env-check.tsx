@@ -28,7 +28,11 @@ export function EnvCheck() {
   return (
     <Alert variant={allGood ? "default" : "destructive"} className="mb-4">
       <div className="flex items-center gap-2">
-        {allGood ? <CheckCircle className="h-4 w-4 text-green-600" /> : <XCircle className="h-4 w-4 text-red-600" />}
+        {allGood ? (
+          <CheckCircle className="h-4 w-4 text-green-600" />
+        ) : (
+          <XCircle className="h-4 w-4 text-red-600" />
+        )}
         <AlertDescription>
           <strong>Environment Check:</strong>
           <ul className="mt-1 text-sm">

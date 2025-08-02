@@ -3,7 +3,12 @@ import { cookies } from "next/headers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SignOutButton } from "@/components/auth/sign-out-button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Settings, User } from "lucide-react"
 import type { Database } from "@/lib/types/database"
 
@@ -20,14 +25,16 @@ export async function Navigation() {
   if (session) {
     const { data } = await supabase
       .from("profiles")
-      .select(`
+      .select(
+        `
         *,
         user_profile_roles (
           user_roles (
             name
           )
         )
-      `)
+      `
+      )
       .eq("auth_user_id", session.user.id)
       .single()
 
@@ -39,7 +46,7 @@ export async function Navigation() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="font-bold text-xl">Credlio</span>
+          <span className="text-xl font-bold">Credlio</span>
         </Link>
 
         {session && profile && (
@@ -65,7 +72,9 @@ export async function Navigation() {
         <div className="flex flex-1 items-center justify-end space-x-4">
           {session ? (
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Welcome, {profile?.full_name || session.user.email}</span>
+              <span className="text-sm text-muted-foreground">
+                Welcome, {profile?.full_name || session.user.email}
+              </span>
 
               {/* User Menu Dropdown */}
               <DropdownMenu>

@@ -43,13 +43,20 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
-      <Link href={`/borrower/payments/${payment.id}`} className="flex items-center text-blue-600 hover:underline mb-6">
-        <ArrowLeft className="h-4 w-4 mr-1" /> Back to Payment Details
+    <div className="container mx-auto max-w-2xl px-4 py-8">
+      <Link
+        href={`/borrower/payments/${payment.id}`}
+        className="mb-6 flex items-center text-blue-600 hover:underline"
+      >
+        <ArrowLeft className="mr-1 h-4 w-4" /> Back to Payment Details
       </Link>
 
-      <div className="flex justify-end mb-4 space-x-2">
-        <Button variant="outline" className="flex items-center gap-2" onClick={() => window.print()}>
+      <div className="mb-4 flex justify-end space-x-2">
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => window.print()}
+        >
           <Printer className="h-4 w-4" />
           Print Receipt
         </Button>
@@ -71,51 +78,60 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
       </div>
 
       <Card className="border-2 print:border-0 print:shadow-none" id="receipt">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-t-lg border-b pb-6">
-          <div className="flex justify-between items-start">
+        <CardHeader className="rounded-t-lg border-b bg-gradient-to-r from-blue-50 to-blue-100 pb-6">
+          <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-2xl font-bold text-blue-800">Payment Receipt</CardTitle>
-              <p className="text-blue-600 font-medium">#{payment.id.substring(0, 8)}</p>
+              <p className="font-medium text-blue-600">#{payment.id.substring(0, 8)}</p>
             </div>
-            <div className="flex items-center bg-green-100 text-green-700 px-3 py-1 rounded-full">
-              <CheckCircle className="h-4 w-4 mr-1" />
+            <div className="flex items-center rounded-full bg-green-100 px-3 py-1 text-green-700">
+              <CheckCircle className="mr-1 h-4 w-4" />
               <span className="text-sm font-medium">Payment Successful</span>
             </div>
           </div>
         </CardHeader>
 
         <div className="p-8 print:p-0">
-          <div className="grid grid-cols-2 gap-8 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">From</h2>
-              <p className="font-medium text-lg">{payment.borrower?.full_name || "Borrower"}</p>
-              {payment.borrower?.email && <p className="text-sm text-gray-600">{payment.borrower.email}</p>}
+          <div className="mb-8 grid grid-cols-2 gap-8">
+            <div className="rounded-lg bg-gray-50 p-4">
+              <h2 className="mb-2 text-sm font-medium text-gray-500">From</h2>
+              <p className="text-lg font-medium">{payment.borrower?.full_name || "Borrower"}</p>
+              {payment.borrower?.email && (
+                <p className="text-sm text-gray-600">{payment.borrower.email}</p>
+              )}
               {payment.borrower?.phone_number && (
                 <p className="text-sm text-gray-600">{payment.borrower.phone_number}</p>
               )}
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">To</h2>
-              <p className="font-medium text-lg">{payment.lender?.full_name || "Lender"}</p>
-              {payment.lender?.email && <p className="text-sm text-gray-600">{payment.lender.email}</p>}
-              {payment.lender?.phone_number && <p className="text-sm text-gray-600">{payment.lender.phone_number}</p>}
+            <div className="rounded-lg bg-gray-50 p-4">
+              <h2 className="mb-2 text-sm font-medium text-gray-500">To</h2>
+              <p className="text-lg font-medium">{payment.lender?.full_name || "Lender"}</p>
+              {payment.lender?.email && (
+                <p className="text-sm text-gray-600">{payment.lender.email}</p>
+              )}
+              {payment.lender?.phone_number && (
+                <p className="text-sm text-gray-600">{payment.lender.phone_number}</p>
+              )}
             </div>
           </div>
 
-          <div className="border-t border-b py-6 mb-8">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="mb-8 border-b border-t py-6">
+            <div className="mb-4 grid grid-cols-2 gap-4">
               <div>
-                <h2 className="text-sm font-medium text-gray-500 mb-1">Payment Date</h2>
+                <h2 className="mb-1 text-sm font-medium text-gray-500">Payment Date</h2>
                 <p className="font-medium">
-                  {new Date(payment.payment_date || payment.updated_at).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {new Date(payment.payment_date || payment.updated_at).toLocaleDateString(
+                    "en-US",
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )}
                 </p>
               </div>
               <div>
-                <h2 className="text-sm font-medium text-gray-500 mb-1">Payment Method</h2>
+                <h2 className="mb-1 text-sm font-medium text-gray-500">Payment Method</h2>
                 <p className="font-medium capitalize">
                   {(payment.payment_method || "Not specified").replace(/_/g, " ")}
                 </p>
@@ -123,13 +139,14 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <h2 className="text-sm font-medium text-gray-500 mb-1">Reference</h2>
+                <h2 className="mb-1 text-sm font-medium text-gray-500">Reference</h2>
                 <p className="font-medium">{payment.transaction_reference || "N/A"}</p>
               </div>
               <div>
-                <h2 className="text-sm font-medium text-gray-500 mb-1">Loan Purpose</h2>
+                <h2 className="mb-1 text-sm font-medium text-gray-500">Loan Purpose</h2>
                 <p className="font-medium">
-                  {payment.loan_request?.purpose || `Loan #${payment.loan_request_id.substring(0, 8)}`}
+                  {payment.loan_request?.purpose ||
+                    `Loan #${payment.loan_request_id.substring(0, 8)}`}
                 </p>
               </div>
             </div>
@@ -139,14 +156,14 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-2 bg-gray-50 rounded-tl-lg">Description</th>
-                  <th className="text-right py-3 px-2 bg-gray-50 rounded-tr-lg">Amount</th>
+                  <th className="rounded-tl-lg bg-gray-50 px-2 py-3 text-left">Description</th>
+                  <th className="rounded-tr-lg bg-gray-50 px-2 py-3 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="py-4 px-2">Loan Payment</td>
-                  <td className="text-right py-4 px-2 font-medium">
+                  <td className="px-2 py-4">Loan Payment</td>
+                  <td className="px-2 py-4 text-right font-medium">
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: payment.currency_code,
@@ -156,8 +173,8 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
               </tbody>
               <tfoot>
                 <tr className="border-t">
-                  <th className="text-left py-3 px-2 bg-gray-50 rounded-bl-lg">Total</th>
-                  <th className="text-right py-3 px-2 bg-gray-50 rounded-br-lg text-blue-700">
+                  <th className="rounded-bl-lg bg-gray-50 px-2 py-3 text-left">Total</th>
+                  <th className="rounded-br-lg bg-gray-50 px-2 py-3 text-right text-blue-700">
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: payment.currency_code,
@@ -169,13 +186,13 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
           </div>
 
           {payment.notes && (
-            <div className="mb-8 bg-gray-50 p-4 rounded-lg">
-              <h2 className="text-sm font-medium text-gray-500 mb-2">Notes</h2>
-              <p className="text-sm text-gray-600 whitespace-pre-line">{payment.notes}</p>
+            <div className="mb-8 rounded-lg bg-gray-50 p-4">
+              <h2 className="mb-2 text-sm font-medium text-gray-500">Notes</h2>
+              <p className="whitespace-pre-line text-sm text-gray-600">{payment.notes}</p>
             </div>
           )}
 
-          <div className="text-center text-sm text-gray-500 border-t pt-6">
+          <div className="border-t pt-6 text-center text-sm text-gray-500">
             <p>This receipt confirms that payment has been received.</p>
             <p className="mt-1">
               Generated on{" "}
@@ -187,10 +204,11 @@ export function PaymentReceiptClient({ payment }: { payment: any }) {
             </p>
           </div>
         </div>
-        <CardFooter className="print:hidden border-t bg-gray-50 flex justify-between py-4">
+        <CardFooter className="flex justify-between border-t bg-gray-50 py-4 print:hidden">
           <p className="text-xs text-gray-500">Receipt ID: {payment.id}</p>
           <p className="text-xs text-gray-500">
-            Confirmed by {payment.lender?.full_name || "Lender"} on {new Date(payment.updated_at).toLocaleString()}
+            Confirmed by {payment.lender?.full_name || "Lender"} on{" "}
+            {new Date(payment.updated_at).toLocaleString()}
           </p>
         </CardFooter>
       </Card>

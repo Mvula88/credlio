@@ -55,7 +55,11 @@ export function SupabaseDebug() {
           <span className="text-sm">Supabase Connection:</span>
           <Badge
             variant={
-              status.connection === "success" ? "default" : status.connection === "error" ? "destructive" : "secondary"
+              status.connection === "success"
+                ? "default"
+                : status.connection === "error"
+                  ? "destructive"
+                  : "secondary"
             }
           >
             {status.connection === "checking" && "⏳ Checking..."}
@@ -63,7 +67,11 @@ export function SupabaseDebug() {
             {status.connection === "error" && "✗ Failed"}
           </Badge>
         </div>
-        {status.error && <div className="text-xs text-red-600 mt-2 p-2 bg-red-50 rounded">Error: {status.error}</div>}
+        {status.error && (
+          <div className="mt-2 rounded bg-red-50 p-2 text-xs text-red-600">
+            Error: {status.error}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

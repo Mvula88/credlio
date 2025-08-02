@@ -7,7 +7,11 @@ export async function GET(request: Request, { params }: { params: { code: string
   try {
     const supabase = createRouteHandlerClient<Database>({ cookies })
 
-    const { data: country, error } = await supabase.from("countries").select("*").eq("code", params.code).single()
+    const { data: country, error } = await supabase
+      .from("countries")
+      .select("*")
+      .eq("code", params.code)
+      .single()
 
     if (error) {
       return NextResponse.json({ error: "Country not found" }, { status: 404 })

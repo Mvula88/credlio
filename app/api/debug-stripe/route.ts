@@ -10,14 +10,14 @@ export const dynamic = "force-dynamic"
 export async function GET() {
   try {
     // Check if price IDs exist
-    const basicPriceId = process.env.STRIPE_PRICE_BASIC_USD
-    const premiumPriceId = process.env.STRIPE_PRICE_PREMIUM_USD
+    const basicPriceId = process.env.STRIPE_PRICE_ID_TIER_1
+    const premiumPriceId = process.env.STRIPE_PRICE_ID_TIER_2
 
     const results = {
       environment: {
         STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ? "Set" : "Missing",
-        STRIPE_PRICE_BASIC_USD: basicPriceId || "Missing",
-        STRIPE_PRICE_PREMIUM_USD: premiumPriceId || "Missing",
+        STRIPE_PRICE_ID_TIER_1: basicPriceId || "Missing",
+        STRIPE_PRICE_ID_TIER_2: premiumPriceId || "Missing",
       },
       prices: {} as any,
     }
@@ -57,7 +57,7 @@ export async function GET() {
       {
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

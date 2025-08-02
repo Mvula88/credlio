@@ -2,7 +2,11 @@ import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 
 const RequestDetailPage = async ({ params }: { params: { requestId: string } }) => {
   const supabase = createServerSupabaseClient()
-  const { data: request, error } = await supabase.from("requests").select("*").eq("id", params.requestId).single()
+  const { data: request, error } = await supabase
+    .from("requests")
+    .select("*")
+    .eq("id", params.requestId)
+    .single()
 
   if (error) {
     console.error("Error fetching request:", error)

@@ -8,7 +8,7 @@ const WatchlistPage = async () => {
 
   if (!session) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <p>Please sign in to view your watchlist.</p>
       </div>
     )

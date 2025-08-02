@@ -6,7 +6,13 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Crown, Globe, BarChart3, Users, DollarSign } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { Database } from "@/lib/types/database"
 
@@ -39,7 +45,13 @@ export function UnifiedAdminDashboard() {
   const [viewMode, setViewMode] = useState<"global" | "country_specific">("global")
   const [stats, setStats] = useState<AdminStats>({
     global: { total_countries: 0, total_users: 0, total_loans: 0, total_payments: 0 },
-    country: { total_users: 0, total_loans: 0, total_payments: 0, active_borrowers: 0, active_lenders: 0 },
+    country: {
+      total_users: 0,
+      total_loans: 0,
+      total_payments: 0,
+      active_borrowers: 0,
+      active_lenders: 0,
+    },
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -63,7 +75,10 @@ export function UnifiedAdminDashboard() {
       setLoading(true)
 
       // Fetch all countries
-      const { data: countryData, error: countryError } = await supabase.from("countries").select("*").order("name")
+      const { data: countryData, error: countryError } = await supabase
+        .from("countries")
+        .select("*")
+        .order("name")
 
       if (countryError) throw countryError
       setCountries(countryData || [])
@@ -98,16 +113,24 @@ export function UnifiedAdminDashboard() {
   const fetchGlobalStats = async () => {
     try {
       // Count total countries
-      const { count: countryCount } = await supabase.from("countries").select("*", { count: "exact", head: true })
+      const { count: countryCount } = await supabase
+        .from("countries")
+        .select("*", { count: "exact", head: true })
 
       // Count total users
-      const { count: userCount } = await supabase.from("profiles").select("*", { count: "exact", head: true })
+      const { count: userCount } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
 
       // Count total loans
-      const { count: loanCount } = await supabase.from("loan_requests").select("*", { count: "exact", head: true })
+      const { count: loanCount } = await supabase
+        .from("loan_requests")
+        .select("*", { count: "exact", head: true })
 
       // Count total payments
-      const { count: paymentCount } = await supabase.from("loan_payments").select("*", { count: "exact", head: true })
+      const { count: paymentCount } = await supabase
+        .from("loan_payments")
+        .select("*", { count: "exact", head: true })
 
       setStats((prev) => ({
         ...prev,
@@ -210,8 +233,8 @@ export function UnifiedAdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex h-40 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
       </div>
     )
   }
@@ -219,19 +242,19 @@ export function UnifiedAdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Crown className="h-8 w-8 text-yellow-500" />
             Your Admin Dashboard
           </h1>
-          <p className="text-gray-600 mt-1">Complete control over your Credlio platform</p>
+          <p className="mt-1 text-gray-600">Complete control over your Credlio platform</p>
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium whitespace-nowrap">View:</label>
+            <label className="whitespace-nowrap text-sm font-medium">View:</label>
             <Select value={viewMode} onValueChange={handleViewModeChange}>
               <SelectTrigger className="w-40">
                 <SelectValue />
@@ -255,7 +278,7 @@ export function UnifiedAdminDashboard() {
 
           {viewMode === "country_specific" && (
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium whitespace-nowrap">Country:</label>
+              <label className="whitespace-nowrap text-sm font-medium">Country:</label>
               <Select value={selectedCountry} onValueChange={handleCountryChange}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
@@ -315,7 +338,7 @@ export function UnifiedAdminDashboard() {
       </Card>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {viewMode === "global" ? (
           <>
             <Card>
@@ -492,26 +515,31 @@ export function UnifiedAdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium mb-2">Your Access Level</h4>
-                  <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <h4 className="mb-2 font-medium">Your Access Level</h4>
+                  <div className="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
                     <Crown className="h-5 w-5 text-yellow-600" />
                     <div>
                       <div className="font-medium text-yellow-800">Super Administrator</div>
-                      <div className="text-sm text-yellow-700">Full platform access and control</div>
+                      <div className="text-sm text-yellow-700">
+                        Full platform access and control
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-medium mb-2">Available Countries</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <h4 className="mb-2 font-medium">Available Countries</h4>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                     {countries.map((country) => (
-                      <div key={country.id} className="flex items-center justify-between p-2 border rounded">
+                      <div
+                        key={country.id}
+                        className="flex items-center justify-between rounded border p-2"
+                      >
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{country.code}</Badge>
                           <span className="text-sm">{country.name}</span>
                         </div>
-                        <Badge variant="default" className="bg-green-100 text-green-800 text-xs">
+                        <Badge variant="default" className="bg-green-100 text-xs text-green-800">
                           Full Access
                         </Badge>
                       </div>

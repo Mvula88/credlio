@@ -16,7 +16,11 @@ export async function deleteUserAccount() {
   }
 
   // Get profile ID
-  const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", session.user.id).single()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("auth_user_id", session.user.id)
+    .single()
 
   if (profile) {
     // Delete profile (this will cascade delete user_profile_roles)

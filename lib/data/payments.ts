@@ -20,18 +20,23 @@ export async function getLoanPayments(loanRequestId: string): Promise<LoanPaymen
 }
 
 // Get upcoming payments for a borrower
-export async function getBorrowerUpcomingPayments(borrowerProfileId: string, limit = 5): Promise<LoanPayment[]> {
+export async function getBorrowerUpcomingPayments(
+  borrowerProfileId: string,
+  limit = 5
+): Promise<LoanPayment[]> {
   const supabase = createServerSupabaseClient()
 
   const { data, error } = await supabase
     .from("loan_payments")
-    .select(`
+    .select(
+      `
       *,
       loan_request:loan_requests (
         id,
         purpose
       )
-    `)
+    `
+    )
     .eq("borrower_profile_id", borrowerProfileId)
     .in("payment_status", ["scheduled", "pending_confirmation"])
     .gte("due_date", new Date().toISOString().split("T")[0]) // Today or future
@@ -47,18 +52,23 @@ export async function getBorrowerUpcomingPayments(borrowerProfileId: string, lim
 }
 
 // Get upcoming payments for a lender
-export async function getLenderUpcomingPayments(lenderProfileId: string, limit = 5): Promise<LoanPayment[]> {
+export async function getLenderUpcomingPayments(
+  lenderProfileId: string,
+  limit = 5
+): Promise<LoanPayment[]> {
   const supabase = createServerSupabaseClient()
 
   const { data, error } = await supabase
     .from("loan_payments")
-    .select(`
+    .select(
+      `
       *,
       loan_request:loan_requests (
         id,
         purpose
       )
-    `)
+    `
+    )
     .eq("lender_profile_id", lenderProfileId)
     .in("payment_status", ["scheduled", "pending_confirmation"])
     .gte("due_date", new Date().toISOString().split("T")[0]) // Today or future
@@ -74,18 +84,23 @@ export async function getLenderUpcomingPayments(lenderProfileId: string, limit =
 }
 
 // Get payment history for a borrower
-export async function getBorrowerPaymentHistory(borrowerProfileId: string, limit = 10): Promise<LoanPayment[]> {
+export async function getBorrowerPaymentHistory(
+  borrowerProfileId: string,
+  limit = 10
+): Promise<LoanPayment[]> {
   const supabase = createServerSupabaseClient()
 
   const { data, error } = await supabase
     .from("loan_payments")
-    .select(`
+    .select(
+      `
       *,
       loan_request:loan_requests (
         id,
         purpose
       )
-    `)
+    `
+    )
     .eq("borrower_profile_id", borrowerProfileId)
     .in("payment_status", ["completed", "failed", "reversed"])
     .order("payment_date", { ascending: false })
@@ -104,7 +119,7 @@ export async function initiatePayment(
   paymentId: string,
   paymentMethod: string,
   transactionReference?: string,
-  notes?: string,
+  notes?: string
 ): Promise<boolean> {
   const supabase = createServerSupabaseClient()
 
@@ -128,7 +143,11 @@ export async function initiatePayment(
 }
 
 // Confirm a payment (for lenders)
-export async function confirmPayment(paymentId: string, amountPaid: number, notes?: string): Promise<boolean> {
+export async function confirmPayment(
+  paymentId: string,
+  amountPaid: number,
+  notes?: string
+): Promise<boolean> {
   const supabase = createServerSupabaseClient()
 
   const { error } = await supabase

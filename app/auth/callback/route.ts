@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
     const supabase = createRouteHandlerClient({ cookies })
 
     // Exchange the code for a session
-    const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.exchangeCodeForSession(code)
 
     if (sessionError) {
       console.error("Session exchange error:", sessionError)
@@ -89,21 +90,29 @@ export async function GET(request: NextRequest) {
               .single()
 
             if (!fallbackCountryData) {
-              return NextResponse.redirect(`${requestUrl.origin}/auth/signin?error=country_setup_required`)
+              return NextResponse.redirect(
+                `${requestUrl.origin}/auth/signin?error=country_setup_required`
+              )
             }
 
             fallbackCountry = fallbackCountryData
           }
 
           // Get user's IP for logging
-          const userIP = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "127.0.0.1"
+          const userIP =
+            request.headers.get("x-forwarded-for") ||
+            request.headers.get("x-real-ip") ||
+            "127.0.0.1"
 
           // Create profile for new user with detected country
           const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .insert({
               auth_user_id: sessionData.user.id,
-              full_name: sessionData.user.user_metadata?.full_name || sessionData.user.email?.split("@")[0] || "User",
+              full_name:
+                sessionData.user.user_metadata?.full_name ||
+                sessionData.user.email?.split("@")[0] ||
+                "User",
               country_id: (detectedCountry || fallbackCountry)?.id,
               trust_score: 50,
               is_blacklisted: false,
@@ -120,11 +129,17 @@ export async function GET(request: NextRequest) {
 
           if (profileError) {
             console.error("Profile creation error:", profileError)
-            return NextResponse.redirect(`${requestUrl.origin}/auth/signin?error=profile_creation_failed`)
+            return NextResponse.redirect(
+              `${requestUrl.origin}/auth/signin?error=profile_creation_failed`
+            )
           }
 
           // Add role to user
-          const { data: roleData } = await supabase.from("user_roles").select("id").eq("role_name", role).single()
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("id")
+            .eq("role_name", role)
+            .single()
 
           if (roleData && profile) {
             await supabase.from("user_profile_roles").insert({
@@ -133,7 +148,9 @@ export async function GET(request: NextRequest) {
             })
           }
 
-          console.log(`Created profile for user ${sessionData.user.email} in country ${detectedCountryCode}`)
+          console.log(
+            `Created profile for user ${sessionData.user.email} in country ${detectedCountryCode}`
+          )
         }
 
         // Redirect based on role
@@ -149,7 +166,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(`${requestUrl.origin}/dashboard`)
       } catch (error) {
         console.error("Callback processing error:", error)
-        return NextResponse.redirect(`${requestUrl.origin}/auth/signin?error=callback_processing_failed`)
+        return NextResponse.redirect(
+          `${requestUrl.origin}/auth/signin?error=callback_processing_failed`
+        )
       }
     }
   }

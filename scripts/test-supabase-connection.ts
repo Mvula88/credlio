@@ -39,7 +39,10 @@ async function testSupabaseConnection() {
       console.log("2. Testing with service role key...")
       const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
-      const { data: adminData, error: adminError } = await supabaseAdmin.from("profiles").select("count").limit(1)
+      const { data: adminData, error: adminError } = await supabaseAdmin
+        .from("profiles")
+        .select("count")
+        .limit(1)
 
       if (adminError && adminError.code !== "42P01") {
         console.log("❌ Admin connection failed:", adminError.message)

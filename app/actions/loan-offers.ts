@@ -10,8 +10,14 @@ const MakeOfferSchema = z.object({
   lenderProfileId: z.string().uuid("Invalid lender profile ID."),
   countryId: z.string().uuid("Invalid country ID."),
   offerAmount: z.coerce.number().positive("Offer amount must be positive."),
-  interestRate: z.coerce.number().min(0, "Interest rate cannot be negative.").max(100, "Interest rate seems too high."),
-  repaymentTermsProposed: z.string().min(5, "Repayment terms must be at least 5 characters.").max(200),
+  interestRate: z.coerce
+    .number()
+    .min(0, "Interest rate cannot be negative.")
+    .max(100, "Interest rate seems too high."),
+  repaymentTermsProposed: z
+    .string()
+    .min(5, "Repayment terms must be at least 5 characters.")
+    .max(200),
   notesToBorrower: z.string().max(500, "Notes are too long.").optional(),
 })
 
@@ -22,7 +28,10 @@ type MakeOfferState = {
   offerId?: string
 }
 
-export async function makeLoanOfferAction(prevState: MakeOfferState, formData: FormData): Promise<MakeOfferState> {
+export async function makeLoanOfferAction(
+  prevState: MakeOfferState,
+  formData: FormData
+): Promise<MakeOfferState> {
   const supabase = createServerSupabaseClient()
 
   const validatedFields = MakeOfferSchema.safeParse({
@@ -116,9 +125,18 @@ export async function makeLoanOfferAction(prevState: MakeOfferState, formData: F
 
     revalidatePath(`/lender/requests/${loanRequestId}`) // Revalidate the loan request details page
     revalidatePath("/lender/dashboard") // Revalidate lender dashboard (maybe they show their offers there)
-    return { message: "Loan offer submitted successfully!", errors: null, success: true, offerId: offer.id }
+    return {
+      message: "Loan offer submitted successfully!",
+      errors: null,
+      success: true,
+      offerId: offer.id,
+    }
   } catch (e: any) {
     console.error("Unexpected error creating loan offer:", e)
-    return { message: "An unexpected error occurred.", errors: { general: [e.message] }, success: false }
+    return {
+      message: "An unexpected error occurred.",
+      errors: { general: [e.message] },
+      success: false,
+    }
   }
 }

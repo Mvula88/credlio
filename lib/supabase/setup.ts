@@ -18,7 +18,7 @@ function validateEnvironmentVariables() {
     console.error("Please check your .env.local file")
     throw new Error(
       `Missing required Supabase environment variables: ${missing.join(", ")}\n` +
-        "Please check your .env.local file and ensure all required variables are set.",
+        "Please check your .env.local file and ensure all required variables are set."
     )
   }
 

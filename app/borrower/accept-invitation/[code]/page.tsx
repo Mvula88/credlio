@@ -33,8 +33,10 @@ async function AcceptInvitationPage({ params }: Props) {
     return <div>Invitation already accepted.</div>
   }
 
-  // Redirect to signup page with invitation details
-  redirect(`/signup?email=${data.email}&organization_id=${data.organization_id}&invitation_code=${params.code}`)
+  // Redirect to borrower landing page with invitation details
+  redirect(
+    `/borrower?invitation=${params.code}&email=${encodeURIComponent(data.email)}`
+  )
 }
 
 export default AcceptInvitationPage

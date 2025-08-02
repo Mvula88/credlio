@@ -65,7 +65,7 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
       {/* Mobile sidebar */}
       <div
         className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ease-in-out ${
-          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={() => setSidebarOpen(false)}
       />
@@ -73,20 +73,25 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:static lg:z-auto lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b">
+        <div className="flex h-16 items-center justify-between border-b px-6">
           <Link href="/admin/dashboard" className="flex items-center space-x-2">
             <Shield className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">Credlio Admin</span>
           </Link>
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden"
+          >
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <nav className="p-4 space-y-1">
+        <nav className="space-y-1 p-4">
           {navigation.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -94,11 +99,15 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors",
-                  isActive ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                  "flex items-center rounded-md px-4 py-3 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 )}
               >
-                <item.icon className={cn("mr-3 h-5 w-5", isActive ? "text-blue-700" : "text-gray-400")} />
+                <item.icon
+                  className={cn("mr-3 h-5 w-5", isActive ? "text-blue-700" : "text-gray-400")}
+                />
                 {item.name}
               </Link>
             )
@@ -107,17 +116,22 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top navigation */}
-        <header className="bg-white shadow-sm z-10">
-          <div className="flex items-center justify-between h-16 px-6">
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)} className="lg:hidden">
+        <header className="z-10 bg-white shadow-sm">
+          <div className="flex h-16 items-center justify-between px-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden"
+            >
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500"></span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -145,7 +159,7 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <SignOutButton>
-                      <div className="flex items-center w-full">
+                      <div className="flex w-full items-center">
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Sign out</span>
                       </div>
@@ -158,7 +172,7 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
         </header>
 
         {/* Main content area */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-6">{children}</main>
       </div>
     </div>
   )

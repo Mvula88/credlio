@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
@@ -27,7 +34,8 @@ export function PaymentsSection() {
         setLoading(true)
         const { data, error } = await supabase
           .from("loan_payments")
-          .select(`
+          .select(
+            `
             *,
             loan_requests (
               id,
@@ -37,7 +45,8 @@ export function PaymentsSection() {
             ),
             borrower:loan_requests(borrower:borrower_id(full_name, email)),
             lender:loan_requests(lender:lender_id(full_name, email))
-          `)
+          `
+          )
           .order("due_date", { ascending: false })
 
         if (error) throw error
@@ -57,7 +66,7 @@ export function PaymentsSection() {
       payment.loan_requests?.loan_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.borrower?.borrower?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.lender?.lender?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.payment_method?.toLowerCase().includes(searchTerm.toLowerCase()),
+      payment.payment_method?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const handleVerifyPayment = async (id: string) => {
@@ -74,7 +83,9 @@ export function PaymentsSection() {
       if (error) throw error
 
       // Update local state
-      setPayments((prev) => prev.map((payment) => (payment.id === id ? { ...payment, status: "completed" } : payment)))
+      setPayments((prev) =>
+        prev.map((payment) => (payment.id === id ? { ...payment, status: "completed" } : payment))
+      )
     } catch (err: any) {
       setError(err.message)
     }
@@ -94,7 +105,9 @@ export function PaymentsSection() {
       if (error) throw error
 
       // Update local state
-      setPayments((prev) => prev.map((payment) => (payment.id === id ? { ...payment, status: "rejected" } : payment)))
+      setPayments((prev) =>
+        prev.map((payment) => (payment.id === id ? { ...payment, status: "rejected" } : payment))
+      )
     } catch (err: any) {
       setError(err.message)
     }
@@ -104,13 +117,13 @@ export function PaymentsSection() {
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          <Badge variant="outline" className="border-yellow-200 bg-yellow-50 text-yellow-700">
             Pending
           </Badge>
         )
       case "completed":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
             Completed
           </Badge>
         )
@@ -118,7 +131,7 @@ export function PaymentsSection() {
         return <Badge variant="destructive">Late</Badge>
       case "rejected":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
             Rejected
           </Badge>
         )
@@ -133,8 +146,8 @@ export function PaymentsSection() {
         <CardHeader>
           <CardTitle>Payment Management</CardTitle>
           <CardDescription>Review and verify loan payments</CardDescription>
-          <div className="flex items-center gap-2 mt-2">
-            <Search className="w-4 h-4 text-gray-500" />
+          <div className="mt-2 flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-500" />
             <Input
               placeholder="Search payments..."
               value={searchTerm}
@@ -153,8 +166,8 @@ export function PaymentsSection() {
           )}
 
           {loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="flex h-40 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
             </div>
           ) : filteredPayments.length > 0 ? (
             <Table>
@@ -188,7 +201,7 @@ export function PaymentsSection() {
                             setReceiptDialogOpen(true)
                           }}
                         >
-                          <Eye className="h-4 w-4 mr-1" />
+                          <Eye className="mr-1 h-4 w-4" />
                           View
                         </Button>
 
@@ -197,20 +210,20 @@ export function PaymentsSection() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+                              className="border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
                               onClick={() => handleVerifyPayment(payment.id)}
                             >
-                              <CheckCircle className="h-4 w-4 mr-1" />
+                              <CheckCircle className="mr-1 h-4 w-4" />
                               Verify
                             </Button>
 
                             <Button
                               variant="outline"
                               size="sm"
-                              className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+                              className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                               onClick={() => handleRejectPayment(payment.id)}
                             >
-                              <XCircle className="h-4 w-4 mr-1" />
+                              <XCircle className="mr-1 h-4 w-4" />
                               Reject
                             </Button>
                           </>
@@ -222,7 +235,7 @@ export function PaymentsSection() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-10">
+            <div className="py-10 text-center">
               <p className="text-gray-500">No payments found</p>
             </div>
           )}
@@ -231,7 +244,11 @@ export function PaymentsSection() {
 
       {/* Payment Receipt Dialog */}
       {selectedPayment && (
-        <PaymentReceiptDialog open={receiptDialogOpen} onOpenChange={setReceiptDialogOpen} payment={selectedPayment} />
+        <PaymentReceiptDialog
+          open={receiptDialogOpen}
+          onOpenChange={setReceiptDialogOpen}
+          payment={selectedPayment}
+        />
       )}
     </>
   )

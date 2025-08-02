@@ -28,7 +28,11 @@ interface SmartTagsDisplayProps {
   showDescription?: boolean
 }
 
-export function SmartTagsDisplay({ tags, maxTags = 5, showDescription = false }: SmartTagsDisplayProps) {
+export function SmartTagsDisplay({
+  tags,
+  maxTags = 5,
+  showDescription = false,
+}: SmartTagsDisplayProps) {
   const getTagIcon = (tagName: string, tagType: string) => {
     const iconClass = "h-3 w-3"
 
@@ -142,7 +146,8 @@ export function SmartTagsDisplay({ tags, maxTags = 5, showDescription = false }:
             .filter((tag) => tag.description)
             .map((tag) => (
               <div key={`desc-${tag.id}`} className="text-xs text-muted-foreground">
-                <span className="font-medium">{formatTagName(tag.tag_name)}:</span> {tag.description}
+                <span className="font-medium">{formatTagName(tag.tag_name)}:</span>{" "}
+                {tag.description}
               </div>
             ))}
         </div>

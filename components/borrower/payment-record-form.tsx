@@ -7,11 +7,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import type { LoanPayment } from "@/lib/types"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { CalendarIcon, InfoIcon } from "lucide-react"
 
 interface PaymentRecordFormProps {
@@ -52,7 +65,9 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
       <Card>
         <CardHeader>
           <CardTitle>Payment Status: {payment.payment_status}</CardTitle>
-          <CardDescription>This payment is already {payment.payment_status}. No action is required.</CardDescription>
+          <CardDescription>
+            This payment is already {payment.payment_status}. No action is required.
+          </CardDescription>
         </CardHeader>
       </Card>
     )
@@ -63,7 +78,8 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
       <CardHeader>
         <CardTitle>Record Your Payment</CardTitle>
         <CardDescription>
-          Record the payment you've made directly to the lender. The lender will need to confirm receipt.
+          Record the payment you've made directly to the lender. The lender will need to confirm
+          receipt.
         </CardDescription>
       </CardHeader>
       <form action={formAction}>
@@ -73,7 +89,7 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
           <input type="hidden" name="lenderProfileId" value={payment.lender_profile_id} />
           <input type="hidden" name="loanRequestId" value={payment.loan_request_id} />
 
-          <div className="flex items-center justify-between bg-muted p-3 rounded-md">
+          <div className="flex items-center justify-between rounded-md bg-muted p-3">
             <div>
               <p className="text-sm font-medium">Amount Due</p>
               <p className="text-lg font-bold">
@@ -83,7 +99,7 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
             <div>
               <p className="text-sm font-medium">Due Date</p>
               <div className="flex items-center">
-                <CalendarIcon className="h-4 w-4 mr-1 text-muted-foreground" />
+                <CalendarIcon className="mr-1 h-4 w-4 text-muted-foreground" />
                 <p>{new Date(payment.due_date).toLocaleDateString()}</p>
               </div>
             </div>
@@ -92,13 +108,19 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
           <Alert>
             <InfoIcon className="h-4 w-4" />
             <AlertDescription>
-              Please make your payment directly to the lender using your preferred method, then record the details here.
+              Please make your payment directly to the lender using your preferred method, then
+              record the details here.
             </AlertDescription>
           </Alert>
 
           <div className="space-y-2">
             <Label htmlFor="paymentMethod">How did you pay?</Label>
-            <Select name="paymentMethod" value={paymentMethod} onValueChange={setPaymentMethod} required>
+            <Select
+              name="paymentMethod"
+              value={paymentMethod}
+              onValueChange={setPaymentMethod}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
@@ -110,7 +132,9 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            {state.errors?.paymentMethod && <p className="text-sm text-red-500">{state.errors.paymentMethod}</p>}
+            {state.errors?.paymentMethod && (
+              <p className="text-sm text-red-500">{state.errors.paymentMethod}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -120,7 +144,9 @@ export function PaymentRecordForm({ payment, borrowerProfileId }: PaymentRecordF
               name="transactionReference"
               placeholder="Transaction ID, check number, etc."
             />
-            <p className="text-xs text-gray-500">If applicable, provide a reference number for this payment</p>
+            <p className="text-xs text-gray-500">
+              If applicable, provide a reference number for this payment
+            </p>
           </div>
 
           <div className="space-y-2">

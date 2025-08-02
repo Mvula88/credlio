@@ -48,7 +48,10 @@ if (allPresent) {
   console.log("\n🔗 Testing Supabase connection...")
   try {
     const { createClient } = require("@supabase/supabase-js")
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
     console.log("✅ Supabase client created successfully!")
   } catch (error) {
     console.log("❌ Failed to create Supabase client:", error)
@@ -74,5 +77,7 @@ if (fs.existsSync(envLocalPath)) {
   })
 } else {
   console.log("\n❌ .env.local file not found!")
-  console.log("Please create a .env.local file in your project root with your Supabase credentials.")
+  console.log(
+    "Please create a .env.local file in your project root with your Supabase credentials."
+  )
 }

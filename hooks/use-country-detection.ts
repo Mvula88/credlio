@@ -29,13 +29,22 @@ export function useCountryDetection() {
 
         // Map IP country codes to your supported countries
         const countryMapping: { [key: string]: string } = {
-          NA: "NAM", // Namibia
           NG: "NGA", // Nigeria
           KE: "KEN", // Kenya
-          GH: "GHA", // Ghana
-          TZ: "TZA", // Tanzania
           UG: "UGA", // Uganda
           ZA: "ZAF", // South Africa
+          GH: "GHA", // Ghana
+          TZ: "TZA", // Tanzania
+          RW: "RWA", // Rwanda
+          ZM: "ZMB", // Zambia
+          NA: "NAM", // Namibia
+          BW: "BWA", // Botswana
+          MW: "MWI", // Malawi
+          SN: "SEN", // Senegal
+          ET: "ETH", // Ethiopia
+          CM: "CMR", // Cameroon
+          SL: "SLE", // Sierra Leone
+          ZW: "ZWE", // Zimbabwe
         }
 
         const detectedCode = countryMapping[data.country_code]
@@ -50,8 +59,8 @@ export function useCountryDetection() {
             throw new Error("Country not supported")
           }
         } else {
-          // Default to Namibia if country not supported
-          const defaultResponse = await fetch("/api/countries/NAM")
+          // Default to Nigeria if country not supported
+          const defaultResponse = await fetch("/api/countries/NGA")
           if (defaultResponse.ok) {
             const defaultData = await defaultResponse.json()
             setCountry(defaultData)
@@ -61,9 +70,9 @@ export function useCountryDetection() {
         console.error("Country detection error:", err)
         setError("Failed to detect country")
 
-        // Fallback to Namibia
+        // Fallback to Nigeria
         try {
-          const fallbackResponse = await fetch("/api/countries/NAM")
+          const fallbackResponse = await fetch("/api/countries/NGA")
           if (fallbackResponse.ok) {
             const fallbackData = await fallbackResponse.json()
             setCountry(fallbackData)

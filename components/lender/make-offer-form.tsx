@@ -1,14 +1,23 @@
 "use client"
 
+import { useState } from "react"
 import { useFormState, useFormStatus } from "react-dom"
 import { makeLoanOfferAction } from "@/app/actions/loan-offers"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
+import { BorrowerRiskWarning } from "@/components/lender/borrower-risk-warning"
 import type { LoanRequest } from "@/lib/types" // Assuming LoanRequest type is available
 
 interface MakeOfferFormProps {
@@ -34,12 +43,18 @@ function SubmitButton() {
 
 export function MakeOfferForm({ loanRequest, lenderProfileId, countryId }: MakeOfferFormProps) {
   const [state, formAction] = useFormState(makeLoanOfferAction, initialState)
+  const [showRiskWarning, setShowRiskWarning] = useState(true)
+  const [proceedWithRisk, setProceedWithRisk] = useState(false)
   const { toast } = useToast()
 
   if (state.success && state.message) {
     toast({ title: "Success", description: state.message })
     // Consider redirecting or clearing the form
-  } else if (!state.success && state.message && !state.errors?.general?.includes("Duplicate offer.")) {
+  } else if (
+    !state.success &&
+    state.message &&
+    !state.errors?.general?.includes("Duplicate offer.")
+  ) {
     // Avoid double toast for duplicate
     toast({ title: "Error", description: state.message, variant: "destructive" })
   }
@@ -52,6 +67,22 @@ export function MakeOfferForm({ loanRequest, lenderProfileId, countryId }: MakeO
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
+          {/* Risk Warning */}
+          {showRiskWarning && !proceedWithRisk && (
+            <BorrowerRiskWarning
+              borrowerName={loanRequest.borrower?.full_name || "Unknown"}
+              borrowerPhone={loanRequest.borrower?.phone_number}
+              borrowerEmail={loanRequest.borrower?.email}
+              countryCode={countryId}
+              onProceed={() => {
+                setProceedWithRisk(true)
+                setShowRiskWarning(false)
+              }}
+              onCancel={() => {
+                window.history.back()
+              }}
+            />
+          )}
           <input type="hidden" name="loanRequestId" value={loanRequest.id} />
           <input type="hidden" name="lenderProfileId" value={lenderProfileId} />
           <input type="hidden" name="countryId" value={countryId} />
@@ -98,7 +129,9 @@ export function MakeOfferForm({ loanRequest, lenderProfileId, countryId }: MakeO
               defaultValue={loanRequest.repayment_terms || ""}
             />
             {state.errors?.repaymentTermsProposed && (
-              <p className="text-sm text-red-500">{state.errors.repaymentTermsProposed.join(", ")}</p>
+              <p className="text-sm text-red-500">
+                {state.errors.repaymentTermsProposed.join(", ")}
+              </p>
             )}
           </div>
 
@@ -117,7 +150,9 @@ export function MakeOfferForm({ loanRequest, lenderProfileId, countryId }: MakeO
 
           {state.message && !state.success && (
             <Alert variant="destructive">
-              <AlertDescription>{state.errors?.general?.join(", ") || state.message}</AlertDescription>
+              <AlertDescription>
+                {state.errors?.general?.join(", ") || state.message}
+              </AlertDescription>
             </Alert>
           )}
           {state.success && state.message && (

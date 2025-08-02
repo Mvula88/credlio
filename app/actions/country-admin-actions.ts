@@ -24,7 +24,11 @@ export async function assignCountryAdmin(profileId: string, countryId: string, p
     if (assignError) throw assignError
 
     // Assign country_admin role to the user
-    const { data: roleData } = await supabase.from("user_roles").select("id").eq("role_name", "country_admin").single()
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("id")
+      .eq("role_name", "country_admin")
+      .single()
 
     if (roleData) {
       const { error: roleError } = await supabase.from("user_profile_roles").insert({
@@ -75,7 +79,10 @@ export async function updateCountryAdminPermissions(countryAdminId: string, perm
   }
 
   try {
-    const { error } = await supabase.from("country_admins").update({ permissions }).eq("id", countryAdminId)
+    const { error } = await supabase
+      .from("country_admins")
+      .update({ permissions })
+      .eq("id", countryAdminId)
 
     if (error) throw error
 
@@ -96,7 +103,10 @@ export async function toggleCountryAdminStatus(countryAdminId: string, isActive:
   }
 
   try {
-    const { error } = await supabase.from("country_admins").update({ is_active: isActive }).eq("id", countryAdminId)
+    const { error } = await supabase
+      .from("country_admins")
+      .update({ is_active: isActive })
+      .eq("id", countryAdminId)
 
     if (error) throw error
 
@@ -118,13 +128,15 @@ export async function getCountryAdminCountries() {
   try {
     const { data, error } = await supabase
       .from("country_admins")
-      .select(`
+      .select(
+        `
         countries (
           id,
           name,
           code
         )
-      `)
+      `
+      )
       .eq("profile_id", profile.id)
       .eq("is_active", true)
 

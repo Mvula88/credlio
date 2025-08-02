@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
@@ -17,7 +24,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { Database } from "@/lib/types/database"
@@ -88,7 +101,8 @@ export function CountryAdminManagement() {
       // Fetch country admins
       const { data: adminData, error: adminError } = await supabase
         .from("country_admins")
-        .select(`
+        .select(
+          `
           *,
           profiles (
             full_name,
@@ -99,13 +113,17 @@ export function CountryAdminManagement() {
             name,
             code
           )
-        `)
+        `
+        )
         .order("assigned_at", { ascending: false })
 
       if (adminError) throw adminError
 
       // Fetch countries
-      const { data: countryData, error: countryError } = await supabase.from("countries").select("*").order("name")
+      const { data: countryData, error: countryError } = await supabase
+        .from("countries")
+        .select("*")
+        .order("name")
 
       if (countryError) throw countryError
 
@@ -188,7 +206,10 @@ export function CountryAdminManagement() {
 
   const handleToggleActive = async (admin: CountryAdmin) => {
     try {
-      const { error } = await supabase.from("country_admins").update({ is_active: !admin.is_active }).eq("id", admin.id)
+      const { error } = await supabase
+        .from("country_admins")
+        .update({ is_active: !admin.is_active })
+        .eq("id", admin.id)
 
       if (error) throw error
 
@@ -202,7 +223,7 @@ export function CountryAdminManagement() {
     (admin) =>
       admin.profiles.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.profiles.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.countries.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+      admin.countries.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const getInitials = (name: string) => {
@@ -217,22 +238,24 @@ export function CountryAdminManagement() {
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
+        <CardHeader className="flex flex-col justify-between space-y-2 sm:flex-row sm:items-center sm:space-y-0">
           <div>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
               Country Admin Management
             </CardTitle>
-            <CardDescription>Manage regional administrators for different countries</CardDescription>
+            <CardDescription>
+              Manage regional administrators for different countries
+            </CardDescription>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 placeholder="Search admins..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[200px] lg:w-[300px]"
+                className="w-full pl-8 sm:w-[200px] lg:w-[300px]"
               />
             </div>
             <Button onClick={() => setAddDialogOpen(true)}>
@@ -250,11 +273,11 @@ export function CountryAdminManagement() {
           )}
 
           {loading ? (
-            <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            <div className="flex h-40 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
             </div>
           ) : filteredAdmins.length > 0 ? (
-            <div className="rounded-md border overflow-hidden">
+            <div className="overflow-hidden rounded-md border">
               <Table>
                 <TableHeader className="bg-gray-50">
                   <TableRow>
@@ -279,8 +302,10 @@ export function CountryAdminManagement() {
                             <AvatarFallback>{getInitials(admin.profiles.full_name)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <div className="font-medium">{admin.profiles.full_name || "Unnamed Admin"}</div>
-                            <div className="text-xs text-gray-500 hidden sm:block">
+                            <div className="font-medium">
+                              {admin.profiles.full_name || "Unnamed Admin"}
+                            </div>
+                            <div className="hidden text-xs text-gray-500 sm:block">
                               {admin.profiles.email || "No email"}
                             </div>
                           </div>
@@ -288,7 +313,10 @@ export function CountryAdminManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Badge
+                            variant="outline"
+                            className="border-blue-200 bg-blue-50 text-blue-700"
+                          >
                             {admin.countries.code}
                           </Badge>
                           <span className="hidden sm:inline">{admin.countries.name}</span>
@@ -299,8 +327,8 @@ export function CountryAdminManagement() {
                           variant={admin.is_active ? "default" : "secondary"}
                           className={
                             admin.is_active
-                              ? "bg-green-50 text-green-700 border-green-200"
-                              : "bg-gray-50 text-gray-700 border-gray-200"
+                              ? "border-green-200 bg-green-50 text-green-700"
+                              : "border-gray-200 bg-gray-50 text-gray-700"
                           }
                         >
                           {admin.is_active ? "Active" : "Inactive"}
@@ -326,7 +354,7 @@ export function CountryAdminManagement() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell text-sm text-gray-500">
+                      <TableCell className="hidden text-sm text-gray-500 sm:table-cell">
                         {new Date(admin.assigned_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
@@ -368,8 +396,8 @@ export function CountryAdminManagement() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-10 border rounded-md bg-gray-50">
-              <Globe className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <div className="rounded-md border bg-gray-50 py-10 text-center">
+              <Globe className="mx-auto mb-4 h-12 w-12 text-gray-400" />
               <p className="text-gray-500">No country admins found</p>
               <Button variant="link" onClick={() => setAddDialogOpen(true)}>
                 Add your first country admin
@@ -384,7 +412,9 @@ export function CountryAdminManagement() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Country Admin</DialogTitle>
-            <DialogDescription>Assign a user as administrator for a specific country</DialogDescription>
+            <DialogDescription>
+              Assign a user as administrator for a specific country
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -401,7 +431,10 @@ export function CountryAdminManagement() {
                     <SelectItem key={user.id} value={user.id}>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={user.profile_picture_url || "/placeholder.svg"} alt={user.full_name} />
+                          <AvatarImage
+                            src={user.profile_picture_url || "/placeholder.svg"}
+                            alt={user.full_name}
+                          />
                           <AvatarFallback>{getInitials(user.full_name)}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -436,7 +469,7 @@ export function CountryAdminManagement() {
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Permissions</label>
+              <label className="mb-2 block text-sm font-medium">Permissions</label>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -505,7 +538,10 @@ export function CountryAdminManagement() {
             <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddAdmin} disabled={!newAdmin.profile_id || !newAdmin.country_id}>
+            <Button
+              onClick={handleAddAdmin}
+              disabled={!newAdmin.profile_id || !newAdmin.country_id}
+            >
               Add Admin
             </Button>
           </DialogFooter>

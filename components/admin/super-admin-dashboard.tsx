@@ -40,13 +40,14 @@ export function SuperAdminDashboard() {
       setLoading(true)
 
       // Fetch all stats in parallel
-      const [usersResult, countriesResult, countryAdminsResult, loansResult, paymentsResult] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("countries").select("id", { count: "exact", head: true }),
-        supabase.from("country_admins").select("id", { count: "exact", head: true }),
-        supabase.from("loan_requests").select("id", { count: "exact", head: true }),
-        supabase.from("loan_payments").select("id", { count: "exact", head: true }),
-      ])
+      const [usersResult, countriesResult, countryAdminsResult, loansResult, paymentsResult] =
+        await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("countries").select("id", { count: "exact", head: true }),
+          supabase.from("country_admins").select("id", { count: "exact", head: true }),
+          supabase.from("loan_requests").select("id", { count: "exact", head: true }),
+          supabase.from("loan_payments").select("id", { count: "exact", head: true }),
+        ])
 
       setStats({
         totalUsers: usersResult.count || 0,
@@ -74,14 +75,16 @@ export function SuperAdminDashboard() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.totalUsers.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.totalUsers.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
 
@@ -111,7 +114,9 @@ export function SuperAdminDashboard() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.totalLoans.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.totalLoans.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
 
@@ -121,7 +126,9 @@ export function SuperAdminDashboard() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.totalPayments.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {loading ? "..." : stats.totalPayments.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
       </div>

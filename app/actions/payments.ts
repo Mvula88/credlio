@@ -25,7 +25,7 @@ type InitiatePaymentState = {
 
 export async function initiatePaymentAction(
   prevState: InitiatePaymentState,
-  formData: FormData,
+  formData: FormData
 ): Promise<InitiatePaymentState> {
   const supabase = createServerSupabaseClient()
 
@@ -47,8 +47,15 @@ export async function initiatePaymentAction(
     }
   }
 
-  const { paymentId, borrowerProfileId, lenderProfileId, loanRequestId, paymentMethod, transactionReference, notes } =
-    validatedFields.data
+  const {
+    paymentId,
+    borrowerProfileId,
+    lenderProfileId,
+    loanRequestId,
+    paymentMethod,
+    transactionReference,
+    notes,
+  } = validatedFields.data
 
   try {
     // Update the payment status to pending_confirmation
@@ -127,7 +134,7 @@ type ConfirmPaymentState = {
 
 export async function confirmPaymentAction(
   prevState: ConfirmPaymentState,
-  formData: FormData,
+  formData: FormData
 ): Promise<ConfirmPaymentState> {
   const supabase = createServerSupabaseClient()
 
@@ -148,7 +155,8 @@ export async function confirmPaymentAction(
     }
   }
 
-  const { paymentId, lenderProfileId, borrowerProfileId, loanRequestId, amountPaid, notes } = validatedFields.data
+  const { paymentId, lenderProfileId, borrowerProfileId, loanRequestId, amountPaid, notes } =
+    validatedFields.data
 
   try {
     // Update the payment status to completed
@@ -228,7 +236,7 @@ type FailPaymentState = {
 
 export async function markPaymentAsFailedAction(
   prevState: FailPaymentState,
-  formData: FormData,
+  formData: FormData
 ): Promise<FailPaymentState> {
   const supabase = createServerSupabaseClient()
 
@@ -248,7 +256,8 @@ export async function markPaymentAsFailedAction(
     }
   }
 
-  const { paymentId, lenderProfileId, borrowerProfileId, loanRequestId, notes } = validatedFields.data
+  const { paymentId, lenderProfileId, borrowerProfileId, loanRequestId, notes } =
+    validatedFields.data
 
   try {
     // Update the payment status to failed

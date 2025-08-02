@@ -71,7 +71,11 @@ export function SubscriptionPage() {
       } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: profile } = await supabase.from("profiles").select("id").eq("auth_user_id", user.id).single()
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .single()
 
       if (profile) {
         const expiresAt = new Date()
@@ -97,10 +101,10 @@ export function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 px-4 py-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-12 text-center">
+          <h1 className="mb-4 text-4xl font-bold text-gray-900">Choose Your Plan</h1>
           <p className="text-xl text-gray-600">Select the plan that best fits your lending needs</p>
         </div>
 
@@ -108,22 +112,22 @@ export function SubscriptionPage() {
           <Alert className="mb-8 border-orange-200 bg-orange-50">
             <AlertCircle className="h-4 w-4 text-orange-600" />
             <AlertDescription className="text-orange-800">
-              <strong>Namibian lenders:</strong> You can also subscribe via eWallet or bank transfer. Contact{" "}
-              <strong>+264 81 440 1522</strong> for manual activation.
+              <strong>Namibian lenders:</strong> You can also subscribe via eWallet or bank
+              transfer. Contact <strong>+264 81 440 1522</strong> for manual activation.
             </AlertDescription>
           </Alert>
         )}
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid gap-8 md:grid-cols-3">
           {plans.map((plan) => (
             <Card
               key={plan.id}
               className={`relative ${plan.name === "Premium" ? "border-2 border-blue-500 shadow-lg" : ""}`}
             >
               {plan.name === "Premium" && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-500 text-white px-4 py-1">
-                    <Crown className="w-4 h-4 mr-1" />
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 transform">
+                  <Badge className="bg-blue-500 px-4 py-1 text-white">
+                    <Crown className="mr-1 h-4 w-4" />
                     Most Popular
                   </Badge>
                 </div>
@@ -133,7 +137,9 @@ export function SubscriptionPage() {
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <div className="text-3xl font-bold text-blue-600">
                   {plan.price_nad === 0 ? "Free" : `N$${plan.price_nad}`}
-                  {plan.trial_days > 0 && <span className="text-sm text-gray-500"> / {plan.trial_days} day trial</span>}
+                  {plan.trial_days > 0 && (
+                    <span className="text-sm text-gray-500"> / {plan.trial_days} day trial</span>
+                  )}
                 </div>
                 <CardDescription>
                   {plan.name === "Free Trial" && "Limited access to test the platform"}
@@ -146,21 +152,21 @@ export function SubscriptionPage() {
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-3 flex-shrink-0" />
+                      <Check className="mr-3 h-4 w-4 flex-shrink-0 text-green-500" />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
 
                   {plan.has_marketplace_access && (
                     <li className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-500 mr-3 flex-shrink-0" />
+                      <Star className="mr-3 h-4 w-4 flex-shrink-0 text-yellow-500" />
                       <span className="text-sm font-medium">Marketplace Access</span>
                     </li>
                   )}
 
                   {plan.has_smart_matching && (
                     <li className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-500 mr-3 flex-shrink-0" />
+                      <Star className="mr-3 h-4 w-4 flex-shrink-0 text-yellow-500" />
                       <span className="text-sm font-medium">Smart Matching</span>
                     </li>
                   )}
@@ -183,8 +189,10 @@ export function SubscriptionPage() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-gray-600">All plans include basic borrower management and risk assessment tools.</p>
+        <div className="mt-12 text-center">
+          <p className="text-gray-600">
+            All plans include basic borrower management and risk assessment tools.
+          </p>
         </div>
       </div>
     </div>

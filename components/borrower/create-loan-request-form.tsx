@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 
@@ -49,7 +56,9 @@ export function CreateLoanRequestForm({ profileId, countryId }: CreateLoanReques
     <Card>
       <CardHeader>
         <CardTitle>Request a New Loan</CardTitle>
-        <CardDescription>Fill in the details below to submit your loan application.</CardDescription>
+        <CardDescription>
+          Fill in the details below to submit your loan application.
+        </CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
@@ -59,7 +68,9 @@ export function CreateLoanRequestForm({ profileId, countryId }: CreateLoanReques
           <div className="space-y-2">
             <Label htmlFor="loanAmount">Loan Amount</Label>
             <Input id="loanAmount" name="loanAmount" type="number" step="0.01" required />
-            {state.errors?.loanAmount && <p className="text-sm text-red-500">{state.errors.loanAmount}</p>}
+            {state.errors?.loanAmount && (
+              <p className="text-sm text-red-500">{state.errors.loanAmount}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -73,19 +84,25 @@ export function CreateLoanRequestForm({ profileId, countryId }: CreateLoanReques
               required
               placeholder="e.g., USD"
             />
-            {state.errors?.currencyCode && <p className="text-sm text-red-500">{state.errors.currencyCode}</p>}
+            {state.errors?.currencyCode && (
+              <p className="text-sm text-red-500">{state.errors.currencyCode}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="purpose">Purpose of Loan</Label>
             <Textarea id="purpose" name="purpose" rows={3} required />
-            {state.errors?.purpose && <p className="text-sm text-red-500">{state.errors.purpose}</p>}
+            {state.errors?.purpose && (
+              <p className="text-sm text-red-500">{state.errors.purpose}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="repaymentTerms">Repayment Terms (e.g., 12 months)</Label>
             <Input id="repaymentTerms" name="repaymentTerms" type="text" required />
-            {state.errors?.repaymentTerms && <p className="text-sm text-red-500">{state.errors.repaymentTerms}</p>}
+            {state.errors?.repaymentTerms && (
+              <p className="text-sm text-red-500">{state.errors.repaymentTerms}</p>
+            )}
           </div>
 
           {state.message && !state.success && (

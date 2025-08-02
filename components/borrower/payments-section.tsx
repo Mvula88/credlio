@@ -5,7 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { PaymentRecordForm } from "@/components/borrower/payment-record-form"
 import { CalendarIcon, FileText } from "lucide-react"
 import { PaymentReceiptDialog } from "@/components/payment-receipt-dialog"
@@ -17,14 +23,20 @@ interface PaymentsSectionProps {
   borrowerProfileId: string
 }
 
-export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProfileId }: PaymentsSectionProps) {
+export function PaymentsSection({
+  upcomingPayments,
+  paymentHistory,
+  borrowerProfileId,
+}: PaymentsSectionProps) {
   const [selectedPayment, setSelectedPayment] = useState<LoanPayment | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isReceiptOpen, setIsReceiptOpen] = useState(false)
 
   // Calculate payment statistics
   const totalScheduled = upcomingPayments.filter((p) => p.payment_status === "scheduled").length
-  const totalPending = upcomingPayments.filter((p) => p.payment_status === "pending_confirmation").length
+  const totalPending = upcomingPayments.filter(
+    (p) => p.payment_status === "pending_confirmation"
+  ).length
   const totalCompleted = paymentHistory.filter((p) => p.payment_status === "completed").length
   const totalFailed = paymentHistory.filter((p) => p.payment_status === "failed").length
 
@@ -41,7 +53,7 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
           <CardDescription>Manage and track your loan payments</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Scheduled</CardTitle>
@@ -87,17 +99,17 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
             </TabsList>
             <TabsContent value="upcoming">
               {upcomingPayments.length === 0 ? (
-                <p className="text-center py-4 text-gray-500">No upcoming payments</p>
+                <p className="py-4 text-center text-gray-500">No upcoming payments</p>
               ) : (
                 <div className="space-y-3">
                   {upcomingPayments.map((payment) => (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`p-2 rounded-full ${
+                          className={`rounded-full p-2 ${
                             payment.payment_status === "scheduled"
                               ? "bg-blue-100"
                               : payment.payment_status === "pending_confirmation"
@@ -129,7 +141,11 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                       </div>
                       <div className="flex items-center gap-3">
                         <PaymentStatusBadge status={payment.payment_status} />
-                        <Button size="sm" variant="ghost" onClick={() => handleViewDetails(payment)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleViewDetails(payment)}
+                        >
                           Details
                         </Button>
                       </div>
@@ -140,17 +156,17 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
             </TabsContent>
             <TabsContent value="history">
               {paymentHistory.length === 0 ? (
-                <p className="text-center py-4 text-gray-500">No payment history</p>
+                <p className="py-4 text-center text-gray-500">No payment history</p>
               ) : (
                 <div className="space-y-3">
                   {paymentHistory.map((payment) => (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50"
+                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`p-2 rounded-full ${
+                          className={`rounded-full p-2 ${
                             payment.payment_status === "completed"
                               ? "bg-green-100"
                               : payment.payment_status === "failed"
@@ -184,7 +200,11 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                       </div>
                       <div className="flex items-center gap-3">
                         <PaymentStatusBadge status={payment.payment_status} />
-                        <Button size="sm" variant="ghost" onClick={() => handleViewDetails(payment)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleViewDetails(payment)}
+                        >
                           Details
                         </Button>
                       </div>
@@ -199,20 +219,22 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
 
       {/* Payment Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           {selectedPayment && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex justify-between items-center">
+                <DialogTitle className="flex items-center justify-between">
                   <span>Payment Details</span>
                   <PaymentStatusBadge status={selectedPayment.payment_status} />
                 </DialogTitle>
-                <DialogDescription>Due on {new Date(selectedPayment.due_date).toLocaleDateString()}</DialogDescription>
+                <DialogDescription>
+                  Due on {new Date(selectedPayment.due_date).toLocaleDateString()}
+                </DialogDescription>
               </DialogHeader>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <h3 className="font-medium mb-2">Payment Information</h3>
+                  <h3 className="mb-2 font-medium">Payment Information</h3>
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-500">Amount Due</p>
@@ -226,7 +248,9 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                     {selectedPayment.payment_method && (
                       <div>
                         <p className="text-sm text-gray-500">Payment Method</p>
-                        <p className="font-medium capitalize">{selectedPayment.payment_method.replace(/_/g, " ")}</p>
+                        <p className="font-medium capitalize">
+                          {selectedPayment.payment_method.replace(/_/g, " ")}
+                        </p>
                       </div>
                     )}
                     {selectedPayment.transaction_reference && (
@@ -238,7 +262,9 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                     {selectedPayment.payment_date && (
                       <div>
                         <p className="text-sm text-gray-500">Payment Date</p>
-                        <p className="font-medium">{new Date(selectedPayment.payment_date).toLocaleDateString()}</p>
+                        <p className="font-medium">
+                          {new Date(selectedPayment.payment_date).toLocaleDateString()}
+                        </p>
                       </div>
                     )}
                     {selectedPayment.notes && (
@@ -252,7 +278,10 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
 
                 <div>
                   {selectedPayment.payment_status === "scheduled" && (
-                    <PaymentRecordForm payment={selectedPayment} borrowerProfileId={borrowerProfileId} />
+                    <PaymentRecordForm
+                      payment={selectedPayment}
+                      borrowerProfileId={borrowerProfileId}
+                    />
                   )}
 
                   {selectedPayment.payment_status === "pending_confirmation" && (
@@ -265,8 +294,9 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-yellow-700">
-                          You recorded this payment on {new Date(selectedPayment.updated_at).toLocaleDateString()}. The
-                          lender will review and confirm receipt of your payment.
+                          You recorded this payment on{" "}
+                          {new Date(selectedPayment.updated_at).toLocaleDateString()}. The lender
+                          will review and confirm receipt of your payment.
                         </p>
                       </CardContent>
                     </Card>
@@ -283,10 +313,17 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                       <CardContent>
                         <p className="text-sm text-green-700">
                           Payment was confirmed on{" "}
-                          {new Date(selectedPayment.payment_date || selectedPayment.updated_at).toLocaleDateString()}.
+                          {new Date(
+                            selectedPayment.payment_date || selectedPayment.updated_at
+                          ).toLocaleDateString()}
+                          .
                         </p>
-                        <Button variant="outline" className="mt-4" onClick={() => setIsReceiptOpen(true)}>
-                          <FileText className="h-4 w-4 mr-2" />
+                        <Button
+                          variant="outline"
+                          className="mt-4"
+                          onClick={() => setIsReceiptOpen(true)}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
                           View Receipt
                         </Button>
                       </CardContent>
@@ -302,9 +339,12 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-red-700">Reason: {selectedPayment.notes || "Not specified"}</p>
-                        <p className="text-sm text-red-700 mt-2">
-                          Please contact the lender directly to resolve this issue, then record a new payment.
+                        <p className="text-sm text-red-700">
+                          Reason: {selectedPayment.notes || "Not specified"}
+                        </p>
+                        <p className="mt-2 text-sm text-red-700">
+                          Please contact the lender directly to resolve this issue, then record a
+                          new payment.
                         </p>
                       </CardContent>
                     </Card>
@@ -315,7 +355,11 @@ export function PaymentsSection({ upcomingPayments, paymentHistory, borrowerProf
           )}
         </DialogContent>
       </Dialog>
-      <PaymentReceiptDialog payment={selectedPayment} isOpen={isReceiptOpen} onOpenChange={setIsReceiptOpen} />
+      <PaymentReceiptDialog
+        payment={selectedPayment}
+        isOpen={isReceiptOpen}
+        onOpenChange={setIsReceiptOpen}
+      />
     </>
   )
 }

@@ -5,7 +5,14 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -35,7 +42,13 @@ interface LoanPayment {
   due_date: string
   amount_paid?: number | null
   payment_date?: string | null
-  payment_status: "scheduled" | "pending_confirmation" | "completed" | "failed" | "overdue" | "reversed"
+  payment_status:
+    | "scheduled"
+    | "pending_confirmation"
+    | "completed"
+    | "failed"
+    | "overdue"
+    | "reversed"
   payment_method?: string | null
   transaction_reference?: string | null
   notes?: string | null
@@ -114,17 +127,17 @@ export default function LoanPaymentsDashboard({ userRole, profileId }: LoanPayme
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
-        return <CheckCircle className="h-4 w-4 mr-1" />
+        return <CheckCircle className="mr-1 h-4 w-4" />
       case "pending_confirmation":
-        return <Clock className="h-4 w-4 mr-1" />
+        return <Clock className="mr-1 h-4 w-4" />
       case "scheduled":
-        return <Clock className="h-4 w-4 mr-1" />
+        return <Clock className="mr-1 h-4 w-4" />
       case "failed":
-        return <XCircle className="h-4 w-4 mr-1" />
+        return <XCircle className="mr-1 h-4 w-4" />
       case "overdue":
-        return <AlertCircle className="h-4 w-4 mr-1" />
+        return <AlertCircle className="mr-1 h-4 w-4" />
       case "reversed":
-        return <AlertCircle className="h-4 w-4 mr-1" />
+        return <AlertCircle className="mr-1 h-4 w-4" />
       default:
         return null
     }
@@ -175,17 +188,17 @@ export default function LoanPaymentsDashboard({ userRole, profileId }: LoanPayme
         {loading ? (
           <div className="flex justify-center p-8">Loading payments...</div>
         ) : error ? (
-          <div className="bg-red-50 text-red-500 p-4 rounded-md">{error}</div>
+          <div className="rounded-md bg-red-50 p-4 text-red-500">{error}</div>
         ) : payments.length === 0 ? (
-          <div className="text-center p-8 text-gray-500">No payment records found</div>
+          <div className="p-8 text-center text-gray-500">No payment records found</div>
         ) : (
           <>
             <Alert className="mb-6">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Payment Information</AlertTitle>
               <AlertDescription>
-                Payments are made directly between borrowers and lenders outside the platform. This dashboard is for
-                recording and tracking payment status only.
+                Payments are made directly between borrowers and lenders outside the platform. This
+                dashboard is for recording and tracking payment status only.
               </AlertDescription>
             </Alert>
 
@@ -317,23 +330,27 @@ function PaymentsTable({
                 </Badge>
               </TableCell>
               {payments.some((p) => p.payment_date) && (
-                <TableCell>{payment.payment_date ? formatDate(payment.payment_date) : "-"}</TableCell>
+                <TableCell>
+                  {payment.payment_date ? formatDate(payment.payment_date) : "-"}
+                </TableCell>
               )}
-              {payments.some((p) => p.payment_method) && <TableCell>{payment.payment_method || "-"}</TableCell>}
+              {payments.some((p) => p.payment_method) && (
+                <TableCell>{payment.payment_method || "-"}</TableCell>
+              )}
               {payments.some((p) => p.transaction_reference) && (
                 <TableCell>{payment.transaction_reference || "-"}</TableCell>
               )}
               <TableCell>
                 <Link href={getDetailPageUrl(payment.id)}>
                   <Button variant="outline" size="sm" className="flex items-center">
-                    <FileText className="h-4 w-4 mr-1" />
+                    <FileText className="mr-1 h-4 w-4" />
                     Details
                   </Button>
                 </Link>
                 {payment.payment_status === "completed" && (
                   <Link href={`${getDetailPageUrl(payment.id)}/receipt`}>
-                    <Button variant="ghost" size="sm" className="flex items-center ml-2">
-                      <FileText className="h-4 w-4 mr-1" />
+                    <Button variant="ghost" size="sm" className="ml-2 flex items-center">
+                      <FileText className="mr-1 h-4 w-4" />
                       Receipt
                     </Button>
                   </Link>

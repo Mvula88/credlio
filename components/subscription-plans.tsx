@@ -29,15 +29,17 @@ const SubscriptionPlans = () => {
 
   return (
     <div>
-      <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">Choose your plan</h2>
-        <p className="mt-3 text-xl text-gray-500">Simple, transparent pricing. Upgrade or downgrade at any time.</p>
+        <p className="mt-3 text-xl text-gray-500">
+          Simple, transparent pricing. Upgrade or downgrade at any time.
+        </p>
 
-        <div className="mt-12 space-y-4 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-6">
+        <div className="mt-12 space-y-4 sm:grid sm:grid-cols-3 sm:gap-6 sm:space-y-0">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`bg-white rounded-lg shadow-md divide-y divide-gray-200 ${
+              className={`divide-y divide-gray-200 rounded-lg bg-white shadow-md ${
                 selectedPlan === plan.name ? "ring-2 ring-indigo-500" : ""
               }`}
             >
@@ -50,12 +52,12 @@ const SubscriptionPlans = () => {
                 </div>
                 <button
                   onClick={() => setSelectedPlan(plan.name)}
-                  className="mt-6 w-full bg-indigo-600 border border-transparent rounded-md py-2 px-4 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="mt-6 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Select Plan
                 </button>
               </div>
-              <div className="pt-6 pb-8 px-6">
+              <div className="px-6 pb-8 pt-6">
                 <h4 className="text-sm font-medium text-gray-900">Features</h4>
                 <ul role="list" className="mt-4 space-y-2">
                   {plan.features.map((feature) => (

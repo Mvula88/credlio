@@ -8,7 +8,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     const { data: loan, error } = await supabase
       .from("loan_requests")
-      .select(`
+      .select(
+        `
         *,
         borrower:profiles!borrower_profile_id (
           id,
@@ -35,7 +36,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             trust_score
           )
         )
-      `)
+      `
+      )
       .eq("id", id)
       .single()
 

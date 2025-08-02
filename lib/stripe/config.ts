@@ -8,18 +8,18 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-06-20",
 })
 
-// Updated pricing structure
+// Updated pricing structure with live price IDs
 export const STRIPE_PRICES = {
-  BASIC_USD: process.env.STRIPE_PRICE_BASIC_USD!, // $12.99
-  PREMIUM_USD: process.env.STRIPE_PRICE_PREMIUM_USD!, // $17.99
+  TIER_1: process.env.STRIPE_PRICE_ID_TIER_1!, // $12.99 tier
+  TIER_2: process.env.STRIPE_PRICE_ID_TIER_2!, // $19.99 tier
 } as const
 
 export function getStripePriceId(planType: "basic" | "premium"): string {
   switch (planType) {
     case "basic":
-      return STRIPE_PRICES.BASIC_USD
+      return STRIPE_PRICES.TIER_1
     case "premium":
-      return STRIPE_PRICES.PREMIUM_USD
+      return STRIPE_PRICES.TIER_2
     default:
       throw new Error(`Invalid plan type: ${planType}`)
   }

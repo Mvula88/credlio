@@ -3,8 +3,22 @@
 import { useState } from "react"
 import { InviteBorrowerForm } from "./invite-borrower-form"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -98,25 +112,25 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          <Badge variant="outline" className="border-yellow-200 bg-yellow-50 text-yellow-700">
             Pending
           </Badge>
         )
       case "accepted":
         return (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
             Accepted
           </Badge>
         )
       case "expired":
         return (
-          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+          <Badge variant="outline" className="border-gray-200 bg-gray-50 text-gray-700">
             Expired
           </Badge>
         )
       case "cancelled":
         return (
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
             Cancelled
           </Badge>
         )
@@ -127,7 +141,7 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Borrower Invitations</h2>
         <InviteBorrowerForm />
       </div>
@@ -136,7 +150,9 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
         <Card>
           <CardHeader>
             <CardTitle>Pending Invitations</CardTitle>
-            <CardDescription>These invitations are waiting for borrowers to accept.</CardDescription>
+            <CardDescription>
+              These invitations are waiting for borrowers to accept.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -158,13 +174,25 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
                     <TableCell>{getStatusBadge(invitation.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleCopyLink(invitation.invitation_code)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopyLink(invitation.invitation_code)}
+                        >
                           <Copy className="h-3 w-3" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleResend(invitation)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleResend(invitation)}
+                        >
                           <RefreshCw className="h-3 w-3" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleCancel(invitation.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancel(invitation.id)}
+                        >
                           <X className="h-3 w-3" />
                         </Button>
                       </div>
@@ -179,7 +207,9 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
         <Card>
           <CardHeader>
             <CardTitle>No Pending Invitations</CardTitle>
-            <CardDescription>You don't have any pending invitations. Create one to invite a borrower.</CardDescription>
+            <CardDescription>
+              You don't have any pending invitations. Create one to invite a borrower.
+            </CardDescription>
           </CardHeader>
           <CardFooter>
             <InviteBorrowerForm />
@@ -209,7 +239,9 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
                     <TableCell className="font-medium">{invitation.borrower_name}</TableCell>
                     <TableCell>{formatDate(invitation.created_at)}</TableCell>
                     <TableCell>{getStatusBadge(invitation.status)}</TableCell>
-                    <TableCell>{invitation.accepted_at ? formatDate(invitation.accepted_at) : "-"}</TableCell>
+                    <TableCell>
+                      {invitation.accepted_at ? formatDate(invitation.accepted_at) : "-"}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -229,20 +261,25 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Resend Invitation</DialogTitle>
-            <DialogDescription>Resend the invitation to {selectedInvitation?.borrower_name}.</DialogDescription>
+            <DialogDescription>
+              Resend the invitation to {selectedInvitation?.borrower_name}.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="rounded-md bg-muted p-4">
               <p className="text-sm font-medium">Invitation Link</p>
-              <div className="flex items-center mt-2">
-                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm flex-1 overflow-x-auto">
-                  {selectedInvitation && `${window.location.origin}/invite/${selectedInvitation.invitation_code}`}
+              <div className="mt-2 flex items-center">
+                <code className="relative flex-1 overflow-x-auto rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
+                  {selectedInvitation &&
+                    `${window.location.origin}/invite/${selectedInvitation.invitation_code}`}
                 </code>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => selectedInvitation && handleCopyLink(selectedInvitation.invitation_code)}
+                  onClick={() =>
+                    selectedInvitation && handleCopyLink(selectedInvitation.invitation_code)
+                  }
                   className="ml-2"
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -251,7 +288,7 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row">
             {selectedInvitation && selectedInvitation.borrower_phone && (
               <WhatsAppShareButton
                 message={getWhatsAppMessage(selectedInvitation)}
@@ -261,7 +298,10 @@ export function InvitationsSection({ invitations, lenderProfileId }: Invitations
             )}
 
             {selectedInvitation && !selectedInvitation.borrower_phone && (
-              <WhatsAppShareButton message={getWhatsAppMessage(selectedInvitation)} className="w-full sm:w-auto" />
+              <WhatsAppShareButton
+                message={getWhatsAppMessage(selectedInvitation)}
+                className="w-full sm:w-auto"
+              />
             )}
 
             <Button

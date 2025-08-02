@@ -63,7 +63,9 @@ async function verifySupabaseSetup() {
     console.log("\n🔒 Row Level Security status:")
     if (rlsData && rlsData.length > 0) {
       rlsData.forEach((table: any) => {
-        console.log(`- ${table.table_name}: ${table.can_select ? "Accessible" : "RLS may be restricting access"}`)
+        console.log(
+          `- ${table.table_name}: ${table.can_select ? "Accessible" : "RLS may be restricting access"}`
+        )
       })
     }
   } catch (error) {
