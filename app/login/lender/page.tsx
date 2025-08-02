@@ -1,4 +1,4 @@
-import { SigninForm } from "@/components/auth/signin-form"
+import { SignInForm } from "@/components/auth/signin-form"
 import Link from "next/link"
 
 export default function LenderLoginPage() {
@@ -14,7 +14,7 @@ export default function LenderLoginPage() {
             </Link>
           </p>
         </div>
-        <SigninForm role="lender" />
+        <SignInForm role="lender" />
       </div>
     </div>
   )
