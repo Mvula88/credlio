@@ -42,3 +42,4 @@ export function getCountryCurrency(code: string): string {
 
 // For backward compatibility
 export const countries = SUPPORTED_COUNTRIES;
+export const COUNTRIES = SUPPORTED_COUNTRIES;
