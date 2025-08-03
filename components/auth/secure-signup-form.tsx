@@ -281,19 +281,36 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   const resendConfirmationEmail = async () => {
     setResendingEmail(true)
     setResendSuccess(false)
+    setError(null)
     
     try {
+      console.log('Attempting to resend confirmation email to:', formData.email)
+      
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: formData.email
+        email: formData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
       })
       
-      if (error) throw error
+      if (error) {
+        console.error('Resend confirmation error:', error)
+        throw error
+      }
       
       setResendSuccess(true)
       setTimeout(() => setResendSuccess(false), 3000)
     } catch (error: any) {
-      setError(error.message)
+      console.error('Failed to resend confirmation email:', error)
+      // Provide more helpful error messages
+      if (error.message?.includes('rate')) {
+        setError('Too many attempts. Please wait a few minutes before trying again.')
+      } else if (error.message?.includes('not found')) {
+        setError('Email address not found. Please check and try again.')
+      } else {
+        setError(error.message || 'Failed to send confirmation email. Please try again.')
+      }
     } finally {
       setResendingEmail(false)
     }
