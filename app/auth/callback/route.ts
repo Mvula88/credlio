@@ -1,6 +1,7 @@
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
+import { sendWelcomeEmail } from "@/lib/email/email-service"
 
 // Country code mapping for IP detection
 const COUNTRY_CODE_MAPPING: { [key: string]: string } = {
@@ -151,6 +152,17 @@ export async function GET(request: NextRequest) {
           console.log(
             `Created profile for user ${sessionData.user.email} in country ${detectedCountryCode}`
           )
+          
+          // Send welcome email for new users
+          try {
+            await sendWelcomeEmail(
+              sessionData.user.email!,
+              sessionData.user.user_metadata?.username || sessionData.user.email!.split("@")[0],
+              role as 'lender' | 'borrower'
+            )
+          } catch (emailError) {
+            console.error("Failed to send welcome email:", emailError)
+          }
         }
 
         // Redirect based on role
