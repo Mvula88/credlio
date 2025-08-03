@@ -190,6 +190,6 @@ export const config = {
      * - public folder
      * - api routes (they handle auth internally)
      */
-    "/((?!_next/static|_next/image|favicon.ico|public|api).*)",
+    "/((?!_next/static|_next/image|favicon.ico|public|api|auth/test|auth/simple-test|auth/debug).*)",
   ],
 }
