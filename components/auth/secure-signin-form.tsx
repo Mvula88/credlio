@@ -48,16 +48,27 @@ export function SecureSigninForm() {
       const deviceFingerprint = generateDeviceFingerprint(headers)
 
       // First, get the email associated with this username
-      console.log("Looking up username:", credentials.username.toUpperCase())
-      const { data: profile, error: profileError } = await supabase
+      // Try with uppercase first (as usernames are generated in uppercase)
+      let { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("email, id, failed_login_attempts, account_locked_until, username")
         .eq("username", credentials.username.toUpperCase())
         .single()
 
-      console.log("Profile lookup result:", { profile, profileError })
+      // If not found, try as-is (in case it was stored differently)
+      if (!profile && profileError?.code === 'PGRST116') {
+        const result = await supabase
+          .from("profiles")
+          .select("email, id, failed_login_attempts, account_locked_until, username")
+          .eq("username", credentials.username)
+          .single()
+        
+        profile = result.data
+        profileError = result.error
+      }
 
       if (!profile) {
+        console.error("Username not found:", credentials.username, "Error:", profileError)
         // Log failed attempt
         await supabase
           .from("login_attempts")
@@ -94,13 +105,10 @@ export function SecureSigninForm() {
       }
 
       // Attempt sign in with email (from username lookup)
-      console.log("Attempting sign in with email:", profile.email)
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: profile.email,
         password: credentials.password
       })
-
-      console.log("Auth result:", { data, authError })
 
       if (authError) {
         // Increment failed attempts
