@@ -48,11 +48,14 @@ export function SecureSigninForm() {
       const deviceFingerprint = generateDeviceFingerprint(headers)
 
       // First, get the email associated with this username
-      const { data: profile } = await supabase
+      console.log("Looking up username:", credentials.username.toUpperCase())
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("email, id, failed_login_attempts, account_locked_until")
+        .select("email, id, failed_login_attempts, account_locked_until, username")
         .eq("username", credentials.username.toUpperCase())
         .single()
+
+      console.log("Profile lookup result:", { profile, profileError })
 
       if (!profile) {
         // Log failed attempt
@@ -91,10 +94,13 @@ export function SecureSigninForm() {
       }
 
       // Attempt sign in with email (from username lookup)
+      console.log("Attempting sign in with email:", profile.email)
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: profile.email,
         password: credentials.password
       })
+
+      console.log("Auth result:", { data, authError })
 
       if (authError) {
         // Increment failed attempts
@@ -297,6 +303,9 @@ export function SecureSigninForm() {
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="username"
+                name="username"
+                type="text"
+                autoComplete="username"
                 placeholder="CRD-KE-2024-A7B9X"
                 value={credentials.username}
                 onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
@@ -315,7 +324,9 @@ export function SecureSigninForm() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 value={credentials.password}
                 onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
                 className="pl-10 pr-10"
