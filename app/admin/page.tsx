@@ -25,8 +25,8 @@ export default async function AdminPage() {
   // Get admin view settings
   const { data: viewSettings } = await supabase.rpc("get_admin_view_settings").single()
 
-  const initialView = viewSettings?.current_view || "super_admin"
-  const initialCountry = viewSettings?.selected_country_code || undefined
+  const initialView = (viewSettings as any)?.current_view || "super_admin"
+  const initialCountry = (viewSettings as any)?.selected_country_code || undefined
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server-app"
+import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 
 export async function getBorrowerLoans(borrowerId: string) {
   const supabase = createServerSupabaseClient()

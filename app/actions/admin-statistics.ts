@@ -62,7 +62,7 @@ export async function getCountryRiskStatistics(countryCode: string): Promise<Cou
   }
 
   // For country admin, ensure they can only see their country's data
-  if (profile.role === 'admin' && profile.country?.code !== countryCode) {
+  if (profile.role === 'admin' && (profile.country as any)?.code !== countryCode) {
     return null;
   }
 
@@ -131,7 +131,7 @@ export async function getRecentRiskActivities(
 
   // For country admin, force their country code
   const effectiveCountryCode = profile.role === 'admin' 
-    ? profile.country?.code 
+    ? (profile.country as any)?.code 
     : countryCode;
 
   const { data, error } = await supabase.rpc('get_recent_risk_activities', {
@@ -198,8 +198,8 @@ export async function getAdminRiskSummary(countryCode?: string) {
   let query = supabase.from('admin_risk_summary').select('*');
   
   // For country admin, filter by their country
-  if (profile.role === 'admin' && profile.country?.code) {
-    query = query.eq('country_code', profile.country.code);
+  if (profile.role === 'admin' && (profile.country as any)?.code) {
+    query = query.eq('country_code', (profile.country as any).code);
   } else if (countryCode) {
     query = query.eq('country_code', countryCode);
   }

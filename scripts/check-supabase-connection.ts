@@ -17,7 +17,7 @@ async function checkConnection() {
   console.log(`URL: ${supabaseUrl}`)
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    const supabase = createClient(supabaseUrl!, supabaseAnonKey!)
 
     // Try a simple query to check connection
     const { data, error } = await supabase.from("profiles").select("count").limit(1)

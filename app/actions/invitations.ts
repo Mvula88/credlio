@@ -58,9 +58,11 @@ export async function createInvitation(formData: InvitationFormData) {
 
   // Create audit log
   await createAuditLog({
+    actorProfileId: lenderProfileId,
+    actorRole: "lender",
     action: "create_invitation",
-    entity_type: "borrower_invitation",
-    entity_id: data.invitation_id,
+    targetResourceId: data.invitation_id,
+    targetResourceType: "borrower_invitation",
     details: {
       borrower_name: formData.borrowerName,
       invitation_code: data.invitation_code,
@@ -134,9 +136,11 @@ export async function cancelInvitation(invitationId: string) {
 
   // Create audit log
   await createAuditLog({
+    actorProfileId: profile.id,
+    actorRole: "lender",
     action: "cancel_invitation",
-    entity_type: "borrower_invitation",
-    entity_id: invitationId,
+    targetResourceId: invitationId,
+    targetResourceType: "borrower_invitation",
     details: {
       cancelled_by: session.user.id,
     },
@@ -196,9 +200,11 @@ export async function acceptInvitation(code: string, borrowerProfileId: string) 
 
   // Create audit log
   await createAuditLog({
+    actorProfileId: borrowerProfileId,
+    actorRole: "borrower",
     action: "accept_invitation",
-    entity_type: "borrower_invitation",
-    entity_id: code,
+    targetResourceId: code,
+    targetResourceType: "borrower_invitation",
     details: {
       borrower_profile_id: borrowerProfileId,
     },

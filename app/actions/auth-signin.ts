@@ -51,7 +51,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
               user_id: profile.id,
               email: data.email,
               ip_address: ipAddress,
-              registered_country_code: profile.countries?.code,
+              registered_country_code: (profile.countries as any)?.code,
               attempt_type: 'login',
               block_reason: authError.message,
               risk_score: 50,
@@ -83,7 +83,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
       return { error: "User profile not found" }
     }
     
-    const registeredCountryCode = profile.countries?.code
+    const registeredCountryCode = (profile.countries as any)?.code
     
     if (!registeredCountryCode) {
       console.error("User has no registered country")

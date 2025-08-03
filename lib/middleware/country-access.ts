@@ -50,7 +50,7 @@ export async function checkCountryAccess(
       return {
         allowed: true,
         userCountryId: profile.country_id,
-        userCountryCode: profile.countries?.code
+        userCountryCode: (profile.countries as any)?.code
       }
     }
     
@@ -59,7 +59,7 @@ export async function checkCountryAccess(
       return {
         allowed: true,
         userCountryId: profile.country_id,
-        userCountryCode: profile.countries?.code
+        userCountryCode: (profile.countries as any)?.code
       }
     }
     
@@ -81,7 +81,7 @@ export async function checkCountryAccess(
     return {
       allowed,
       userCountryId: profile.country_id,
-      userCountryCode: profile.countries?.code,
+      userCountryCode: (profile.countries as any)?.code,
       targetCountryId: checkCountryId,
       reason: allowed ? undefined : "Access denied: You can only view data from your registered country"
     }

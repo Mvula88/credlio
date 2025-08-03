@@ -18,7 +18,7 @@ async function verifySupabaseSetup() {
   console.log("🔍 Verifying Supabase setup...")
 
   // Create a Supabase client with the service role key
-  const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey)
+  const supabase = createClient<Database>(supabaseUrl!, supabaseServiceKey!)
 
   try {
     // Test connection by getting Supabase version
@@ -35,7 +35,7 @@ async function verifySupabaseSetup() {
     const { data: tables, error: tablesError } = await supabase
       .from("information_schema.tables")
       .select("table_name")
-      .eq("table_schema", "public")
+      .eq("table_schema" as any, "public")
 
     if (tablesError) {
       throw tablesError
@@ -54,7 +54,7 @@ async function verifySupabaseSetup() {
     const { data: rlsData, error: rlsError } = await supabase
       .from("information_schema.tables")
       .select("table_name, has_table_privilege(table_name, 'SELECT') as can_select")
-      .eq("table_schema", "public")
+      .eq("table_schema" as any, "public")
 
     if (rlsError) {
       throw rlsError

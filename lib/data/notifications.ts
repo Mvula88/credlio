@@ -28,3 +28,27 @@ export async function markNotificationAsRead(id: string) {
 
   return true
 }
+
+export async function createNotificationEntry(
+  profileId: string,
+  title: string,
+  message: string,
+  type: string = 'info'
+) {
+  const supabase = createServerSupabaseClient()
+
+  const { error } = await supabase.from("notifications").insert({
+    profile_id: profileId,
+    title,
+    message,
+    type,
+    read: false
+  })
+
+  if (error) {
+    console.error("Error creating notification:", error)
+    return false
+  }
+
+  return true
+}

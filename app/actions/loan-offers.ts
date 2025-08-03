@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { logAuditAction } from "./audit" // Assuming you have this audit action
@@ -23,7 +23,7 @@ const MakeOfferSchema = z.object({
 
 type MakeOfferState = {
   message: string
-  errors?: z.ZodError<typeof MakeOfferSchema>["formErrors"]["fieldErrors"] | null
+  errors?: Record<string, string[]> | null
   success: boolean
   offerId?: string
 }
@@ -35,13 +35,13 @@ export async function makeLoanOfferAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = MakeOfferSchema.safeParse({
-    loanRequestId: formData.get("loanRequestId"),
-    lenderProfileId: formData.get("lenderProfileId"), // This should come from the logged-in user's session/profile
-    countryId: formData.get("countryId"), // This should match the loan request's country
-    offerAmount: formData.get("offerAmount"),
-    interestRate: formData.get("interestRate"),
-    repaymentTermsProposed: formData.get("repaymentTermsProposed"),
-    notesToBorrower: formData.get("notesToBorrower"),
+    loanRequestId: formData.get("loanRequestId") as string,
+    lenderProfileId: formData.get("lenderProfileId") as string, // This should come from the logged-in user's session/profile
+    countryId: formData.get("countryId") as string, // This should match the loan request's country
+    offerAmount: Number(formData.get("offerAmount")),
+    interestRate: Number(formData.get("interestRate")),
+    repaymentTermsProposed: formData.get("repaymentTermsProposed") as string,
+    notesToBorrower: formData.get("notesToBorrower") as string,
   })
 
   if (!validatedFields.success) {
@@ -92,20 +92,20 @@ export async function makeLoanOfferAction(
         return {
           message:
             "Permission denied or offer conditions not met. Ensure the loan request is still available and you are eligible to make an offer.",
-          errors: { general: ["RLS policy violation."] },
+          errors: {},
           success: false,
         }
       }
       if (error.message.includes("uq_loan_request_lender_offer")) {
         return {
           message: "You have already made an offer for this loan request.",
-          errors: { general: ["Duplicate offer."] },
+          errors: {},
           success: false,
         }
       }
       return {
         message: error.message || "Failed to create loan offer.",
-        errors: { general: [error.message] },
+        errors: {},
         success: false,
       }
     }
@@ -117,10 +117,14 @@ export async function makeLoanOfferAction(
       action: "LOAN_OFFER_CREATED",
       targetResourceId: offer.id, // ID of the newly created loan_offer
       targetResourceType: "loan_offers",
-      secondaryTargetResourceId: loanRequestId, // ID of the loan_request
-      secondaryTargetResourceType: "loan_requests",
       countryId: countryId,
-      details: { offerAmount, interestRate, loanRequestId },
+      details: { 
+        offerAmount, 
+        interestRate, 
+        loanRequestId,
+        secondaryTargetResourceId: loanRequestId,
+        secondaryTargetResourceType: "loan_requests"
+      },
     })
 
     revalidatePath(`/lender/requests/${loanRequestId}`) // Revalidate the loan request details page
@@ -135,7 +139,7 @@ export async function makeLoanOfferAction(
     console.error("Unexpected error creating loan offer:", e)
     return {
       message: "An unexpected error occurred.",
-      errors: { general: [e.message] },
+      errors: {},
       success: false,
     }
   }

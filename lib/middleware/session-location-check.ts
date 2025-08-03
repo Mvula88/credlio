@@ -38,7 +38,7 @@ export async function checkSessionLocation(
       .eq("auth_user_id", user.id)
       .single()
     
-    if (!profile || !profile.countries?.code) {
+    if (!profile || !(profile.countries as any)?.code) {
       return {
         allowed: false,
         reason: "User profile or country not found"
@@ -51,7 +51,7 @@ export async function checkSessionLocation(
     const ipAddress = forwardedFor?.split(',')[0] || realIP || null
     
     // Verify location
-    const locationVerification = await verifyIpLocation(ipAddress, profile.countries.code)
+    const locationVerification = await verifyIpLocation(ipAddress, (profile.countries as any).code)
     
     // Get session ID from auth token
     const authHeader = request.headers.get('authorization')
@@ -63,7 +63,7 @@ export async function checkSessionLocation(
         user_id: profile.id,
         session_id: sessionId,
         ip_address: ipAddress,
-        country_code: locationVerification.detectedCountry || profile.countries.code,
+        country_code: locationVerification.detectedCountry || (profile.countries as any).code,
         is_vpn: locationVerification.flags.includes('vpn_detected'),
         risk_score: locationVerification.riskScore,
         last_activity: new Date().toISOString()
@@ -90,7 +90,7 @@ export async function checkSessionLocation(
         user_id: profile.id,
         ip_address: ipAddress,
         detected_country_code: locationVerification.detectedCountry,
-        registered_country_code: profile.countries.code,
+        registered_country_code: (profile.countries as any).code,
         attempt_type: 'session_check',
         block_reason: reason,
         risk_score: locationVerification.riskScore,
@@ -124,7 +124,7 @@ export async function checkSessionLocation(
           p_event_type: 'session_check',
           p_ip_address: ipAddress,
           p_detected_country: locationVerification.detectedCountry || null,
-          p_registered_country: profile.countries.code,
+          p_registered_country: (profile.countries as any).code,
           p_method: 'ip',
           p_result: locationVerification.verified,
           p_risk_score: locationVerification.riskScore,

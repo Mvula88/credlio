@@ -58,7 +58,7 @@ export async function reportOffPlatformDefaulter(data: z.infer<typeof offPlatfor
     return { error: 'Only lenders can report defaulters' };
   }
 
-  const countryCode = profile.country?.code;
+  const countryCode = (profile.country as any)?.code;
   if (!countryCode) {
     return { error: 'Country not found' };
   }
@@ -286,7 +286,7 @@ export async function getUnifiedRiskData(countryCode: string) {
   }
 
   // Ensure lender can only see data from their country
-  if (profile.country?.code !== countryCode) {
+  if ((profile.country as any)?.code !== countryCode) {
     return { error: 'Unauthorized country access', data: [] };
   }
 

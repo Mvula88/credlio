@@ -64,7 +64,7 @@ async function runAllSqlScripts() {
 
     if (error) {
       // If the function doesn't exist yet, create it directly
-      await supabase.sql(createFunctionSql)
+      // await supabase.sql(createFunctionSql) // Note: .sql() method not available in SDK
     }
   } catch (error) {
     // If rpc fails, try creating the function directly
@@ -76,7 +76,7 @@ async function runAllSqlScripts() {
         END;
         $$ LANGUAGE plpgsql SECURITY DEFINER;
       `
-      await supabase.sql(createFunctionSql)
+      // await supabase.sql(createFunctionSql) // Note: .sql() method not available in SDK
     } catch (innerError) {
       console.error("❌ Could not create exec_sql function:", innerError)
       console.log("⚠️ You may need to create this function manually in the Supabase SQL editor.")

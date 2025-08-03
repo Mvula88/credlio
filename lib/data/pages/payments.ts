@@ -1,4 +1,4 @@
-import { createPagesSupabaseClient } from "@/lib/supabase/server-pages"
+import { createPagesSupabaseClient } from "@/lib/supabase/pages-client"
 import type { GetServerSidePropsContext } from "next"
 import type { Database } from "@/lib/types/database"
 

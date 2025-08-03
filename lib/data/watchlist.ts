@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server-app"
+import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 
 export async function getWatchlist() {
   const supabase = createServerSupabaseClient()
@@ -64,6 +64,60 @@ export async function removeFromWatchlist(id: string) {
 
     if (error) {
       console.error("Error removing from watchlist:", error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Unexpected error removing from watchlist:", error)
+    return { success: false, error: "Unexpected error" }
+  }
+}
+
+// Lender-Borrower Watchlist functions
+export async function addBorrowerToWatchlist(
+  lenderProfileId: string,
+  borrowerProfileId: string,
+  countryId: string
+) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    const { error } = await supabase
+      .from("lender_watchlist")
+      .insert([{ 
+        lender_profile_id: lenderProfileId,
+        borrower_profile_id: borrowerProfileId,
+        country_id: countryId
+      }])
+
+    if (error) {
+      console.error("Error adding borrower to watchlist:", error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Unexpected error adding to watchlist:", error)
+    return { success: false, error: "Unexpected error" }
+  }
+}
+
+export async function removeBorrowerFromWatchlist(
+  lenderProfileId: string,
+  borrowerProfileId: string
+) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    const { error } = await supabase
+      .from("lender_watchlist")
+      .delete()
+      .eq("lender_profile_id", lenderProfileId)
+      .eq("borrower_profile_id", borrowerProfileId)
+
+    if (error) {
+      console.error("Error removing borrower from watchlist:", error)
       return { success: false, error: error.message }
     }
 

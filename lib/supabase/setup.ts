@@ -23,12 +23,12 @@ function validateEnvironmentVariables() {
   }
 
   // Validate URL format
-  if (!supabaseUrl.startsWith("https://")) {
+  if (supabaseUrl && !supabaseUrl.startsWith("https://")) {
     throw new Error("NEXT_PUBLIC_SUPABASE_URL must start with https://")
   }
 
   // Validate key format (should start with eyJ for JWT)
-  if (!supabaseAnonKey.startsWith("eyJ")) {
+  if (supabaseAnonKey && !supabaseAnonKey.startsWith("eyJ")) {
     throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY appears to be invalid (should start with 'eyJ')")
   }
 

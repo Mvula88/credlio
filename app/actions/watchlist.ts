@@ -1,6 +1,6 @@
 "use server"
 
-import { addToWatchlist, removeFromWatchlist } from "@/lib/data/watchlist"
+import { addBorrowerToWatchlist, removeBorrowerFromWatchlist } from "@/lib/data/watchlist"
 import { revalidatePath } from "next/cache"
 import { logAuditAction } from "./audit" // Import the audit action
 
@@ -14,9 +14,9 @@ export async function toggleWatchlistAction(
     const actionType = isCurrentlyInWatchlist ? "REMOVED_FROM_WATCHLIST" : "ADDED_TO_WATCHLIST"
 
     if (isCurrentlyInWatchlist) {
-      await removeFromWatchlist(lenderProfileId, borrowerProfileId)
+      await removeBorrowerFromWatchlist(lenderProfileId, borrowerProfileId)
     } else {
-      await addToWatchlist(lenderProfileId, borrowerProfileId, countryId)
+      await addBorrowerToWatchlist(lenderProfileId, borrowerProfileId, countryId)
     }
 
     // Log the audit action

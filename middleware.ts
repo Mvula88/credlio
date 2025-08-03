@@ -90,7 +90,7 @@ export async function middleware(req: NextRequest) {
       }
       
       // Perform location verification for protected routes
-      if (isProtectedRoute && profile.countries?.code) {
+      if (isProtectedRoute && (profile.countries as any)?.code) {
         const locationCheck = await checkSessionLocation(req)
         
         // Handle blocked access

@@ -70,6 +70,10 @@ export async function requireRole(roleName: string) {
 
 // Get user by email
 export async function getUserByEmail(email: string) {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client is not configured")
+  }
+  
   const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("*")
@@ -81,6 +85,10 @@ export async function getUserByEmail(email: string) {
 
 // Create a new user with Supabase Auth
 export async function createUser(email: string, password: string) {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client is not configured")
+  }
+  
   return await supabaseAdmin.auth.admin.createUser({
     email,
     password,
@@ -90,6 +98,10 @@ export async function createUser(email: string, password: string) {
 
 // Delete a user with Supabase Auth
 export async function deleteUser(userId: string) {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client is not configured")
+  }
+  
   return await supabaseAdmin.auth.admin.deleteUser(userId)
 }
 

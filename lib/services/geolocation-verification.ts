@@ -76,7 +76,7 @@ export async function verifyIpLocation(
       return {
         verified: false,
         registeredCountry: registeredCountryCode,
-        ipAddress,
+        ipAddress: ipAddress || undefined,
         verificationMethod: 'ip',
         riskScore: 60,
         flags: ['geolocation_failed'],
@@ -110,7 +110,7 @@ export async function verifyIpLocation(
       verified: countriesMatch && riskScore < 50,
       registeredCountry: registeredCountryCode,
       detectedCountry,
-      ipAddress,
+      ipAddress: ipAddress || undefined,
       verificationMethod: 'ip',
       riskScore: Math.min(100, riskScore),
       flags: riskFlags,
@@ -121,7 +121,7 @@ export async function verifyIpLocation(
     return {
       verified: false,
       registeredCountry: registeredCountryCode,
-      ipAddress,
+      ipAddress: ipAddress || undefined,
       verificationMethod: 'ip',
       riskScore: 70,
       flags: ['verification_error'],
@@ -224,7 +224,7 @@ export async function verifyHybridLocation(
 
   // Combine results
   const combinedRiskScore = Math.round((ipResult.riskScore + browserResult.riskScore) / 2)
-  const combinedFlags = [...new Set([...ipResult.flags, ...browserResult.flags])]
+  const combinedFlags = Array.from(new Set([...ipResult.flags, ...browserResult.flags]))
 
   // If both agree on verification, trust it more
   if (ipResult.verified && browserResult.verified) {

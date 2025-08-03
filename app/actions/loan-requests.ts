@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { logAuditAction } from "./audit"
@@ -35,12 +35,12 @@ export async function createLoanRequestAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = LoanRequestSchema.safeParse({
-    borrowerProfileId: formData.get("borrowerProfileId"),
-    countryId: formData.get("countryId"),
-    loanAmount: formData.get("loanAmount"),
-    currencyCode: formData.get("currencyCode"),
-    purpose: formData.get("purpose"),
-    repaymentTerms: formData.get("repaymentTerms"),
+    borrowerProfileId: formData.get("borrowerProfileId") as string,
+    countryId: formData.get("countryId") as string,
+    loanAmount: Number(formData.get("loanAmount")),
+    currencyCode: formData.get("currencyCode") as string,
+    purpose: formData.get("purpose") as string,
+    repaymentTerms: formData.get("repaymentTerms") as string,
   })
 
   if (!validatedFields.success) {

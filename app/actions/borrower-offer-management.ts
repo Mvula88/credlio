@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { logAuditAction } from "./audit" // Assuming audit action exists
@@ -16,7 +16,7 @@ const AcceptOfferSchema = z.object({
 
 type AcceptOfferState = {
   message: string
-  errors?: z.ZodError<typeof AcceptOfferSchema>["formErrors"]["fieldErrors"] | null
+  errors?: Record<string, string[]> | null
   success: boolean
 }
 
@@ -27,11 +27,11 @@ export async function acceptOfferAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = AcceptOfferSchema.safeParse({
-    offerId: formData.get("offerId"),
-    borrowerProfileId: formData.get("borrowerProfileId"),
-    loanRequestId: formData.get("loanRequestId"),
-    lenderProfileId: formData.get("lenderProfileId"),
-    countryId: formData.get("countryId"),
+    offerId: formData.get("offerId") as string,
+    borrowerProfileId: formData.get("borrowerProfileId") as string,
+    loanRequestId: formData.get("loanRequestId") as string,
+    lenderProfileId: formData.get("lenderProfileId") as string,
+    countryId: formData.get("countryId") as string,
   })
 
   if (!validatedFields.success) {
@@ -73,11 +73,14 @@ export async function acceptOfferAction(
       action: "LOAN_OFFER_ACCEPTED",
       targetResourceId: offerId,
       targetResourceType: "loan_offers",
-      secondaryTargetResourceId: loanRequestId,
-      secondaryTargetResourceType: "loan_requests",
       targetProfileId: lenderProfileId, // The lender whose offer was accepted
       countryId: countryId,
-      details: { offerId, loanRequestId },
+      details: { 
+        offerId, 
+        loanRequestId,
+        secondaryTargetResourceId: loanRequestId,
+        secondaryTargetResourceType: "loan_requests"
+      },
     })
     await logAuditAction({
       actorProfileId: borrowerProfileId,
@@ -85,10 +88,14 @@ export async function acceptOfferAction(
       action: "LOAN_FUNDED", // Or LOAN_REQUEST_FUNDED
       targetResourceId: loanRequestId,
       targetResourceType: "loan_requests",
-      secondaryTargetResourceId: lenderProfileId, // Lender who funded
-      secondaryTargetResourceType: "profiles",
       countryId: countryId,
-      details: { loanRequestId, offerId, lender: lenderProfileId },
+      details: { 
+        loanRequestId, 
+        offerId, 
+        lender: lenderProfileId,
+        secondaryTargetResourceId: lenderProfileId,
+        secondaryTargetResourceType: "profiles"
+      },
     })
 
     revalidatePath("/borrower/dashboard")
@@ -113,7 +120,7 @@ const RejectOfferSchema = z.object({
 
 type RejectOfferState = {
   message: string
-  errors?: z.ZodError<typeof RejectOfferSchema>["formErrors"]["fieldErrors"] | null
+  errors?: Record<string, string[]> | null
   success: boolean
 }
 
@@ -124,11 +131,11 @@ export async function rejectOfferAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = RejectOfferSchema.safeParse({
-    offerId: formData.get("offerId"),
-    borrowerProfileId: formData.get("borrowerProfileId"),
-    loanRequestId: formData.get("loanRequestId"),
-    lenderProfileId: formData.get("lenderProfileId"),
-    countryId: formData.get("countryId"),
+    offerId: formData.get("offerId") as string,
+    borrowerProfileId: formData.get("borrowerProfileId") as string,
+    loanRequestId: formData.get("loanRequestId") as string,
+    lenderProfileId: formData.get("lenderProfileId") as string,
+    countryId: formData.get("countryId") as string,
   })
 
   if (!validatedFields.success) {
@@ -170,11 +177,14 @@ export async function rejectOfferAction(
       action: "LOAN_OFFER_REJECTED",
       targetResourceId: offerId,
       targetResourceType: "loan_offers",
-      secondaryTargetResourceId: loanRequestId,
-      secondaryTargetResourceType: "loan_requests",
       targetProfileId: lenderProfileId, // The lender whose offer was rejected
       countryId: countryId,
-      details: { offerId, loanRequestId },
+      details: { 
+        offerId, 
+        loanRequestId,
+        secondaryTargetResourceId: loanRequestId,
+        secondaryTargetResourceType: "loan_requests"
+      },
     })
 
     revalidatePath("/borrower/dashboard")

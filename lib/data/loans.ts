@@ -47,7 +47,7 @@ export async function getMarketplaceLoanRequests(
           ...request,
           borrower: request.borrower
             ? ({
-                ...request.borrower,
+                ...(Array.isArray(request.borrower) ? request.borrower[0] : request.borrower),
                 smart_tags: smartTags,
                 badges: badges,
               } as ProfileWithBadges)
@@ -56,7 +56,7 @@ export async function getMarketplaceLoanRequests(
       }
       return {
         ...request,
-        borrower: request.borrower ? ({ ...request.borrower } as ProfileWithBadges) : null,
+        borrower: request.borrower ? ({ ...(Array.isArray(request.borrower) ? request.borrower[0] : request.borrower) } as ProfileWithBadges) : null,
       }
     })
   )
@@ -105,13 +105,14 @@ export async function getLoanRequestById(
 
   let borrowerWithDetails: ProfileWithBadges | null = null
   if (data.borrower) {
-    const smartTags = await getBorrowerSmartTagsSimple(data.borrower.id)
-    const badges = await getUserBadgesSimple(data.borrower.id)
+    const borrowerData = Array.isArray(data.borrower) ? data.borrower[0] : data.borrower
+    const smartTags = await getBorrowerSmartTagsSimple(borrowerData.id)
+    const badges = await getUserBadgesSimple(borrowerData.id)
     borrowerWithDetails = {
-      ...data.borrower,
+      ...borrowerData,
       smart_tags: smartTags,
       badges: badges,
-    }
+    } as ProfileWithBadges
   }
 
   return {

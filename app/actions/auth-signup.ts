@@ -63,7 +63,7 @@ export async function signupUser(data: SignupData) {
     }
     
     // Verify IP location matches detected country
-    const locationVerification = await verifyIpLocation(signupIpAddress, detectedCountryCode)
+    const locationVerification = await verifyIpLocation(signupIpAddress || null, detectedCountryCode)
     
     // Log the verification attempt
     console.log('Signup location verification:', {

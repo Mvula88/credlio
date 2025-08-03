@@ -22,14 +22,25 @@ export async function logAuditAction(args: LogAuditActionArgs) {
   // const userAgent = heads.get("user-agent") ?? undefined
 
   try {
-    await createAuditLogDb({
-      ...args,
-      // ipAddress,
-      // userAgent,
-    })
+    // Convert to the expected format for createAuditLogDb
+    const userId = args.actorProfileId || 'system'
+    const action = args.action
+    const details = {
+      actorRole: args.actorRole,
+      targetProfileId: args.targetProfileId,
+      targetResourceId: args.targetResourceId,
+      targetResourceType: args.targetResourceType,
+      countryId: args.countryId,
+      ...args.details
+    }
+    
+    await createAuditLogDb(userId, action, details)
     return { success: true }
   } catch (error) {
     console.error("Failed to log audit action:", error)
     return { success: false, error: "Failed to log audit action" }
   }
 }
+
+// Export alias for compatibility
+export const createAuditLog = logAuditAction

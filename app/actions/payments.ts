@@ -1,6 +1,6 @@
 "use server"
 
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { logAuditAction } from "./audit"
@@ -19,7 +19,7 @@ const InitiatePaymentSchema = z.object({
 
 type InitiatePaymentState = {
   message: string
-  errors?: z.ZodError<typeof InitiatePaymentSchema>["formErrors"]["fieldErrors"] | null
+  errors?: Record<string, string[]> | null
   success: boolean
 }
 
@@ -30,13 +30,13 @@ export async function initiatePaymentAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = InitiatePaymentSchema.safeParse({
-    paymentId: formData.get("paymentId"),
-    borrowerProfileId: formData.get("borrowerProfileId"),
-    lenderProfileId: formData.get("lenderProfileId"),
-    loanRequestId: formData.get("loanRequestId"),
-    paymentMethod: formData.get("paymentMethod"),
-    transactionReference: formData.get("transactionReference"),
-    notes: formData.get("notes"),
+    paymentId: formData.get("paymentId") as string,
+    borrowerProfileId: formData.get("borrowerProfileId") as string,
+    lenderProfileId: formData.get("lenderProfileId") as string,
+    loanRequestId: formData.get("loanRequestId") as string,
+    paymentMethod: formData.get("paymentMethod") as string,
+    transactionReference: formData.get("transactionReference") as string,
+    notes: formData.get("notes") as string,
   })
 
   if (!validatedFields.success) {
@@ -86,9 +86,12 @@ export async function initiatePaymentAction(
       action: "PAYMENT_INITIATED",
       targetResourceId: paymentId,
       targetResourceType: "loan_payments",
-      secondaryTargetResourceId: loanRequestId,
-      secondaryTargetResourceType: "loan_requests",
-      details: { paymentMethod, transactionReference },
+      details: { 
+        paymentMethod, 
+        transactionReference,
+        secondaryTargetResourceId: loanRequestId,
+        secondaryTargetResourceType: "loan_requests"
+      },
     })
 
     // Create notification for lender
@@ -128,7 +131,7 @@ const ConfirmPaymentSchema = z.object({
 
 type ConfirmPaymentState = {
   message: string
-  errors?: z.ZodError<typeof ConfirmPaymentSchema>["formErrors"]["fieldErrors"] | null
+  errors?: Record<string, string[]> | null
   success: boolean
 }
 
@@ -139,12 +142,12 @@ export async function confirmPaymentAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = ConfirmPaymentSchema.safeParse({
-    paymentId: formData.get("paymentId"),
-    lenderProfileId: formData.get("lenderProfileId"),
-    borrowerProfileId: formData.get("borrowerProfileId"),
-    loanRequestId: formData.get("loanRequestId"),
-    amountPaid: formData.get("amountPaid"),
-    notes: formData.get("notes"),
+    paymentId: formData.get("paymentId") as string,
+    lenderProfileId: formData.get("lenderProfileId") as string,
+    borrowerProfileId: formData.get("borrowerProfileId") as string,
+    loanRequestId: formData.get("loanRequestId") as string,
+    amountPaid: formData.get("amountPaid") as string,
+    notes: formData.get("notes") as string,
   })
 
   if (!validatedFields.success) {
@@ -188,10 +191,12 @@ export async function confirmPaymentAction(
       action: "PAYMENT_CONFIRMED",
       targetResourceId: paymentId,
       targetResourceType: "loan_payments",
-      secondaryTargetResourceId: loanRequestId,
-      secondaryTargetResourceType: "loan_requests",
       targetProfileId: borrowerProfileId,
-      details: { amountPaid },
+      details: { 
+        amountPaid,
+        secondaryTargetResourceId: loanRequestId,
+        secondaryTargetResourceType: "loan_requests"
+      },
     })
 
     // Create notification for borrower
@@ -230,7 +235,7 @@ const FailPaymentSchema = z.object({
 
 type FailPaymentState = {
   message: string
-  errors?: z.ZodError<typeof FailPaymentSchema>["formErrors"]["fieldErrors"] | null
+  errors?: Record<string, string[]> | null
   success: boolean
 }
 
@@ -241,11 +246,11 @@ export async function markPaymentAsFailedAction(
   const supabase = createServerSupabaseClient()
 
   const validatedFields = FailPaymentSchema.safeParse({
-    paymentId: formData.get("paymentId"),
-    lenderProfileId: formData.get("lenderProfileId"),
-    borrowerProfileId: formData.get("borrowerProfileId"),
-    loanRequestId: formData.get("loanRequestId"),
-    notes: formData.get("notes"),
+    paymentId: formData.get("paymentId") as string,
+    lenderProfileId: formData.get("lenderProfileId") as string,
+    borrowerProfileId: formData.get("borrowerProfileId") as string,
+    loanRequestId: formData.get("loanRequestId") as string,
+    notes: formData.get("notes") as string,
   })
 
   if (!validatedFields.success) {
@@ -287,10 +292,12 @@ export async function markPaymentAsFailedAction(
       action: "PAYMENT_FAILED",
       targetResourceId: paymentId,
       targetResourceType: "loan_payments",
-      secondaryTargetResourceId: loanRequestId,
-      secondaryTargetResourceType: "loan_requests",
       targetProfileId: borrowerProfileId,
-      details: { reason: notes },
+      details: { 
+        reason: notes,
+        secondaryTargetResourceId: loanRequestId,
+        secondaryTargetResourceType: "loan_requests"
+      },
     })
 
     // Create notification for borrower
