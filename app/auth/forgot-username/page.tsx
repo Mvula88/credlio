@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Mail, ArrowLeft, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function ForgotUsernamePage() {
   const [email, setEmail] = useState("")
@@ -41,6 +42,12 @@ export default function ForgotUsernamePage() {
       if (!response.ok) {
         throw new Error(data.error || "Failed to process request")
       }
+
+      // Show success toast
+      toast.success("Username sent!", {
+        description: `Check ${email} for your username`,
+        duration: 5000,
+      })
 
       setSuccess(true)
     } catch (err: any) {

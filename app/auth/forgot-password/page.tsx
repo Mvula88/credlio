@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Mail, ArrowLeft, CheckCircle, User } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<"username" | "success">("username")
@@ -44,6 +45,13 @@ export default function ForgotPasswordPage() {
       }
 
       setEmail(data.email || "your registered email")
+      
+      // Show success toast
+      toast.success("Password reset email sent!", {
+        description: `Check ${data.email || "your email"} for reset instructions`,
+        duration: 5000,
+      })
+      
       setStep("success")
     } catch (err: any) {
       setError(err.message)

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "sonner"
 import {
   Select,
   SelectContent,
@@ -239,6 +240,12 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         // Show username to user (ONLY TIME THEY SEE IT)
         setGeneratedUsername(username)
         
+        // Show success toast for email sent
+        toast.success("Confirmation email sent!", {
+          description: `Check ${formData.email} for your confirmation link`,
+          duration: 5000,
+        })
+        
         // Show email confirmation message
         // Supabase has already sent the confirmation email via Resend SMTP
         setShowEmailConfirmation(true)
@@ -278,10 +285,12 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   const resendConfirmationEmail = async () => {
     setResendingEmail(true)
     setResendSuccess(false)
-    setError(null)
     
     try {
       console.log('Resending confirmation email to:', formData.email)
+      
+      // Show loading toast
+      const loadingToast = toast.loading("Sending confirmation email...")
       
       // Use Supabase's resend method - it will send via Resend SMTP
       const { error } = await supabase.auth.resend({
@@ -292,17 +301,34 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         }
       })
       
+      // Dismiss loading toast
+      toast.dismiss(loadingToast)
+      
       if (error) throw error
       
       setResendSuccess(true)
+      
+      // Show success toast
+      toast.success("Email sent successfully!", {
+        description: "Please check your inbox for the confirmation link",
+        duration: 5000,
+      })
+      
       setTimeout(() => setResendSuccess(false), 3000)
     } catch (error: any) {
       console.error('Failed to resend confirmation email:', error)
-      // Provide helpful error messages
+      
+      // Show error toast with appropriate message
       if (error.message?.includes('rate')) {
-        setError('Too many attempts. Please wait a few minutes before trying again.')
+        toast.error("Too many attempts", {
+          description: "Please wait a few minutes before trying again",
+          duration: 5000,
+        })
       } else {
-        setError(error.message || 'Failed to send confirmation email. Please try again.')
+        toast.error("Failed to send email", {
+          description: error.message || "Please try again later",
+          duration: 5000,
+        })
       }
     } finally {
       setResendingEmail(false)
