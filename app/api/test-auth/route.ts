@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
+    const { email, password, username } = await request.json()
     
     // Create a fresh Supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -11,11 +11,36 @@ export async function POST(request: NextRequest) {
     
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
     
-    console.log("Testing auth with:", { email, passwordLength: password?.length })
+    // If username is provided, look up the email
+    let authEmail = email
+    if (username && !email) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("username", username)
+        .single()
+      
+      if (!profile) {
+        return NextResponse.json({
+          error: `Username '${username}' not found`,
+          username,
+          tests: {
+            signIn: {
+              success: false,
+              error: `Username '${username}' not found in profiles table`
+            }
+          }
+        })
+      }
+      authEmail = profile.email
+      console.log("Found email for username:", { username, email: authEmail })
+    }
+    
+    console.log("Testing auth with:", { email: authEmail, username, passwordLength: password?.length })
     
     // Test 1: Try to sign in
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
+      email: authEmail,
       password,
     })
     
@@ -29,12 +54,13 @@ export async function POST(request: NextRequest) {
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
-      .eq("email", email)
+      .eq("email", authEmail)
       .single()
     
     return NextResponse.json({
       timestamp: new Date().toISOString(),
-      email,
+      email: authEmail,
+      username: username || null,
       tests: {
         signIn: {
           success: !signInError,

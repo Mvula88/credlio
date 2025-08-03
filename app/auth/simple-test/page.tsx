@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 export default function SimpleTestPage() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [result, setResult] = useState("")
   const [loading, setLoading] = useState(false)
@@ -17,16 +17,16 @@ export default function SimpleTestPage() {
       const response = await fetch("/api/test-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       })
       
       const data = await response.json()
       
       // Display result
       if (data.tests?.signIn?.success) {
-        setResult(`✅ SUCCESS! Logged in as: ${data.tests.signIn.user?.email}`)
+        setResult(`✅ SUCCESS! Username: ${data.username}, Email: ${data.tests.signIn.user?.email}`)
       } else {
-        setResult(`❌ FAILED: ${data.tests?.signIn?.error || "Unknown error"}`)
+        setResult(`❌ FAILED: ${data.tests?.signIn?.error || data.error || "Unknown error"}`)
       }
       
       console.log("Full result:", data)
@@ -42,18 +42,18 @@ export default function SimpleTestPage() {
       <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>Simple Auth Test</h1>
       
       <div style={{ marginBottom: "20px" }}>
-        <label style={{ display: "block", marginBottom: "5px" }}>Email:</label>
+        <label style={{ display: "block", marginBottom: "5px" }}>Username:</label>
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           style={{
             width: "100%",
             padding: "8px",
             border: "1px solid #ccc",
             borderRadius: "4px"
           }}
-          placeholder="your@email.com"
+          placeholder="Your username"
         />
       </div>
       
@@ -75,7 +75,7 @@ export default function SimpleTestPage() {
       
       <button
         onClick={handleTest}
-        disabled={loading || !email || !password}
+        disabled={loading || !username || !password}
         style={{
           padding: "10px 20px",
           backgroundColor: loading ? "#ccc" : "#007bff",
@@ -96,11 +96,11 @@ export default function SimpleTestPage() {
         whiteSpace: "pre-wrap"
       }}>
         <strong>Result:</strong><br />
-        {result || "Enter email and password, then click Test Login"}
+        {result || "Enter username and password, then click Test Login"}
       </div>
       
       <div style={{ marginTop: "20px", fontSize: "14px", color: "#666" }}>
-        <p>This page tests if your email/password work with Supabase.</p>
+        <p>This page tests if your username/password work with Supabase.</p>
         <p>Check the browser console (F12) for more details.</p>
       </div>
     </div>

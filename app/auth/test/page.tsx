@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react"
 
 export default function TestAuthPage() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -21,7 +21,7 @@ export default function TestAuthPage() {
       const response = await fetch("/api/test-auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       })
       const data = await response.json()
       setResult(data)
@@ -53,12 +53,12 @@ export default function TestAuthPage() {
         <CardContent className="space-y-6">
           <div className="grid gap-4">
             <div>
-              <label className="text-sm font-medium">Email</label>
+              <label className="text-sm font-medium">Username</label>
               <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your-email@example.com"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Your username"
                 className="mt-1"
               />
             </div>
@@ -76,7 +76,7 @@ export default function TestAuthPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={handleTest} disabled={loading || !email || !password}>
+            <Button onClick={handleTest} disabled={loading || !username || !password}>
               {loading ? "Testing..." : "Test Sign In"}
             </Button>
             <Button onClick={handleTestSupabase} variant="outline">
@@ -109,7 +109,9 @@ export default function TestAuthPage() {
                             {result.tests.signIn.success ? (
                               <div>
                                 <p>✅ Sign in successful!</p>
-                                <p className="text-xs mt-1">User ID: {result.tests.signIn.user?.id}</p>
+                                <p className="text-xs mt-1">Username: {result.username}</p>
+                                <p className="text-xs">Email: {result.tests.signIn.user?.email}</p>
+                                <p className="text-xs">User ID: {result.tests.signIn.user?.id}</p>
                                 <p className="text-xs">Email confirmed: {result.tests.signIn.user?.emailConfirmed || "Not confirmed"}</p>
                               </div>
                             ) : (
@@ -158,10 +160,11 @@ export default function TestAuthPage() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Common Issues</AlertTitle>
             <AlertDescription className="space-y-2 mt-2">
-              <p className="text-sm">• <strong>Email not confirmed:</strong> Check your email for confirmation link</p>
+              <p className="text-sm">• <strong>Wrong username:</strong> Username is case-sensitive</p>
               <p className="text-sm">• <strong>Wrong password:</strong> Password is case-sensitive</p>
+              <p className="text-sm">• <strong>Email not confirmed:</strong> Check your email for confirmation link</p>
               <p className="text-sm">• <strong>No profile:</strong> User exists in auth but profile wasn't created</p>
-              <p className="text-sm">• <strong>Email typo:</strong> Check for spaces or typos in email</p>
+              <p className="text-sm">• <strong>Username doesn't exist:</strong> Check if username was created during signup</p>
             </AlertDescription>
           </Alert>
         </CardContent>

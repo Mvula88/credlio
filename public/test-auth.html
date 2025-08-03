@@ -73,7 +73,7 @@
         <h1>🔐 Standalone Auth Test</h1>
         <p style="color: #666; margin-bottom: 20px;">This page tests authentication directly without any Next.js middleware.</p>
         
-        <input type="email" id="email" placeholder="Enter your email" />
+        <input type="text" id="username" placeholder="Enter your username" />
         <input type="password" id="password" placeholder="Enter your password" />
         
         <button id="testBtn" onclick="testAuth()">Test Authentication</button>
@@ -85,13 +85,13 @@
 
     <script>
         async function testAuth() {
-            const email = document.getElementById('email').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const resultDiv = document.getElementById('result');
             const button = document.getElementById('testBtn');
             
-            if (!email || !password) {
-                resultDiv.innerHTML = '⚠️ Please enter both email and password';
+            if (!username || !password) {
+                resultDiv.innerHTML = '⚠️ Please enter both username and password';
                 resultDiv.className = 'result error';
                 return;
             }
@@ -108,7 +108,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ username, password })
                 });
                 
                 const data = await response.json();
@@ -119,6 +119,7 @@
                 if (data.tests?.signIn?.success) {
                     output += '✅ AUTHENTICATION SUCCESSFUL!\n\n';
                     output += 'User Details:\n';
+                    output += `- Username: ${data.username}\n`;
                     output += `- Email: ${data.tests.signIn.user?.email}\n`;
                     output += `- User ID: ${data.tests.signIn.user?.id}\n`;
                     output += `- Email Confirmed: ${data.tests.signIn.user?.emailConfirmed || 'Not confirmed'}\n`;
@@ -135,9 +136,10 @@
                     resultDiv.className = 'result success';
                 } else {
                     output += '❌ AUTHENTICATION FAILED\n\n';
-                    output += `Error: ${data.tests?.signIn?.error || 'Unknown error'}\n\n`;
+                    output += `Error: ${data.tests?.signIn?.error || data.error || 'Unknown error'}\n\n`;
                     output += 'Possible issues:\n';
-                    output += '• Wrong email or password\n';
+                    output += '• Wrong username or password\n';
+                    output += '• Username does not exist\n';
                     output += '• Email not confirmed (check your inbox)\n';
                     output += '• Account doesn\'t exist\n\n';
                     
