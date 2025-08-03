@@ -7,12 +7,24 @@ interface EmailOptions {
   text?: string
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 // This is only used for custom emails (like username recovery)
 // Password reset is handled by Supabase Auth
 export async function sendEmail(options: EmailOptions): Promise<void> {
   try {
+    // Check if Resend is configured
+    if (!resend) {
+      console.warn('⚠️ Resend is not configured. Please set RESEND_API_KEY environment variable.')
+      console.log('📧 Email that would be sent:', {
+        to: options.to,
+        subject: options.subject,
+        preview: options.html.substring(0, 100) + '...'
+      })
+      return
+    }
+
     // In development, log the email details
     if (process.env.NODE_ENV === 'development') {
       console.log('📧 Sending email:', {
