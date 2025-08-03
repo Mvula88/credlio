@@ -1,8 +1,10 @@
-# Supabase Email Configuration with Resend
+# Supabase + Resend Email Configuration
 
-## Quick Setup (Using Supabase Auth)
+## How It Works
 
-With this setup, Supabase handles everything - token generation, email sending, password reset, and email confirmation. You just configure Resend as the SMTP provider.
+- **Supabase** handles the logic (tokens, validation, user management)
+- **Resend** sends the emails (via SMTP for auth emails, API for custom emails)
+- You get the best of both worlds: Supabase's robust auth + Resend's reliable delivery
 
 ### Step 1: Enable Email Confirmation
 
@@ -22,9 +24,10 @@ With this setup, Supabase handles everything - token generation, email sending, 
 Host: smtp.resend.com
 Port: 465
 Username: resend
-Password: re_APoptXqA_23X3XqPj13PWKcMekiyqf8zL (your API key)
-Sender email: noreply@yourdomain.com (or use onboarding@resend.dev for testing)
+Password: [Your RESEND_API_KEY]
+Sender email: no-reply@send.credlio.com (or your verified domain)
 Sender name: Credlio
+Secure: Yes (SSL/TLS)
 ```
 
 ### Step 3: Customize Email Templates (Optional)
@@ -56,19 +59,16 @@ In the same **Email Templates** section, you can customize:
    - User enters email on `/auth/forgot-username`
    - Your API sends email directly using Resend (custom logic)
 
-## What Supabase Handles vs What You Handle
+## Email Responsibility Matrix
 
-| Feature | Supabase Handles | You Handle |
-|---------|-----------------|------------|
-| Email confirmation | ✅ | ❌ |
-| Generate reset token | ✅ | ❌ |
-| Store token securely | ✅ | ❌ |
-| Send confirmation email | ✅ (via Resend SMTP) | ❌ |
-| Send password reset email | ✅ (via Resend SMTP) | ❌ |
-| Validate tokens | ✅ | ❌ |
-| Update password | ✅ | ❌ |
-| Username recovery | ❌ | ✅ (custom) |
-| Resend confirmation | ✅ | ✅ (trigger) |
+| Feature | Logic Handled By | Email Sent Via | Status |
+|---------|-----------------|----------------|--------|
+| **Signup Confirmation** | Supabase Auth | Resend SMTP | ✅ Active |
+| **Password Reset** | Supabase Auth | Resend SMTP | ✅ Active |
+| **Username Recovery** | Your Backend | Resend API | ✅ Active |
+| **Welcome Email** | Your Backend | Resend API | 🔄 Optional |
+| **Security Alerts** | Your Backend | Resend API | 🔄 Future |
+| **Subscription Receipts** | Your Backend | Resend API | 🔄 Future |
 
 ## Testing
 

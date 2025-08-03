@@ -154,7 +154,7 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
       // Generate unique username
       const username = await generateUniqueUsername(formData.country)
       
-      // Create auth user
+      // Create auth user - Supabase will handle confirmation email via Resend SMTP
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -164,7 +164,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
             username: username,
             role: role,
             country: formData.country
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
@@ -238,39 +239,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         // Show username to user (ONLY TIME THEY SEE IT)
         setGeneratedUsername(username)
         
-        // Send custom confirmation email
-        try {
-          console.log('Sending confirmation email for:', {
-            userId: authData.user.id,
-            email: formData.email,
-            username: username
-          })
-          
-          const response = await fetch('/api/auth/send-confirmation', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: authData.user.id,
-              email: formData.email,
-              username: username
-            })
-          })
-          
-          const result = await response.json()
-          
-          if (!response.ok) {
-            console.error('Failed to send confirmation email:', result)
-            // Show the actual error to user
-            setError(`Email sending failed: ${result.error || 'Unknown error'}`)
-          } else {
-            console.log('Confirmation email sent successfully:', result)
-          }
-        } catch (emailError) {
-          console.error('Error sending confirmation email:', emailError)
-          setError('Failed to send confirmation email. Please check console for details.')
-        }
-        
-        // Always show email confirmation (our custom flow)
+        // Show email confirmation message
+        // Supabase has already sent the confirmation email via Resend SMTP
         setShowEmailConfirmation(true)
       }
     } catch (error: any) {
@@ -313,38 +283,27 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     try {
       console.log('Resending confirmation email to:', formData.email)
       
-      // Get user ID from Supabase
-      const { data: userData } = await supabase
-        .from('profiles')
-        .select('auth_user_id')
-        .eq('email', formData.email)
-        .single()
-      
-      if (!userData) {
-        throw new Error('User not found')
-      }
-      
-      // Use our custom endpoint
-      const response = await fetch('/api/auth/send-confirmation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: userData.auth_user_id,
-          email: formData.email,
-          username: generatedUsername
-        })
+      // Use Supabase's resend method - it will send via Resend SMTP
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: formData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
       })
       
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to send email')
-      }
+      if (error) throw error
       
       setResendSuccess(true)
       setTimeout(() => setResendSuccess(false), 3000)
     } catch (error: any) {
       console.error('Failed to resend confirmation email:', error)
-      setError(error.message || 'Failed to send confirmation email. Please try again.')
+      // Provide helpful error messages
+      if (error.message?.includes('rate')) {
+        setError('Too many attempts. Please wait a few minutes before trying again.')
+      } else {
+        setError(error.message || 'Failed to send confirmation email. Please try again.')
+      }
     } finally {
       setResendingEmail(false)
     }
