@@ -39,6 +39,9 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   const [showUsernameDialog, setShowUsernameDialog] = useState(false)
   const [usernameCopied, setUsernameCopied] = useState(false)
   const [invitationCode, setInvitationCode] = useState<string | null>(null)
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
+  const [resendingEmail, setResendingEmail] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -234,7 +237,14 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
 
         // Show username to user (ONLY TIME THEY SEE IT)
         setGeneratedUsername(username)
-        setShowUsernameDialog(true)
+        // Check if email confirmation is required
+        if (authData.session) {
+          // User is already confirmed (shouldn't happen with email confirmation enabled)
+          setShowUsernameDialog(true)
+        } else {
+          // Email confirmation required
+          setShowEmailConfirmation(true)
+        }
       }
     } catch (error: any) {
       setError(error.message)
@@ -268,7 +278,120 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     router.push("/auth/signin?newAccount=true")
   }
 
-  // Username dialog
+  const resendConfirmationEmail = async () => {
+    setResendingEmail(true)
+    setResendSuccess(false)
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: formData.email
+      })
+      
+      if (error) throw error
+      
+      setResendSuccess(true)
+      setTimeout(() => setResendSuccess(false), 3000)
+    } catch (error: any) {
+      setError(error.message)
+    } finally {
+      setResendingEmail(false)
+    }
+  }
+
+  // Email confirmation dialog
+  if (showEmailConfirmation && generatedUsername) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="h-6 w-6 text-blue-600" />
+          </div>
+          <CardTitle>Check Your Email!</CardTitle>
+          <CardDescription>
+            We've sent a confirmation email to <strong>{formData.email}</strong>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Important: Save your username!</strong>
+              <div className="mt-2 p-2 bg-white rounded border border-green-200">
+                <div className="flex items-center justify-between">
+                  <code className="font-mono text-lg">{generatedUsername}</code>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={copyUsername}
+                    className="ml-2"
+                  >
+                    {usernameCopied ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <p className="text-sm mt-2">You'll need this username to sign in</p>
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Please click the link in your email to confirm your account. 
+              Once confirmed, you can sign in with your username and password.
+            </p>
+            
+            <div className="pt-2 border-t">
+              <p className="text-sm text-muted-foreground mb-3">
+                Didn't receive the email?
+              </p>
+              <Button
+                onClick={resendConfirmationEmail}
+                disabled={resendingEmail}
+                variant="outline"
+                className="w-full"
+              >
+                {resendingEmail ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : resendSuccess ? (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
+                    Email Sent!
+                  </>
+                ) : (
+                  "Resend Confirmation Email"
+                )}
+              </Button>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="pt-4 text-center">
+              <Button
+                onClick={() => router.push("/auth/signin")}
+                variant="link"
+                className="text-sm"
+              >
+                Go to Sign In
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Username dialog (backup for when email confirmation is disabled)
   if (showUsernameDialog && generatedUsername) {
     return (
       <Card className="w-full max-w-md mx-auto">

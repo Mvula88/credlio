@@ -69,6 +69,7 @@
     "react-resizable-panels": "^2.1.7",
     "readline": "latest",
     "recharts": "latest",
+    "resend": "^4.7.0",
     "sonner": "latest",
     "stripe": "latest",
     "tailwind-merge": "^2.5.5",
