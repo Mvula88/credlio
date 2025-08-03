@@ -10,9 +10,13 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { userId, email, username } = await request.json()
+    const body = await request.json()
+    console.log('Send confirmation request received:', body)
+    
+    const { userId, email, username } = body
 
     if (!userId || !email || !username) {
+      console.error('Missing fields:', { userId: !!userId, email: !!email, username: !!username })
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -46,6 +50,20 @@ export async function POST(request: Request) {
 
     // Create confirmation link
     const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${token}`
+
+    // Check if Resend is configured
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('RESEND_API_KEY not configured, skipping email send')
+      console.log('Would send confirmation to:', email)
+      console.log('Confirmation link:', confirmLink)
+      
+      // Return success even if email not sent (for testing)
+      return NextResponse.json({
+        success: true,
+        message: "Confirmation email skipped (no RESEND_API_KEY)",
+        confirmLink: confirmLink // Include link for testing
+      })
+    }
 
     // Send confirmation email with username included
     await sendEmail({

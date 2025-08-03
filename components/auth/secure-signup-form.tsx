@@ -240,6 +240,12 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         
         // Send custom confirmation email
         try {
+          console.log('Sending confirmation email for:', {
+            userId: authData.user.id,
+            email: formData.email,
+            username: username
+          })
+          
           const response = await fetch('/api/auth/send-confirmation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -250,11 +256,18 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
             })
           })
           
+          const result = await response.json()
+          
           if (!response.ok) {
-            console.error('Failed to send confirmation email')
+            console.error('Failed to send confirmation email:', result)
+            // Show the actual error to user
+            setError(`Email sending failed: ${result.error || 'Unknown error'}`)
+          } else {
+            console.log('Confirmation email sent successfully:', result)
           }
         } catch (emailError) {
           console.error('Error sending confirmation email:', emailError)
+          setError('Failed to send confirmation email. Please check console for details.')
         }
         
         // Always show email confirmation (our custom flow)
