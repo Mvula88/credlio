@@ -237,14 +237,28 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
 
         // Show username to user (ONLY TIME THEY SEE IT)
         setGeneratedUsername(username)
-        // Check if email confirmation is required
-        if (authData.session) {
-          // User is already confirmed (shouldn't happen with email confirmation enabled)
-          setShowUsernameDialog(true)
-        } else {
-          // Email confirmation required
-          setShowEmailConfirmation(true)
+        
+        // Send custom confirmation email
+        try {
+          const response = await fetch('/api/auth/send-confirmation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: authData.user.id,
+              email: formData.email,
+              username: username
+            })
+          })
+          
+          if (!response.ok) {
+            console.error('Failed to send confirmation email')
+          }
+        } catch (emailError) {
+          console.error('Error sending confirmation email:', emailError)
         }
+        
+        // Always show email confirmation (our custom flow)
+        setShowEmailConfirmation(true)
       }
     } catch (error: any) {
       setError(error.message)
@@ -284,33 +298,40 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     setError(null)
     
     try {
-      console.log('Attempting to resend confirmation email to:', formData.email)
+      console.log('Resending confirmation email to:', formData.email)
       
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: formData.email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
+      // Get user ID from Supabase
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('auth_user_id')
+        .eq('email', formData.email)
+        .single()
+      
+      if (!userData) {
+        throw new Error('User not found')
+      }
+      
+      // Use our custom endpoint
+      const response = await fetch('/api/auth/send-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userData.auth_user_id,
+          email: formData.email,
+          username: generatedUsername
+        })
       })
       
-      if (error) {
-        console.error('Resend confirmation error:', error)
-        throw error
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to send email')
       }
       
       setResendSuccess(true)
       setTimeout(() => setResendSuccess(false), 3000)
     } catch (error: any) {
       console.error('Failed to resend confirmation email:', error)
-      // Provide more helpful error messages
-      if (error.message?.includes('rate')) {
-        setError('Too many attempts. Please wait a few minutes before trying again.')
-      } else if (error.message?.includes('not found')) {
-        setError('Email address not found. Please check and try again.')
-      } else {
-        setError(error.message || 'Failed to send confirmation email. Please try again.')
-      }
+      setError(error.message || 'Failed to send confirmation email. Please try again.')
     } finally {
       setResendingEmail(false)
     }

@@ -60,6 +60,76 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   }
 }
 
+// Generate a secure random token
+export function generateToken(): string {
+  // Use crypto for server-side, fallback for client-side
+  if (typeof window === 'undefined') {
+    const crypto = require('crypto')
+    return crypto.randomBytes(32).toString('hex')
+  } else {
+    // Client-side fallback
+    return Math.random().toString(36).substring(2) + Date.now().toString(36)
+  }
+}
+
+// Generate token expiry (default 24 hours for confirmation)
+export function getTokenExpiry(hours: number = 24): Date {
+  const expiry = new Date()
+  expiry.setHours(expiry.getHours() + hours)
+  return expiry
+}
+
+// Email confirmation template
+export function getEmailConfirmationEmail(confirmLink: string, username: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; padding: 14px 30px; background-color: #4F46E5; color: white !important; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .username-box { background-color: #E0E7FF; border: 2px solid #4F46E5; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Welcome to Credlio! 🎉</h1>
+        </div>
+        <div class="content">
+          <p>Hello,</p>
+          <p>Thank you for signing up! Please confirm your email address to activate your account.</p>
+          
+          <div class="username-box">
+            <strong>Important: Save your username!</strong><br>
+            <span style="font-size: 20px; font-family: monospace; color: #4F46E5;">${username}</span><br>
+            <small>You'll need this to sign in</small>
+          </div>
+
+          <p style="text-align: center; margin: 30px 0;">
+            <a href="${confirmLink}" class="button">Confirm Email Address</a>
+          </p>
+
+          <p style="font-size: 14px; color: #666;">
+            Or copy and paste this link in your browser:<br>
+            <code style="background: #f0f0f0; padding: 5px; word-break: break-all;">${confirmLink}</code>
+          </p>
+
+          <div class="footer">
+            <p>This link will expire in 24 hours for security reasons.</p>
+            <p>If you didn't create an account with Credlio, please ignore this email.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
+
 // Template functions for common emails
 export function getUsernameRecoveryEmail(username: string): string {
   return `
