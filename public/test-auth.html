@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standalone Auth Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+        }
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Standalone Auth Test</h1>
+        <p style="color: #666; margin-bottom: 20px;">This page tests authentication directly without any Next.js middleware.</p>
+        
+        <input type="email" id="email" placeholder="Enter your email" />
+        <input type="password" id="password" placeholder="Enter your password" />
+        
+        <button id="testBtn" onclick="testAuth()">Test Authentication</button>
+        
+        <div id="result" class="result">
+            Results will appear here...
+        </div>
+    </div>
+
+    <script>
+        async function testAuth() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            const button = document.getElementById('testBtn');
+            
+            if (!email || !password) {
+                resultDiv.innerHTML = '⚠️ Please enter both email and password';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            button.disabled = true;
+            button.textContent = 'Testing...';
+            resultDiv.innerHTML = '⏳ Testing authentication...';
+            resultDiv.className = 'result';
+            
+            try {
+                // Test the API endpoint
+                const response = await fetch('/api/test-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                // Format the result
+                let output = '';
+                
+                if (data.tests?.signIn?.success) {
+                    output += '✅ AUTHENTICATION SUCCESSFUL!\n\n';
+                    output += 'User Details:\n';
+                    output += `- Email: ${data.tests.signIn.user?.email}\n`;
+                    output += `- User ID: ${data.tests.signIn.user?.id}\n`;
+                    output += `- Email Confirmed: ${data.tests.signIn.user?.emailConfirmed || 'Not confirmed'}\n`;
+                    output += `- Created: ${data.tests.signIn.user?.created}\n\n`;
+                    
+                    if (data.tests.profile?.exists) {
+                        output += 'Profile Details:\n';
+                        output += `- Role: ${data.tests.profile.data?.role}\n`;
+                        output += `- Country ID: ${data.tests.profile.data?.country_id}\n`;
+                    } else {
+                        output += '⚠️ No profile found (this might be the issue)\n';
+                    }
+                    
+                    resultDiv.className = 'result success';
+                } else {
+                    output += '❌ AUTHENTICATION FAILED\n\n';
+                    output += `Error: ${data.tests?.signIn?.error || 'Unknown error'}\n\n`;
+                    output += 'Possible issues:\n';
+                    output += '• Wrong email or password\n';
+                    output += '• Email not confirmed (check your inbox)\n';
+                    output += '• Account doesn\'t exist\n\n';
+                    
+                    resultDiv.className = 'result error';
+                }
+                
+                output += '\n--- Full Response ---\n';
+                output += JSON.stringify(data, null, 2);
+                
+                resultDiv.innerHTML = output;
+                
+                // Also log to console
+                console.log('Auth test result:', data);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}\n\nThis might mean the API endpoint is not accessible.`;
+                resultDiv.className = 'result error';
+                console.error('Test error:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Authentication';
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') testAuth();
+        });
+    </script>
+</body>
+</html>
