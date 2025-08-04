@@ -35,8 +35,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [generatedCustomerId, setGeneratedCustomerId] = useState<string | null>(null)
-  const [customerIdCopied, setCustomerIdCopied] = useState(false)
   const [invitationCode, setInvitationCode] = useState<string | null>(null)
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
   const [resendingEmail, setResendingEmail] = useState(false)
@@ -150,8 +148,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         }
       }
 
-      // Generate unique customer ID for reference
-      const customerId = `${formData.country}-${Date.now().toString().slice(-6)}`
       
       // Create auth user - Supabase will handle confirmation email via Resend SMTP
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -160,7 +156,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         options: {
           data: {
             full_name: formData.fullName,
-            customer_id: customerId,
             role: role,
             country: formData.country
           },
@@ -185,7 +180,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
             auth_user_id: authData.user.id,
             email: formData.email,
             full_name: formData.fullName,
-            customer_id: customerId,
             phone: formData.phone,
             role: role,
             national_id_hash: idHash,
@@ -253,9 +247,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
           }
         }
 
-        // Show customer ID to user for reference
-        setGeneratedCustomerId(customerId)
-        
         // Show success toast for email sent
         toast.success("Confirmation email sent!", {
           description: `Check ${formData.email} for your confirmation link`,
@@ -274,13 +265,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   }
 
 
-  const copyCustomerId = () => {
-    if (generatedCustomerId) {
-      navigator.clipboard.writeText(generatedCustomerId)
-      setCustomerIdCopied(true)
-      setTimeout(() => setCustomerIdCopied(false), 2000)
-    }
-  }
 
   const proceedAfterUsername = () => {
     // Redirect to sign in page
@@ -341,7 +325,7 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   }
 
   // Email confirmation dialog
-  if (showEmailConfirmation && generatedCustomerId) {
+  if (showEmailConfirmation) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
@@ -357,25 +341,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
           <Alert className="border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              <strong>Important: Save your Customer ID!</strong>
-              <div className="mt-2 p-2 bg-white rounded border border-green-200">
-                <div className="flex items-center justify-between">
-                  <code className="font-mono text-lg">{generatedCustomerId}</code>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={copyCustomerId}
-                    className="ml-2"
-                  >
-                    {customerIdCopied ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <p className="text-sm mt-2">Save this Customer ID for your records (you'll sign in with your email)</p>
+              <strong>Account created successfully!</strong>
+              <p className="text-sm mt-2">Please check your email to confirm your account. You'll sign in with your email and password.</p>
             </AlertDescription>
           </Alert>
 
@@ -432,68 +399,6 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     )
   }
 
-  // Customer ID dialog (backup for when email confirmation is disabled)
-  if (false) { // Disabled - we use email confirmation
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="h-6 w-6 text-green-600" />
-          </div>
-          <CardTitle>Account Created Successfully!</CardTitle>
-          <CardDescription>
-            Save your username below. You'll need it to sign in.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert className="border-amber-200 bg-amber-50">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-800">
-              This is the ONLY time you'll see your username. Save it securely!
-            </AlertDescription>
-          </Alert>
-          
-          <div className="space-y-2">
-            <Label>Your Customer ID</Label>
-            <div className="flex gap-2">
-              <Input
-                value={generatedCustomerId || ''}
-                readOnly
-                className="font-mono text-lg"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={copyUsername}
-              >
-                {usernameCopied ? (
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Write this down or save it in a secure password manager
-            </p>
-          </div>
-
-          <div className="bg-muted p-4 rounded-lg space-y-2">
-            <h4 className="font-medium text-sm">Sign In Credentials:</h4>
-            <div className="text-sm space-y-1">
-              <p><span className="text-muted-foreground">Customer ID:</span> {generatedCustomerId}</p>
-              <p><span className="text-muted-foreground">Password:</span> The password you just created</p>
-            </div>
-          </div>
-
-          <Button onClick={proceedAfterUsername} className="w-full">
-            I've Saved My Customer ID - Continue
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">

@@ -11,13 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, User, Lock, AlertCircle, Eye, EyeOff, Shield, Smartphone } from "lucide-react"
 import { generateDeviceFingerprint } from "@/lib/auth/secure-auth-utils"
 import Link from "next/link"
+import { OTPVerification } from "./otp-verification"
+import { toast } from "sonner"
 
 export function SecureSigninForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [requiresDeviceVerification, setRequiresDeviceVerification] = useState(false)
-  const [verificationCode, setVerificationCode] = useState("")
+  const [requiresOTP, setRequiresOTP] = useState(false)
+  const [userEmail, setUserEmail] = useState("")
   
   const [credentials, setCredentials] = useState({
     email: "",
@@ -50,15 +52,67 @@ export function SecureSigninForm() {
       // Skip profile checks for now to speed up login
       // These can be done after successful authentication
 
-      // Attempt sign in with email directly
+      // First, try to sign in to validate credentials
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: credentials.email,
         password: credentials.password
       })
 
       if (authError) {
-        // Don't log failed attempts for now to speed up the process
         throw new Error("Invalid email or password")
+      }
+
+      // After successful password validation, send OTP for additional security
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: credentials.email,
+        options: {
+          shouldCreateUser: false,
+        }
+      })
+
+      if (otpError) {
+        console.error('OTP send error:', otpError)
+        // If OTP sending fails, continue with regular login flow
+        // This is a fallback for when email service is down
+        
+        // Get the user's profile and continue
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("id, role, country")
+          .eq("auth_user_id", data.user?.id)
+          .single()
+
+        // Redirect based on role
+        if (!userProfile?.country) {
+          router.push("/auth/select-country")
+        } else {
+          switch (userProfile?.role) {
+            case "borrower":
+              router.push("/borrower/dashboard")
+              break
+            case "lender":
+              router.push("/lender/dashboard")
+              break
+            case "admin":
+            case "super_admin":
+              router.push("/super-admin/dashboard")
+              break
+            case "country_admin":
+              router.push("/admin/country")
+              break
+            default:
+              router.push("/dashboard")
+          }
+        }
+      } else {
+        // Successfully sent OTP, now sign out temporarily and show OTP screen
+        await supabase.auth.signOut()
+        
+        // Show OTP verification screen
+        setUserEmail(credentials.email)
+        setRequiresOTP(true)
+        toast.success("Verification code sent to your email")
+        return
       }
 
       // Get the user's profile after successful auth
@@ -113,84 +167,102 @@ export function SecureSigninForm() {
     }
   }
 
-  const handleDeviceVerification = async () => {
-    // In a real app, verify the code sent via SMS/email
-    if (verificationCode === "123456") { // Demo code
-      // Mark device as trusted and continue login
+  const handleOTPVerify = async (otp: string) => {
+    try {
+      // Verify OTP
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: userEmail,
+        token: otp,
+        type: 'email'
+      })
+
+      if (error) {
+        throw new Error("Invalid verification code")
+      }
+
+      // Get the user's profile after successful OTP verification
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("id, role, country")
+        .eq("email", userEmail)
+        .single()
+
+      // Generate and store device fingerprint
       const headers = new Headers()
       headers.append('User-Agent', window.navigator.userAgent)
       const deviceFingerprint = generateDeviceFingerprint(headers)
       
-      // Get profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", credentials.email)
-        .single()
-
-      if (profile) {
+      if (userProfile?.id) {
         await supabase
           .from("user_devices")
-          .update({ is_trusted: true, trusted_at: new Date().toISOString() })
-          .eq("user_id", profile.id)
-          .eq("device_fingerprint", deviceFingerprint)
+          .upsert({
+            user_id: userProfile.id,
+            device_fingerprint: deviceFingerprint,
+            last_used: new Date().toISOString(),
+            is_trusted: true
+          })
       }
 
-      // Retry login
-      setRequiresDeviceVerification(false)
-      handleSignin(new Event('submit') as any)
-    } else {
-      setError("Invalid verification code")
+      // Check if country is set
+      if (!userProfile?.country) {
+        router.push("/auth/select-country")
+      } else {
+        // Redirect based on role
+        switch (userProfile?.role) {
+          case "borrower":
+            router.push("/borrower/dashboard")
+            break
+          case "lender":
+            router.push("/lender/dashboard")
+            break
+          case "admin":
+          case "super_admin":
+            router.push("/super-admin/dashboard")
+            break
+          case "country_admin":
+            router.push("/admin/country")
+            break
+          default:
+            router.push("/dashboard")
+        }
+      }
+    } catch (error: any) {
+      throw error
     }
   }
 
-  if (requiresDeviceVerification) {
+  const handleOTPResend = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: userEmail,
+        options: {
+          shouldCreateUser: false,
+        }
+      })
+
+      if (error) throw error
+      
+      toast.success("New verification code sent to your email")
+    } catch (error: any) {
+      throw new Error("Failed to resend verification code")
+    }
+  }
+
+  const handleOTPCancel = () => {
+    setRequiresOTP(false)
+    setUserEmail("")
+    setError(null)
+  }
+
+  // Show OTP verification screen
+  if (requiresOTP) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Smartphone className="h-6 w-6 text-blue-600" />
-          </div>
-          <CardTitle>New Device Detected</CardTitle>
-          <CardDescription>
-            We've sent a verification code to your registered phone/email
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="code">Verification Code</Label>
-            <Input
-              id="code"
-              placeholder="Enter 6-digit code"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-              maxLength={6}
-            />
-            <p className="text-xs text-muted-foreground">
-              Demo: Use code 123456
-            </p>
-          </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <Button onClick={handleDeviceVerification} className="w-full">
-            Verify Device
-          </Button>
-
-          <Button
-            variant="ghost"
-            onClick={() => setRequiresDeviceVerification(false)}
-            className="w-full"
-          >
-            Back to Login
-          </Button>
-        </CardContent>
-      </Card>
+      <OTPVerification
+        email={userEmail}
+        onVerify={handleOTPVerify}
+        onResend={handleOTPResend}
+        onCancel={handleOTPCancel}
+      />
     )
   }
 

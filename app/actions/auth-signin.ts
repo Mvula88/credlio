@@ -43,7 +43,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
           const { data: profile } = await supabase
             .from("profiles")
             .select("id, country_id, countries(code)")
-            .eq("email", emailToUse)
+            .eq("email", data.email)
             .single()
           
           if (profile) {
@@ -128,7 +128,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
       // Log blocked attempt
       await supabase.from("blocked_access_attempts").insert({
         user_id: profile.id,
-        email: emailToUse,
+        email: data.email,
         ip_address: ipAddress,
         detected_country_code: locationVerification.detectedCountry,
         registered_country_code: registeredCountryCode,
@@ -147,7 +147,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
     if (locationVerification.riskScore >= 60) {
       // Medium-high risk - require additional verification (Phase 2)
       console.warn('Medium-high risk login:', {
-        email: emailToUse,
+        email: data.email,
         riskScore: locationVerification.riskScore,
         flags: locationVerification.flags
       })
