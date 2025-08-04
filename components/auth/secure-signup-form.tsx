@@ -359,10 +359,10 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={copyCustomerId}
+                    onClick={copyUsername}
                     className="ml-2"
                   >
-                    {customerIdCopied ? (
+                    {usernameCopied ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (
                       <Copy className="h-4 w-4" />
@@ -460,9 +460,9 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={copyCustomerId}
+                onClick={copyUsername}
               >
-                {customerIdCopied ? (
+                {usernameCopied ? (
                   <CheckCircle className="h-4 w-4 text-green-600" />
                 ) : (
                   <Copy className="h-4 w-4" />

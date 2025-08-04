@@ -27,11 +27,36 @@ export default function SelectCountryPage() {
 
   async function fetchCountries() {
     try {
-      const { data } = await supabase.from("countries").select("*").eq("active", true).order("name")
+      const { data, error } = await supabase
+        .from("countries")
+        .select("*")
+        .eq("active", true)
+        .order("name")
 
-      setCountries(data || [])
+      if (error) {
+        console.error("Error fetching countries:", error)
+        setError("Failed to load countries. Please refresh the page.")
+        // Set some default countries if fetch fails
+        const defaultCountries = [
+          { id: "ng", code: "NG", name: "Nigeria", flag: "🇳🇬", active: true },
+          { id: "ke", code: "KE", name: "Kenya", flag: "🇰🇪", active: true },
+          { id: "ug", code: "UG", name: "Uganda", flag: "🇺🇬", active: true },
+          { id: "za", code: "ZA", name: "South Africa", flag: "🇿🇦", active: true },
+          { id: "gh", code: "GH", name: "Ghana", flag: "🇬🇭", active: true },
+          { id: "tz", code: "TZ", name: "Tanzania", flag: "🇹🇿", active: true },
+          { id: "rw", code: "RW", name: "Rwanda", flag: "🇷🇼", active: true },
+          { id: "zm", code: "ZM", name: "Zambia", flag: "🇿🇲", active: true },
+        ]
+        setCountries(defaultCountries)
+      } else {
+        setCountries(data || [])
+        if (!data || data.length === 0) {
+          setError("No countries available. Please contact support.")
+        }
+      }
     } catch (error) {
       console.error("Error fetching countries:", error)
+      setError("Failed to load countries. Please refresh the page.")
     } finally {
       setLoading(false)
     }
@@ -152,25 +177,36 @@ export default function SelectCountryPage() {
             </Alert>
           )}
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-            {countries.map((country) => (
-              <Button
-                key={country.code}
-                variant={selectedCountry === country.code ? "default" : "outline"}
-                className="flex h-auto flex-col items-center justify-center gap-2 px-3 py-4"
-                onClick={() => setSelectedCountry(country.code)}
-              >
-                <span className="text-2xl">{country.flag}</span>
-                <span className="text-center text-xs">{country.name}</span>
-              </Button>
-            ))}
-          </div>
+          {countries.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+              {countries.map((country) => (
+                <Button
+                  key={country.code}
+                  variant={selectedCountry === country.code ? "default" : "outline"}
+                  className="flex h-auto flex-col items-center justify-center gap-2 px-3 py-4 transition-all hover:scale-105"
+                  onClick={() => {
+                    setSelectedCountry(country.code as SupportedCountry)
+                    setError(null)
+                  }}
+                >
+                  <span className="text-2xl">{country.flag || "🌍"}</span>
+                  <span className="text-center text-xs font-medium">{country.name}</span>
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <Alert>
+              <AlertDescription>
+                No countries available for selection. Please contact support if this issue persists.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="mt-8 flex flex-col items-center gap-4">
             <Button
               size="lg"
               onClick={handleSelectCountry}
-              disabled={!selectedCountry || saving}
+              disabled={!selectedCountry || saving || countries.length === 0}
               className="min-w-[200px]"
             >
               {saving ? (
@@ -178,8 +214,10 @@ export default function SelectCountryPage() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Setting Country...
                 </>
+              ) : selectedCountry ? (
+                `Continue with ${countries.find(c => c.code === selectedCountry)?.name || selectedCountry}`
               ) : (
-                "Continue"
+                "Select a Country to Continue"
               )}
             </Button>
 
