@@ -47,7 +47,7 @@ export function CTASection() {
             size="lg" 
             variant="secondary" 
             className="group px-8 py-6 text-lg font-semibold shadow-xl transition-all hover:shadow-2xl"
-            onClick={() => router.push("/signup/lender")}
+            onClick={() => router.push("/auth/signup")}
           >
             Get Started Free
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

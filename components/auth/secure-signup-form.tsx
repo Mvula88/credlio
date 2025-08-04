@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/select"
 import { Loader2, User, Lock, Calendar, CreditCard, AlertCircle, CheckCircle, Eye, EyeOff, Copy } from "lucide-react"
 import { 
-  generateUsername, 
   hashSensitiveData, 
   validateIDNumber, 
   checkPasswordStrength,
@@ -36,9 +35,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [generatedUsername, setGeneratedUsername] = useState<string | null>(null)
-  const [showUsernameDialog, setShowUsernameDialog] = useState(false)
-  const [usernameCopied, setUsernameCopied] = useState(false)
+  const [generatedCustomerId, setGeneratedCustomerId] = useState<string | null>(null)
+  const [customerIdCopied, setCustomerIdCopied] = useState(false)
   const [invitationCode, setInvitationCode] = useState<string | null>(null)
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
   const [resendingEmail, setResendingEmail] = useState(false)
@@ -152,8 +150,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         }
       }
 
-      // Generate unique username
-      const username = await generateUniqueUsername(formData.country)
+      // Generate unique customer ID for reference
+      const customerId = `${formData.country}-${Date.now().toString().slice(-6)}`
       
       // Create auth user - Supabase will handle confirmation email via Resend SMTP
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -162,7 +160,7 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         options: {
           data: {
             full_name: formData.fullName,
-            username: username,
+            customer_id: customerId,
             role: role,
             country: formData.country
           },
@@ -170,43 +168,61 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
         }
       })
 
-      if (authError) throw authError
+      if (authError) {
+        console.error('Auth signup error:', authError)
+        if (authError.message.includes('already registered')) {
+          throw new Error('This email is already registered. Please sign in instead.')
+        }
+        throw authError
+      }
 
       if (authData.user) {
-        // Update the automatically created profile with additional data
-        // The trigger creates the basic profile, we just update it with more details
-        const { error: profileError } = await supabase
+        // First try to insert the profile (in case trigger didn't create it)
+        const { error: insertError } = await supabase
           .from("profiles")
-          .update({
+          .insert({
+            id: authData.user.id,
+            auth_user_id: authData.user.id,
+            email: formData.email,
+            full_name: formData.fullName,
+            customer_id: customerId,
             phone: formData.phone,
+            role: role,
             national_id_hash: idHash,
             id_type: formData.idType,
             date_of_birth: formData.dateOfBirth,
-            country_id: countryId,  // Use the UUID instead of country code
-            id_verified: false
+            country_id: countryId,
+            id_verified: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           })
-          .eq('auth_user_id', authData.user.id)
 
-        if (profileError) {
-          // If update fails, try insert (fallback for cases where trigger didn't fire)
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert({
-              id: authData.user.id,
-              auth_user_id: authData.user.id,
-              email: formData.email,
-              full_name: formData.fullName,
-              username: username,
-              phone: formData.phone,
-              role: role,
-              national_id_hash: idHash,
-              id_type: formData.idType,
-              date_of_birth: formData.dateOfBirth,
-              country_id: countryId,
-              id_verified: false
-            })
+        if (insertError) {
+          console.error('Profile insert error:', insertError)
           
-          if (insertError) throw insertError
+          // If insert fails due to duplicate, try update (in case trigger already created it)
+          if (insertError.code === '23505') {
+            const { error: updateError } = await supabase
+              .from("profiles")
+              .update({
+                phone: formData.phone,
+                national_id_hash: idHash,
+                id_type: formData.idType,
+                date_of_birth: formData.dateOfBirth,
+                country_id: countryId,
+                id_verified: false,
+                updated_at: new Date().toISOString()
+              })
+              .eq('auth_user_id', authData.user.id)
+            
+            if (updateError) {
+              console.error('Profile update error:', updateError)
+              throw new Error(`Database error updating user profile: ${updateError.message}`)
+            }
+          } else {
+            // For other errors, throw them
+            throw new Error(`Database error saving user profile: ${insertError.message}`)
+          }
         }
 
         // Store identity verification record
@@ -237,8 +253,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
           }
         }
 
-        // Show username to user (ONLY TIME THEY SEE IT)
-        setGeneratedUsername(username)
+        // Show customer ID to user for reference
+        setGeneratedCustomerId(customerId)
         
         // Show success toast for email sent
         toast.success("Confirmation email sent!", {
@@ -257,23 +273,12 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     }
   }
 
-  const generateUniqueUsername = async (country: string): Promise<string> => {
-    const { data, error } = await supabase
-      .rpc('generate_unique_username', { country_code: country })
-    
-    if (error || !data) {
-      // Fallback to client-side generation
-      return generateUsername(country)
-    }
-    
-    return data
-  }
 
-  const copyUsername = () => {
-    if (generatedUsername) {
-      navigator.clipboard.writeText(generatedUsername)
-      setUsernameCopied(true)
-      setTimeout(() => setUsernameCopied(false), 2000)
+  const copyCustomerId = () => {
+    if (generatedCustomerId) {
+      navigator.clipboard.writeText(generatedCustomerId)
+      setCustomerIdCopied(true)
+      setTimeout(() => setCustomerIdCopied(false), 2000)
     }
   }
 
@@ -336,7 +341,7 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
   }
 
   // Email confirmation dialog
-  if (showEmailConfirmation && generatedUsername) {
+  if (showEmailConfirmation && generatedCustomerId) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
@@ -352,17 +357,17 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
           <Alert className="border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              <strong>Important: Save your username!</strong>
+              <strong>Important: Save your Customer ID!</strong>
               <div className="mt-2 p-2 bg-white rounded border border-green-200">
                 <div className="flex items-center justify-between">
-                  <code className="font-mono text-lg">{generatedUsername}</code>
+                  <code className="font-mono text-lg">{generatedCustomerId}</code>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={copyUsername}
+                    onClick={copyCustomerId}
                     className="ml-2"
                   >
-                    {usernameCopied ? (
+                    {customerIdCopied ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (
                       <Copy className="h-4 w-4" />
@@ -427,8 +432,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     )
   }
 
-  // Username dialog (backup for when email confirmation is disabled)
-  if (showUsernameDialog && generatedUsername) {
+  // Customer ID dialog (backup for when email confirmation is disabled)
+  if (false) { // Disabled - we use email confirmation
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
@@ -449,10 +454,10 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
           </Alert>
           
           <div className="space-y-2">
-            <Label>Your Username</Label>
+            <Label>Your Customer ID</Label>
             <div className="flex gap-2">
               <Input
-                value={generatedUsername}
+                value={generatedCustomerId || ''}
                 readOnly
                 className="font-mono text-lg"
               />
@@ -477,13 +482,13 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
           <div className="bg-muted p-4 rounded-lg space-y-2">
             <h4 className="font-medium text-sm">Sign In Credentials:</h4>
             <div className="text-sm space-y-1">
-              <p><span className="text-muted-foreground">Username:</span> {generatedUsername}</p>
+              <p><span className="text-muted-foreground">Customer ID:</span> {generatedCustomerId}</p>
               <p><span className="text-muted-foreground">Password:</span> The password you just created</p>
             </div>
           </div>
 
           <Button onClick={proceedAfterUsername} className="w-full">
-            I've Saved My Username - Continue
+            I've Saved My Customer ID - Continue
           </Button>
         </CardContent>
       </Card>

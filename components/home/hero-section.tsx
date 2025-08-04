@@ -77,10 +77,10 @@ export function HeroSection() {
             <Button 
               size="lg" 
               className="group px-8 py-6 text-lg shadow-lg transition-all hover:shadow-xl"
-              onClick={() => router.push("/signup/lender")}
+              onClick={() => router.push("/auth/signup")}
             >
               <Users className="mr-2 h-5 w-5" />
-              Start Lending Now
+              Get Started
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button 
