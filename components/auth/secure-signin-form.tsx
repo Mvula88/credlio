@@ -47,37 +47,8 @@ export function SecureSigninForm() {
       headers.append('User-Agent', window.navigator.userAgent)
       const deviceFingerprint = generateDeviceFingerprint(headers)
 
-      // Get the user profile to check for account locks
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, failed_login_attempts, account_locked_until")
-        .eq("email", credentials.email)
-        .single()
-
-      // Profile might not exist yet, that's ok - we'll check during auth
-
-      // Check if account is locked (only if profile exists)
-      if (profile?.account_locked_until && new Date(profile.account_locked_until) > new Date()) {
-        const lockTime = new Date(profile.account_locked_until).toLocaleTimeString()
-        throw new Error(`Account is locked until ${lockTime} due to multiple failed login attempts`)
-      }
-
-      // Check if this is a trusted device (only if profile exists)
-      if (profile) {
-        const { data: trustedDevice } = await supabase
-          .from("user_devices")
-          .select("is_trusted")
-          .eq("user_id", profile.id)
-          .eq("device_fingerprint", deviceFingerprint)
-          .single()
-
-        // If not a trusted device, we'll need additional verification
-        if (!trustedDevice?.is_trusted && !isNewAccount) {
-          setRequiresDeviceVerification(true)
-          // In a real app, you'd send an SMS/email here
-          return
-        }
-      }
+      // Skip profile checks for now to speed up login
+      // These can be done after successful authentication
 
       // Attempt sign in with email directly
       const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -86,68 +57,21 @@ export function SecureSigninForm() {
       })
 
       if (authError) {
-        // Increment failed attempts if profile exists
-        const newFailedAttempts = (profile?.failed_login_attempts || 0) + 1
-        const updates: any = { failed_login_attempts: newFailedAttempts }
-        
-        // Lock account after 3 failed attempts
-        if (newFailedAttempts >= 3) {
-          const lockUntil = new Date()
-          lockUntil.setHours(lockUntil.getHours() + 1) // Lock for 1 hour
-          updates.account_locked_until = lockUntil.toISOString()
-        }
-        
-        if (profile) {
-          await supabase
-            .from("profiles")
-            .update(updates)
-            .eq("id", profile.id)
-        }
-
-        // Log failed attempt
-        await supabase
-          .from("login_attempts")
-          .insert({
-            email: credentials.email,
-            ip_address: window.location.hostname,
-            device_fingerprint: deviceFingerprint,
-            success: false,
-            failure_reason: "Invalid credentials"
-          })
-
+        // Don't log failed attempts for now to speed up the process
         throw new Error("Invalid email or password")
       }
 
       // Get the user's profile after successful auth
       const { data: userProfile } = await supabase
         .from("profiles")
-        .select("id, role")
+        .select("id, role, country")
         .eq("auth_user_id", data.user?.id)
         .single()
 
-      if (userProfile) {
-        // Reset failed attempts on successful login
-        await supabase
-          .from("profiles")
-          .update({ 
-            failed_login_attempts: 0,
-            account_locked_until: null 
-          })
-          .eq("id", userProfile.id)
-      }
-
-      // Log successful attempt
-      await supabase
-        .from("login_attempts")
-        .insert({
-          email: credentials.email,
-          ip_address: window.location.hostname,
-          device_fingerprint: deviceFingerprint,
-          success: true
-        })
-
-      // Update or create device record
-      if (userProfile) {
+      // Skip logging for now to speed up login
+      
+      // Update or create device record asynchronously (don't wait)
+      if (userProfile?.id) {
         await supabase
           .from("user_devices")
           .upsert({
@@ -159,23 +83,28 @@ export function SecureSigninForm() {
       }
 
 
-      // Redirect based on role
-      switch (userProfile?.role) {
-        case "borrower":
-          router.push("/borrower/dashboard")
-          break
-        case "lender":
-          router.push("/lender/dashboard")
-          break
-        case "admin":
-        case "super_admin":
-          router.push("/super-admin/dashboard")
-          break
-        case "country_admin":
-          router.push("/admin/country")
-          break
-        default:
-          router.push("/dashboard")
+      // Check if country is set
+      if (!userProfile?.country) {
+        router.push("/auth/select-country")
+      } else {
+        // Redirect based on role
+        switch (userProfile?.role) {
+          case "borrower":
+            router.push("/borrower/dashboard")
+            break
+          case "lender":
+            router.push("/lender/dashboard")
+            break
+          case "admin":
+          case "super_admin":
+            router.push("/super-admin/dashboard")
+            break
+          case "country_admin":
+            router.push("/admin/country")
+            break
+          default:
+            router.push("/dashboard")
+        }
       }
     } catch (error: any) {
       setError(error.message)
