@@ -359,10 +359,10 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={copyUsername}
+                    onClick={copyCustomerId}
                     className="ml-2"
                   >
-                    {usernameCopied ? (
+                    {customerIdCopied ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (
                       <Copy className="h-4 w-4" />
@@ -370,14 +370,14 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
                   </Button>
                 </div>
               </div>
-              <p className="text-sm mt-2">You'll need this username to sign in</p>
+              <p className="text-sm mt-2">Save this Customer ID for your records (you'll sign in with your email)</p>
             </AlertDescription>
           </Alert>
 
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
               Please click the link in your email to confirm your account. 
-              Once confirmed, you can sign in with your username and password.
+              Once confirmed, you can sign in with your email and password.
             </p>
             
             <div className="pt-2 border-t">
@@ -460,9 +460,9 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={copyUsername}
+                onClick={copyCustomerId}
               >
-                {usernameCopied ? (
+                {customerIdCopied ? (
                   <CheckCircle className="h-4 w-4 text-green-600" />
                 ) : (
                   <Copy className="h-4 w-4" />

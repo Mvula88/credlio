@@ -20,7 +20,7 @@ export function SecureSigninForm() {
   const [verificationCode, setVerificationCode] = useState("")
   
   const [credentials, setCredentials] = useState({
-    username: "",
+    email: "",
     password: ""
   })
   
@@ -38,8 +38,8 @@ export function SecureSigninForm() {
 
     try {
       // Validate inputs
-      if (!credentials.username || !credentials.password) {
-        throw new Error("Please enter both username and password")
+      if (!credentials.email || !credentials.password) {
+        throw new Error("Please enter both email and password")
       }
 
       // Generate device fingerprint
@@ -47,72 +47,47 @@ export function SecureSigninForm() {
       headers.append('User-Agent', window.navigator.userAgent)
       const deviceFingerprint = generateDeviceFingerprint(headers)
 
-      // First, get the email associated with this username
-      // Try with uppercase first (as usernames are generated in uppercase)
-      let { data: profile, error: profileError } = await supabase
+      // Get the user profile to check for account locks
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("email, id, failed_login_attempts, account_locked_until, username")
-        .eq("username", credentials.username.toUpperCase())
+        .select("id, failed_login_attempts, account_locked_until")
+        .eq("email", credentials.email)
         .single()
 
-      // If not found, try as-is (in case it was stored differently)
-      if (!profile && profileError?.code === 'PGRST116') {
-        const result = await supabase
-          .from("profiles")
-          .select("email, id, failed_login_attempts, account_locked_until, username")
-          .eq("username", credentials.username)
-          .single()
-        
-        profile = result.data
-        profileError = result.error
-      }
+      // Profile might not exist yet, that's ok - we'll check during auth
 
-      if (!profile) {
-        console.error("Username not found:", credentials.username, "Error:", profileError)
-        // Log failed attempt
-        await supabase
-          .from("login_attempts")
-          .insert({
-            username: credentials.username,
-            ip_address: window.location.hostname,
-            device_fingerprint: deviceFingerprint,
-            success: false,
-            failure_reason: "Invalid username"
-          })
-        
-        throw new Error("Invalid username or password")
-      }
-
-      // Check if account is locked
-      if (profile.account_locked_until && new Date(profile.account_locked_until) > new Date()) {
+      // Check if account is locked (only if profile exists)
+      if (profile?.account_locked_until && new Date(profile.account_locked_until) > new Date()) {
         const lockTime = new Date(profile.account_locked_until).toLocaleTimeString()
         throw new Error(`Account is locked until ${lockTime} due to multiple failed login attempts`)
       }
 
-      // Check if this is a trusted device
-      const { data: trustedDevice } = await supabase
-        .from("user_devices")
-        .select("is_trusted")
-        .eq("user_id", profile.id)
-        .eq("device_fingerprint", deviceFingerprint)
-        .single()
+      // Check if this is a trusted device (only if profile exists)
+      if (profile) {
+        const { data: trustedDevice } = await supabase
+          .from("user_devices")
+          .select("is_trusted")
+          .eq("user_id", profile.id)
+          .eq("device_fingerprint", deviceFingerprint)
+          .single()
 
-      // If not a trusted device, we'll need additional verification
-      if (!trustedDevice?.is_trusted && !isNewAccount) {
-        setRequiresDeviceVerification(true)
-        // In a real app, you'd send an SMS/email here
-        return
+        // If not a trusted device, we'll need additional verification
+        if (!trustedDevice?.is_trusted && !isNewAccount) {
+          setRequiresDeviceVerification(true)
+          // In a real app, you'd send an SMS/email here
+          return
+        }
       }
 
-      // Attempt sign in with email (from username lookup)
+      // Attempt sign in with email directly
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: profile.email,
+        email: credentials.email,
         password: credentials.password
       })
 
       if (authError) {
-        // Increment failed attempts
-        const newFailedAttempts = (profile.failed_login_attempts || 0) + 1
+        // Increment failed attempts if profile exists
+        const newFailedAttempts = (profile?.failed_login_attempts || 0) + 1
         const updates: any = { failed_login_attempts: newFailedAttempts }
         
         // Lock account after 3 failed attempts
@@ -122,60 +97,67 @@ export function SecureSigninForm() {
           updates.account_locked_until = lockUntil.toISOString()
         }
         
-        await supabase
-          .from("profiles")
-          .update(updates)
-          .eq("id", profile.id)
+        if (profile) {
+          await supabase
+            .from("profiles")
+            .update(updates)
+            .eq("id", profile.id)
+        }
 
         // Log failed attempt
         await supabase
           .from("login_attempts")
           .insert({
-            username: credentials.username,
+            email: credentials.email,
             ip_address: window.location.hostname,
             device_fingerprint: deviceFingerprint,
             success: false,
-            failure_reason: "Invalid password"
+            failure_reason: "Invalid credentials"
           })
 
-        throw new Error("Invalid username or password")
+        throw new Error("Invalid email or password")
       }
 
-      // Reset failed attempts on successful login
-      await supabase
+      // Get the user's profile after successful auth
+      const { data: userProfile } = await supabase
         .from("profiles")
-        .update({ 
-          failed_login_attempts: 0,
-          account_locked_until: null 
-        })
-        .eq("id", profile.id)
+        .select("id, role")
+        .eq("auth_user_id", data.user?.id)
+        .single()
+
+      if (userProfile) {
+        // Reset failed attempts on successful login
+        await supabase
+          .from("profiles")
+          .update({ 
+            failed_login_attempts: 0,
+            account_locked_until: null 
+          })
+          .eq("id", userProfile.id)
+      }
 
       // Log successful attempt
       await supabase
         .from("login_attempts")
         .insert({
-          username: credentials.username,
+          email: credentials.email,
           ip_address: window.location.hostname,
           device_fingerprint: deviceFingerprint,
           success: true
         })
 
       // Update or create device record
-      await supabase
-        .from("user_devices")
-        .upsert({
-          user_id: profile.id,
-          device_fingerprint: deviceFingerprint,
-          last_used: new Date().toISOString(),
-          is_trusted: isNewAccount // Trust first device after signup
-        })
+      if (userProfile) {
+        await supabase
+          .from("user_devices")
+          .upsert({
+            user_id: userProfile.id,
+            device_fingerprint: deviceFingerprint,
+            last_used: new Date().toISOString(),
+            is_trusted: isNewAccount // Trust first device after signup
+          })
+      }
 
-      // Get user role for proper redirect
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", profile.id)
-        .single()
 
       // Redirect based on role
       switch (userProfile?.role) {
@@ -214,7 +196,7 @@ export function SecureSigninForm() {
       const { data: profile } = await supabase
         .from("profiles")
         .select("id")
-        .eq("username", credentials.username.toUpperCase())
+        .eq("email", credentials.email)
         .single()
 
       if (profile) {
@@ -306,23 +288,23 @@ export function SecureSigninForm() {
 
         <form onSubmit={handleSignin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="email">Email</Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                placeholder="CRD-KE-2024-A7B9X"
-                value={credentials.username}
-                onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
-                className="pl-10 font-mono"
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={credentials.email}
+                onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
+                className="pl-10"
                 required
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Enter the username provided during registration
+              Enter the email you used during registration
             </p>
           </div>
 
@@ -371,10 +353,6 @@ export function SecureSigninForm() {
           </Button>
 
           <div className="text-center space-y-2 pt-4">
-            <Link href="/auth/forgot-username" className="text-sm text-primary hover:underline">
-              Forgot Username?
-            </Link>
-            <span className="text-sm text-muted-foreground mx-2">•</span>
             <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
               Forgot Password?
             </Link>

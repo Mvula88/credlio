@@ -1,13 +1,16 @@
 import { createHash } from 'crypto'
 
 /**
- * Generate a unique username for banking-style authentication
+ * Generate a unique customer ID for reference (not for authentication)
  */
-export function generateUsername(countryCode: string): string {
+export function generateCustomerId(countryCode: string): string {
   const year = new Date().getFullYear()
   const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase()
   return `CRD-${countryCode.toUpperCase()}-${year}-${randomPart}`
 }
+
+// Keep old function name for backward compatibility during migration
+export const generateUsername = generateCustomerId
 
 /**
  * Hash sensitive data (ID numbers) for secure storage

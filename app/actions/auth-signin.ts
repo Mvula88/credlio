@@ -5,8 +5,7 @@ import { headers } from "next/headers"
 import { verifyIpLocation } from "@/lib/services/geolocation-verification"
 
 interface SigninData {
-  username?: string
-  email?: string
+  email: string
   password: string
 }
 
@@ -28,31 +27,9 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
     const ipAddress = forwardedFor?.split(',')[0] || realIP || null
     const userAgent = headersList.get('user-agent') || null
     
-    let emailToUse = data.email
-    
-    // If username is provided instead of email, look up the email
-    if (data.username && !data.email) {
-      const { data: profile, error: profileLookupError } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("username", data.username.toUpperCase())
-        .single()
-      
-      if (profileLookupError || !profile) {
-        console.error("Username lookup error:", profileLookupError)
-        return { error: "Invalid username or password" }
-      }
-      
-      emailToUse = profile.email
-    }
-    
-    if (!emailToUse) {
-      return { error: "Email or username is required" }
-    }
-    
-    // Attempt to sign in
+    // Attempt to sign in directly with email
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: emailToUse,
+      email: data.email,
       password: data.password,
     })
     
@@ -72,7 +49,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
           if (profile) {
             await supabase.from("blocked_access_attempts").insert({
               user_id: profile.id,
-              email: emailToUse,
+              email: data.email,
               ip_address: ipAddress,
               registered_country_code: (profile.countries as any)?.code,
               attempt_type: 'login',
@@ -117,7 +94,7 @@ export async function signinUser(data: SigninData): Promise<SigninResult> {
     const locationVerification = await verifyIpLocation(ipAddress, registeredCountryCode)
     
     console.log('Login location verification:', {
-      email: emailToUse,
+      email: data.email,
       registeredCountry: registeredCountryCode,
       detectedCountry: locationVerification.detectedCountry,
       verified: locationVerification.verified,
