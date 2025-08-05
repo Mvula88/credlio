@@ -63,10 +63,13 @@ export function SecureSigninForm() {
       }
 
       // After successful password validation, send OTP for additional security
+      // Note: Supabase sends a magic link with the OTP token embedded
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: credentials.email,
         options: {
           shouldCreateUser: false,
+          // The magic link will contain the OTP token that can be extracted
+          emailRedirectTo: `${window.location.origin}/auth/verify-otp`,
         }
       })
 
@@ -111,7 +114,7 @@ export function SecureSigninForm() {
         // Show OTP verification screen
         setUserEmail(credentials.email)
         setRequiresOTP(true)
-        toast.success("Verification code sent to your email")
+        toast.success("Check your email for the verification link")
         return
       }
 
@@ -237,12 +240,13 @@ export function SecureSigninForm() {
         email: userEmail,
         options: {
           shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/auth/verify-otp`,
         }
       })
 
       if (error) throw error
       
-      toast.success("New verification code sent to your email")
+      toast.success("New verification link sent to your email")
     } catch (error: any) {
       throw new Error("Failed to resend verification code")
     }

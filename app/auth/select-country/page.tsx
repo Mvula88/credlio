@@ -7,10 +7,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Globe, Loader2, MapPin } from "lucide-react"
-import type { Country, SupportedCountry } from "@/lib/types/bureau"
+import type { SupportedCountry } from "@/lib/types/bureau"
+
+// Database country type (actual structure)
+interface DbCountry {
+  id: string
+  name: string
+  code: string
+  currency_code: string
+  created_at: string
+}
+
+// Country flag mapping - 16 African countries
+const countryFlags: { [key: string]: string } = {
+  'NG': '🇳🇬',
+  'KE': '🇰🇪',
+  'UG': '🇺🇬',
+  'ZA': '🇿🇦',
+  'GH': '🇬🇭',
+  'TZ': '🇹🇿',
+  'RW': '🇷🇼',
+  'ZM': '🇿🇲',
+  'NA': '🇳🇦',
+  'BW': '🇧🇼',
+  'MW': '🇲🇼',
+  'SN': '🇸🇳',
+  'ET': '🇪🇹',
+  'CM': '🇨🇲',
+  'SL': '🇸🇱',
+  'ZW': '🇿🇼'
+}
 
 export default function SelectCountryPage() {
-  const [countries, setCountries] = useState<Country[]>([])
+  const [countries, setCountries] = useState<DbCountry[]>([])
   const [selectedCountry, setSelectedCountry] = useState<SupportedCountry | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -30,27 +59,18 @@ export default function SelectCountryPage() {
       const { data, error } = await supabase
         .from("countries")
         .select("*")
-        .eq("active", true)
         .order("name")
 
       if (error) {
         console.error("Error fetching countries:", error)
         setError("Failed to load countries. Please refresh the page.")
-        // Set some default countries if fetch fails
-        const defaultCountries = [
-          { id: "ng", code: "NG", name: "Nigeria", flag: "🇳🇬", active: true },
-          { id: "ke", code: "KE", name: "Kenya", flag: "🇰🇪", active: true },
-          { id: "ug", code: "UG", name: "Uganda", flag: "🇺🇬", active: true },
-          { id: "za", code: "ZA", name: "South Africa", flag: "🇿🇦", active: true },
-          { id: "gh", code: "GH", name: "Ghana", flag: "🇬🇭", active: true },
-          { id: "tz", code: "TZ", name: "Tanzania", flag: "🇹🇿", active: true },
-          { id: "rw", code: "RW", name: "Rwanda", flag: "🇷🇼", active: true },
-          { id: "zm", code: "ZM", name: "Zambia", flag: "🇿🇲", active: true },
-        ]
-        setCountries(defaultCountries)
       } else {
-        setCountries(data || [])
-        if (!data || data.length === 0) {
+        // Filter to only show the 16 African countries
+        const africanCountries = (data || []).filter(country => 
+          countryFlags.hasOwnProperty(country.code)
+        )
+        setCountries(africanCountries)
+        if (!africanCountries || africanCountries.length === 0) {
           setError("No countries available. Please contact support.")
         }
       }
@@ -189,7 +209,7 @@ export default function SelectCountryPage() {
                     setError(null)
                   }}
                 >
-                  <span className="text-2xl">{country.flag || "🌍"}</span>
+                  <span className="text-2xl">{countryFlags[country.code] || "🌍"}</span>
                   <span className="text-center text-xs font-medium">{country.name}</span>
                 </Button>
               ))}

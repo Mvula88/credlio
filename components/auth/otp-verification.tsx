@@ -122,15 +122,19 @@ export function OTPVerification({ email, onVerify, onResend, onCancel }: OTPVeri
         <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
           <ShieldCheck className="h-6 w-6 text-blue-600" />
         </div>
-        <CardTitle>Verify Your Email</CardTitle>
+        <CardTitle>Check Your Email</CardTitle>
         <CardDescription>
-          We've sent a 6-digit code to <strong>{email}</strong>
+          We've sent a verification email to <strong>{email}</strong>.
+          <br />
+          <span className="text-xs mt-2 block">
+            Click the magic link in the email to sign in instantly, or copy the 6-digit code from the link and paste it below.
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
           <Label htmlFor="otp" className="text-center block mb-3">
-            Enter verification code
+            Or manually enter the verification code
           </Label>
           <div className="flex gap-2 justify-center">
             {otp.map((digit, index) => (
@@ -207,7 +211,8 @@ export function OTPVerification({ email, onVerify, onResend, onCancel }: OTPVeri
         </div>
 
         <div className="text-center text-sm text-muted-foreground">
-          <p>Didn't receive the code? Check your spam folder</p>
+          <p>Didn't receive the email? Check your spam folder</p>
+          <p className="mt-2 text-xs">Click the link in the email for instant verification</p>
         </div>
       </CardContent>
     </Card>
