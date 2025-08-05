@@ -71,8 +71,7 @@ export function SecureSigninForm() {
         .eq("auth_user_id", data.user.id)
         .single()
 
-      // Generate and store device fingerprint
-      const deviceFingerprint = generateDeviceFingerprint(headers)
+      // Device fingerprint already generated above
       
       if (profile?.id) {
         await supabase
