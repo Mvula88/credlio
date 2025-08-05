@@ -71,7 +71,7 @@ export function SecureSigninForm() {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: credentials.email,
         options: {
-          shouldCreateUser: false,
+          shouldCreateUser: true,
         }
       })
 
