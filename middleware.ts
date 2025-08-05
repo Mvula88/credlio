@@ -35,6 +35,7 @@ export async function middleware(req: NextRequest) {
     "/personal-admin",
     "/profile",
     "/notifications",
+    "/messages",
   ]
 
   // Auth routes that should redirect if already logged in

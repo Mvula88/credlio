@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Menu, X, User, Settings, LogOut, ChevronDown, Shield, Globe } from "lucide-react"
+import { Menu, X, User, Settings, LogOut, ChevronDown, Shield, Globe, MessageSquare } from "lucide-react"
 import { CountryInfoBadge, TravelBanner } from "@/components/country/country-info-badge"
 
 export function Header() {
@@ -102,6 +102,12 @@ export function Header() {
                       <Link href={getDashboardLink()} className="flex items-center">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/messages" className="flex items-center">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Messages
                       </Link>
                     </DropdownMenuItem>
                     {profile?.role === "admin" && (
