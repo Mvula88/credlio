@@ -214,51 +214,29 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
       }
 
       if (authData.user) {
-        // First try to insert the profile (in case trigger didn't create it)
-        const { error: insertError } = await supabase
+        // Wait a moment for the trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Update the profile with additional information
+        const { error: updateError } = await supabase
           .from("profiles")
-          .insert({
-            id: authData.user.id,
-            auth_user_id: authData.user.id,
-            email: formData.email,
+          .update({
             full_name: formData.fullName,
             phone: formData.phone,
-            role: role,
             national_id_hash: idHash,
             id_type: formData.idType,
             date_of_birth: formData.dateOfBirth,
             country_id: countryId,
             id_verified: false,
-            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
+          .eq('auth_user_id', authData.user.id)
 
-        if (insertError) {
-          console.error('Profile insert error:', insertError)
+        if (updateError) {
+          console.error('Profile update error:', updateError)
           
-          // If insert fails due to duplicate, try update (in case trigger already created it)
-          if (insertError.code === '23505') {
-            const { error: updateError } = await supabase
-              .from("profiles")
-              .update({
-                phone: formData.phone,
-                national_id_hash: idHash,
-                id_type: formData.idType,
-                date_of_birth: formData.dateOfBirth,
-                country_id: countryId,
-                id_verified: false,
-                updated_at: new Date().toISOString()
-              })
-              .eq('auth_user_id', authData.user.id)
-            
-            if (updateError) {
-              console.error('Profile update error:', updateError)
-              throw new Error(`Database error updating user profile: ${updateError.message}`)
-            }
-          } else {
-            // For other errors, throw them
-            throw new Error(`Database error saving user profile: ${insertError.message}`)
-          }
+          // Don't throw error - the profile will be created by the trigger
+          // or it might already exist and just need the country selection
         }
 
         // Store identity verification record

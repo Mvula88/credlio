@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js"
-import dotenv from "dotenv"
-import type { Database } from "../lib/types/database"
+import * as dotenv from "dotenv"
+import * as path from "path"
 
 // Load environment variables from .env.local
-dotenv.config({ path: ".env.local" })
+dotenv.config({ path: path.resolve(__dirname, "../.env.local") })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -16,60 +16,89 @@ if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
 
 async function verifySupabaseSetup() {
   console.log("🔍 Verifying Supabase setup...")
+  console.log("=====================================\n")
 
   // Create a Supabase client with the service role key
-  const supabase = createClient<Database>(supabaseUrl!, supabaseServiceKey!)
+  const supabase = createClient(supabaseUrl!, supabaseServiceKey!)
 
   try {
-    // Test connection by getting Supabase version
-    const { data, error } = await supabase.rpc("version")
-
-    if (error) {
-      throw error
+    // Test basic connection
+    console.log("1️⃣ Testing connection...")
+    const { count, error: testError } = await supabase
+      .from("profiles")
+      .select("*", { count: "exact", head: true })
+    
+    if (testError && testError.code !== "PGRST116") {
+      throw testError
     }
 
     console.log("✅ Successfully connected to Supabase!")
-    console.log(`📊 Supabase version: ${data}`)
 
-    // Check if essential tables exist
-    const { data: tables, error: tablesError } = await supabase
-      .from("information_schema.tables")
-      .select("table_name")
-      .eq("table_schema" as any, "public")
+    // Check essential tables by trying to query them
+    console.log("\n2️⃣ Checking essential tables:")
+    const tables = [
+      "profiles",
+      "countries", 
+      "subscriptions",
+      "blacklisted_borrowers",
+      "loan_requests",
+      "loan_offers",
+      "payments"
+    ]
 
-    if (tablesError) {
-      throw tablesError
+    const existingTables: string[] = []
+    const missingTables: string[] = []
+
+    for (const table of tables) {
+      const { error } = await supabase
+        .from(table)
+        .select("id", { count: "exact", head: true })
+        .limit(1)
+      
+      if (error && error.code === "42P01") {
+        missingTables.push(table)
+        console.log(`   ❌ ${table} - Not found`)
+      } else {
+        existingTables.push(table)
+        console.log(`   ✅ ${table} - Exists`)
+      }
     }
 
-    console.log("\n📋 Existing tables in your database:")
-    if (tables && tables.length > 0) {
-      tables.forEach((table: any) => {
-        console.log(`- ${table.table_name}`)
-      })
+    // Check auth configuration
+    console.log("\n3️⃣ Auth Configuration:")
+    console.log(`   ✅ Service Role Key: ${supabaseServiceKey.substring(0, 20)}...`)
+    console.log(`   ✅ Anon Key: ${supabaseAnonKey.substring(0, 20)}...`)
+    console.log(`   ✅ URL: ${supabaseUrl}`)
+
+    // Summary
+    console.log("\n📊 Summary:")
+    console.log("============")
+    console.log(`✅ Tables found: ${existingTables.length}`)
+    console.log(`❌ Tables missing: ${missingTables.length}`)
+    
+    if (missingTables.length > 0) {
+      console.log("\n⚠️  Missing tables need to be created:")
+      missingTables.forEach(t => console.log(`   - ${t}`))
+      console.log("\nRun the database setup scripts to create these tables.")
+    }
+
+    // Check if we can access profiles (RLS test)
+    console.log("\n4️⃣ Testing RLS on profiles table:")
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .limit(1)
+    
+    if (profileError) {
+      console.log("   ⚠️  RLS may be restricting access (this is normal)")
     } else {
-      console.log("No tables found. You need to run the setup scripts.")
+      console.log("   ✅ Can access profiles table")
     }
 
-    // Check if RLS is enabled
-    const { data: rlsData, error: rlsError } = await supabase
-      .from("information_schema.tables")
-      .select("table_name, has_table_privilege(table_name, 'SELECT') as can_select")
-      .eq("table_schema" as any, "public")
-
-    if (rlsError) {
-      throw rlsError
-    }
-
-    console.log("\n🔒 Row Level Security status:")
-    if (rlsData && rlsData.length > 0) {
-      rlsData.forEach((table: any) => {
-        console.log(
-          `- ${table.table_name}: ${table.can_select ? "Accessible" : "RLS may be restricting access"}`
-        )
-      })
-    }
-  } catch (error) {
-    console.error("❌ Error connecting to Supabase:", error)
+    console.log("\n✅ Supabase verification complete!")
+    
+  } catch (error: any) {
+    console.error("\n❌ Error:", error.message || error)
     process.exit(1)
   }
 }
