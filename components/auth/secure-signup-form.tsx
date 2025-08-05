@@ -214,42 +214,61 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
       }
 
       if (authData.user) {
-        // Wait a moment for the trigger to create the profile
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Update the profile with additional information
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            full_name: formData.fullName,
-            phone: formData.phone,
-            national_id_hash: idHash,
-            id_type: formData.idType,
-            date_of_birth: formData.dateOfBirth,
-            country_id: countryId,
-            id_verified: false,
-            updated_at: new Date().toISOString()
-          })
-          .eq('auth_user_id', authData.user.id)
+        try {
+          // Use the helper function to create or update profile
+          const { data: profileData, error: profileError } = await supabase
+            .rpc('create_or_update_profile', {
+              p_auth_user_id: authData.user.id,
+              p_email: formData.email,
+              p_full_name: formData.fullName,
+              p_phone: formData.phone,
+              p_role: role,
+              p_country_id: countryId,
+              p_national_id_hash: idHash,
+              p_id_type: formData.idType,
+              p_date_of_birth: formData.dateOfBirth
+            })
 
-        if (updateError) {
-          console.error('Profile update error:', updateError)
-          
-          // Don't throw error - the profile will be created by the trigger
-          // or it might already exist and just need the country selection
+          if (profileError) {
+            console.error('Profile creation/update error:', profileError)
+            // Continue anyway - profile might be created by trigger
+          }
+
+          // Get the profile ID
+          let profileId = profileData;
+          if (!profileId) {
+            // Try to get profile ID
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq('auth_user_id', authData.user.id)
+              .single()
+            
+            profileId = profile?.id
+          }
+
+          // Store identity verification record if we have a profile ID
+          if (profileId) {
+            const { error: verifyError } = await supabase
+              .from("identity_verifications")
+              .insert({
+                national_id_hash: idHash,
+                full_name: formData.fullName,
+                date_of_birth: formData.dateOfBirth,
+                id_type: formData.idType,
+                country_code: formData.country,
+                verified_profile_id: profileId
+              })
+            
+            if (verifyError) {
+              console.error('Identity verification error:', verifyError)
+              // Don't throw - this is not critical for signup
+            }
+          }
+        } catch (err) {
+          console.error('Error updating profile:', err)
+          // Don't throw - continue with signup flow
         }
-
-        // Store identity verification record
-        await supabase
-          .from("identity_verifications")
-          .insert({
-            national_id_hash: idHash,
-            full_name: formData.fullName,
-            date_of_birth: formData.dateOfBirth,
-            id_type: formData.idType,
-            country_code: formData.country,
-            verified_profile_id: authData.user.id
-          })
 
         // Handle invitation if present
         if (invitationCode && role === 'borrower') {
