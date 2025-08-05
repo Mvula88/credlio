@@ -119,15 +119,6 @@ export function SecureSigninForm() {
     }
   }
 
-          default:
-            router.push("/dashboard")
-        }
-      }
-    } catch (error: any) {
-      throw error
-    }
-  }
-
 
   return (
     <Card className="w-full max-w-md mx-auto">
