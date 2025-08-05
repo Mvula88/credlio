@@ -34,7 +34,6 @@ export async function middleware(req: NextRequest) {
     "/super-admin",
     "/personal-admin",
     "/profile",
-    "/messages",
     "/notifications",
   ]
 

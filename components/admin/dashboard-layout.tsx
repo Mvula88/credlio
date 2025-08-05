@@ -19,7 +19,6 @@ import {
   X,
   LogOut,
   UserX,
-  MessageSquare,
 } from "lucide-react"
 import { SignOutButton } from "@/components/auth/sign-out-button"
 import {
@@ -47,7 +46,6 @@ export function AdminDashboardLayout({ children, user }: AdminDashboardLayoutPro
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Blacklist", href: "/admin/blacklist", icon: UserX },
     { name: "Audit Logs", href: "/admin/audit-logs", icon: Shield },
-    { name: "Messages", href: "/admin/messages", icon: MessageSquare },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]
