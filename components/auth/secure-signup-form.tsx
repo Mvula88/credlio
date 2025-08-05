@@ -75,6 +75,48 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
     }
   }, [searchParams])
 
+  // Auto-detect country from IP
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        // Use public IP geolocation service (no auth required for signup)
+        const response = await fetch('https://ipapi.co/json/')
+        const data = await response.json()
+        
+        if (data.country_code) {
+          // Map 2-letter codes to our supported countries
+          const countryMapping: { [key: string]: string } = {
+            'NA': 'NA', // Namibia
+            'NG': 'NG', // Nigeria
+            'KE': 'KE', // Kenya
+            'GH': 'GH', // Ghana
+            'TZ': 'TZ', // Tanzania
+            'UG': 'UG', // Uganda
+            'ZA': 'ZA', // South Africa
+            'RW': 'RW', // Rwanda
+            'ZM': 'ZM', // Zambia
+            'BW': 'BW', // Botswana
+            'MW': 'MW', // Malawi
+            'SN': 'SN', // Senegal
+            'ET': 'ET', // Ethiopia
+            'CM': 'CM', // Cameroon
+            'SL': 'SL', // Sierra Leone
+            'ZW': 'ZW', // Zimbabwe
+          }
+          
+          const mappedCountry = countryMapping[data.country_code]
+          if (mappedCountry && !formData.country) {
+            setFormData(prev => ({ ...prev, country: mappedCountry }))
+          }
+        }
+      } catch (error) {
+        console.log('Could not auto-detect country:', error)
+      }
+    }
+    
+    detectCountry()
+  }, [])
+
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     

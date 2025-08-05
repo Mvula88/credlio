@@ -121,7 +121,7 @@ export function SecureSigninForm() {
       // Get the user's profile after successful auth
       const { data: userProfile } = await supabase
         .from("profiles")
-        .select("id, role, country")
+        .select("id, role, country_id")
         .eq("auth_user_id", data.user?.id)
         .single()
 
@@ -141,7 +141,7 @@ export function SecureSigninForm() {
 
 
       // Check if country is set
-      if (!userProfile?.country) {
+      if (!userProfile?.country_id) {
         router.push("/auth/select-country")
       } else {
         // Redirect based on role
@@ -186,7 +186,7 @@ export function SecureSigninForm() {
       // Get the user's profile after successful OTP verification
       const { data: userProfile } = await supabase
         .from("profiles")
-        .select("id, role, country")
+        .select("id, role, country_id")
         .eq("email", userEmail)
         .single()
 
@@ -207,7 +207,7 @@ export function SecureSigninForm() {
       }
 
       // Check if country is set
-      if (!userProfile?.country) {
+      if (!userProfile?.country_id) {
         router.push("/auth/select-country")
       } else {
         // Redirect based on role

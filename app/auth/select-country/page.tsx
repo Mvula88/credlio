@@ -122,12 +122,22 @@ export default function SelectCountryPage() {
         throw new Error("Profile not found")
       }
 
+      // Get country ID from country code
+      const { data: countryData } = await supabase
+        .from("countries")
+        .select("id")
+        .eq("code", selectedCountry)
+        .single()
+
+      if (!countryData) {
+        throw new Error("Selected country not found")
+      }
+
       // Update profile with country
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
-          country: selectedCountry,
-          home_country: selectedCountry,
+          country_id: countryData.id,
         })
         .eq("id", profile.id)
 
@@ -175,8 +185,7 @@ export default function SelectCountryPage() {
           </div>
           <CardTitle className="text-2xl">Select Your Country</CardTitle>
           <CardDescription>
-            Choose your country to continue. This helps us provide localized services and connect
-            you with users in your region.
+            Select your country to complete your profile setup
           </CardDescription>
         </CardHeader>
         <CardContent>
