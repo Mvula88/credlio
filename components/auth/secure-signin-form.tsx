@@ -11,15 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, User, Lock, AlertCircle, Eye, EyeOff, Shield, Smartphone } from "lucide-react"
 import { generateDeviceFingerprint } from "@/lib/auth/secure-auth-utils"
 import Link from "next/link"
-import { OTPVerification } from "./otp-verification"
 import { toast } from "sonner"
 
 export function SecureSigninForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [requiresOTP, setRequiresOTP] = useState(false)
-  const [userEmail, setUserEmail] = useState("")
   
   const [credentials, setCredentials] = useState({
     email: "",
@@ -52,7 +49,7 @@ export function SecureSigninForm() {
       // Skip profile checks for now to speed up login
       // These can be done after successful authentication
 
-      // First, validate password
+      // Sign in with password
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: credentials.email,
         password: credentials.password
@@ -63,66 +60,25 @@ export function SecureSigninForm() {
         throw new Error("Invalid email or password")
       }
 
-      // Password is correct, now sign out and send OTP
-      await supabase.auth.signOut()
-
-      // Send OTP (this will send an email with the code)
-      console.log("Sending OTP to:", credentials.email)
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: credentials.email,
-        options: {
-          shouldCreateUser: true,
-        }
-      })
-
-      if (otpError) {
-        console.error("OTP Error:", otpError)
-        throw new Error(otpError.message || "Failed to send verification code. Please try again.")
+      if (!data.user) {
+        throw new Error("Failed to sign in")
       }
 
-      // Show OTP verification screen
-      setUserEmail(credentials.email)
-      setRequiresOTP(true)
-      toast.success("We've sent a verification code to your email")
-      return
-
-    } catch (error: any) {
-      setError(error.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleOTPVerify = async (otp: string) => {
-    try {
-      // Verify OTP
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: userEmail,
-        token: otp,
-        type: 'email'
-      })
-
-      if (error) {
-        throw new Error("Invalid verification code")
-      }
-
-      // Get the user's profile after successful OTP verification
-      const { data: userProfile } = await supabase
+      // Get user profile
+      const { data: profile } = await supabase
         .from("profiles")
         .select("id, role, country_id")
-        .eq("email", userEmail)
+        .eq("auth_user_id", data.user.id)
         .single()
 
       // Generate and store device fingerprint
-      const headers = new Headers()
-      headers.append('User-Agent', window.navigator.userAgent)
       const deviceFingerprint = generateDeviceFingerprint(headers)
       
-      if (userProfile?.id) {
+      if (profile?.id) {
         await supabase
           .from("user_devices")
           .upsert({
-            user_id: userProfile.id,
+            user_id: profile.id,
             device_fingerprint: deviceFingerprint,
             last_used: new Date().toISOString(),
             is_trusted: true
@@ -130,11 +86,11 @@ export function SecureSigninForm() {
       }
 
       // Check if country is set
-      if (!userProfile?.country_id) {
+      if (!profile?.country_id) {
         router.push("/auth/select-country")
       } else {
         // Redirect based on role
-        switch (userProfile?.role) {
+        switch (profile?.role) {
           case "borrower":
             router.push("/borrower/dashboard")
             break
@@ -152,49 +108,26 @@ export function SecureSigninForm() {
             router.push("/dashboard")
         }
       }
+      
+      toast.success("Successfully signed in!")
+      return
+
+    } catch (error: any) {
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+          default:
+            router.push("/dashboard")
+        }
+      }
     } catch (error: any) {
       throw error
     }
   }
 
-  const handleOTPResend = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: userEmail,
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/auth/verify-otp`,
-        }
-      })
-
-      if (error) {
-        console.error("Resend OTP Error:", error)
-        throw error
-      }
-      
-      toast.success("New verification link sent to your email")
-    } catch (error: any) {
-      throw new Error("Failed to resend verification code")
-    }
-  }
-
-  const handleOTPCancel = () => {
-    setRequiresOTP(false)
-    setUserEmail("")
-    setError(null)
-  }
-
-  // Show OTP verification screen
-  if (requiresOTP) {
-    return (
-      <OTPVerification
-        email={userEmail}
-        onVerify={handleOTPVerify}
-        onResend={handleOTPResend}
-        onCancel={handleOTPCancel}
-      />
-    )
-  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
