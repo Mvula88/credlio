@@ -52,7 +52,7 @@ export function SecureSigninForm() {
       // Skip profile checks for now to speed up login
       // These can be done after successful authentication
 
-      // First, try to sign in to validate credentials
+      // First, validate password
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: credentials.email,
         password: credentials.password
@@ -62,107 +62,27 @@ export function SecureSigninForm() {
         throw new Error("Invalid email or password")
       }
 
-      // After successful password validation, send OTP for additional security
-      // Note: Supabase sends a magic link with the OTP token embedded
+      // Password is correct, now sign out and send OTP
+      await supabase.auth.signOut()
+
+      // Send OTP (this will send an email with the code)
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: credentials.email,
         options: {
           shouldCreateUser: false,
-          // The magic link will contain the OTP token that can be extracted
-          emailRedirectTo: `${window.location.origin}/auth/verify-otp`,
         }
       })
 
       if (otpError) {
-        console.error('OTP send error:', otpError)
-        // If OTP sending fails, continue with regular login flow
-        // This is a fallback for when email service is down
-        
-        // Get the user's profile and continue
-        const { data: userProfile } = await supabase
-          .from("profiles")
-          .select("id, role, country")
-          .eq("auth_user_id", data.user?.id)
-          .single()
-
-        // Redirect based on role
-        if (!userProfile?.country) {
-          router.push("/auth/select-country")
-        } else {
-          switch (userProfile?.role) {
-            case "borrower":
-              router.push("/borrower/dashboard")
-              break
-            case "lender":
-              router.push("/lender/dashboard")
-              break
-            case "admin":
-            case "super_admin":
-              router.push("/super-admin/dashboard")
-              break
-            case "country_admin":
-              router.push("/admin/country")
-              break
-            default:
-              router.push("/dashboard")
-          }
-        }
-      } else {
-        // Successfully sent OTP, now sign out temporarily and show OTP screen
-        await supabase.auth.signOut()
-        
-        // Show OTP verification screen
-        setUserEmail(credentials.email)
-        setRequiresOTP(true)
-        toast.success("Check your email for the verification link")
-        return
+        throw new Error("Failed to send verification code. Please try again.")
       }
 
-      // Get the user's profile after successful auth
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("id, role, country_id")
-        .eq("auth_user_id", data.user?.id)
-        .single()
+      // Show OTP verification screen
+      setUserEmail(credentials.email)
+      setRequiresOTP(true)
+      toast.success("We've sent a verification code to your email")
+      return
 
-      // Skip logging for now to speed up login
-      
-      // Update or create device record asynchronously (don't wait)
-      if (userProfile?.id) {
-        await supabase
-          .from("user_devices")
-          .upsert({
-            user_id: userProfile.id,
-            device_fingerprint: deviceFingerprint,
-            last_used: new Date().toISOString(),
-            is_trusted: isNewAccount // Trust first device after signup
-          })
-      }
-
-
-      // Check if country is set
-      if (!userProfile?.country_id) {
-        router.push("/auth/select-country")
-      } else {
-        // Redirect based on role
-        switch (userProfile?.role) {
-          case "borrower":
-            router.push("/borrower/dashboard")
-            break
-          case "lender":
-            router.push("/lender/dashboard")
-            break
-          case "admin":
-          case "super_admin":
-            router.push("/super-admin/dashboard")
-            break
-          case "country_admin":
-            router.push("/admin/country")
-            break
-          default:
-            router.push("/dashboard")
-        }
-      }
     } catch (error: any) {
       setError(error.message)
     } finally {

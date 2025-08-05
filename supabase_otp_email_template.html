@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Credlio Verification Code</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f9fafb;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 40px 40px 20px 40px; text-align: center;">
+              <div style="display: inline-block; padding: 12px; background-color: #3b82f6; border-radius: 12px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L2 7V12C2 16.5 4.23 20.68 7.62 23.15L12 24L16.38 23.15C19.77 20.68 22 16.5 22 12V7L12 2Z" fill="white"/>
+                </svg>
+              </div>
+              <h1 style="margin: 20px 0 0 0; color: #111827; font-size: 28px; font-weight: 700;">Credlio</h1>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 20px 40px;">
+              <h2 style="margin: 0 0 10px 0; color: #111827; font-size: 24px; font-weight: 600; text-align: center;">Verification Code</h2>
+              <p style="margin: 0 0 30px 0; color: #6b7280; font-size: 16px; line-height: 24px; text-align: center;">
+                Please enter this code to complete your sign in:
+              </p>
+              
+              <!-- OTP Code Box -->
+              <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 30px; border-radius: 12px; text-align: center; margin: 0 0 30px 0;">
+                <div style="font-family: 'Courier New', monospace; font-size: 42px; font-weight: 700; letter-spacing: 12px; color: #ffffff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                  {{ .Token | slice 0 6 }}
+                </div>
+              </div>
+              
+              <!-- Info -->
+              <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin: 0 0 20px 0;">
+                <p style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">
+                  <strong>Valid for:</strong> 60 minutes
+                </p>
+                <p style="margin: 0; color: #374151; font-size: 14px;">
+                  <strong>Requested from:</strong> {{ .SiteURL }}
+                </p>
+              </div>
+              
+              <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px; line-height: 20px; text-align: center;">
+                If you didn't request this code, you can safely ignore this email. Someone may have entered your email address by mistake.
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 40px 40px 40px; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 18px; text-align: center;">
+                This is an automated message from Credlio. Please do not reply to this email.
+              </p>
+              <p style="margin: 10px 0 0 0; color: #9ca3af; font-size: 12px; line-height: 18px; text-align: center;">
+                &copy; 2024 Credlio. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  
+  <!-- Hidden magic link for fallback -->
+  <div style="display: none !important; max-height: 0; overflow: hidden;">
+    <p>Or use this link: <a href="{{ .ConfirmationURL }}">{{ .ConfirmationURL }}</a></p>
+  </div>
+</body>
+</html>
