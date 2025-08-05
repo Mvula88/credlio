@@ -59,6 +59,7 @@ export function SecureSigninForm() {
       })
 
       if (authError) {
+        console.error("Auth Error:", authError)
         throw new Error("Invalid email or password")
       }
 
@@ -66,6 +67,7 @@ export function SecureSigninForm() {
       await supabase.auth.signOut()
 
       // Send OTP (this will send an email with the code)
+      console.log("Sending OTP to:", credentials.email)
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: credentials.email,
         options: {
@@ -74,7 +76,8 @@ export function SecureSigninForm() {
       })
 
       if (otpError) {
-        throw new Error("Failed to send verification code. Please try again.")
+        console.error("OTP Error:", otpError)
+        throw new Error(otpError.message || "Failed to send verification code. Please try again.")
       }
 
       // Show OTP verification screen
@@ -164,7 +167,10 @@ export function SecureSigninForm() {
         }
       })
 
-      if (error) throw error
+      if (error) {
+        console.error("Resend OTP Error:", error)
+        throw error
+      }
       
       toast.success("New verification link sent to your email")
     } catch (error: any) {
