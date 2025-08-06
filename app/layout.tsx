@@ -9,6 +9,7 @@ import { ClientProviders } from "@/components/providers/client-providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'),
   title: "Credlio - Lend Safely. Check First.",
   description: "Build trust before you lend or borrow. Comprehensive credit verification and risk assessment platform for secure lending decisions.",
   keywords: "credit verification, lending platform, risk assessment, credit reports, secure lending, borrower verification, trust platform",

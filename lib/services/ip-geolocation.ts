@@ -15,6 +15,15 @@ interface GeolocationResult {
  */
 export async function getCountryFromIP(ipAddress?: string): Promise<GeolocationResult> {
   try {
+    // Check if this is a private/localhost IP address
+    if (ipAddress && isPrivateIP(ipAddress)) {
+      console.log('Private/localhost IP detected, skipping geolocation')
+      return {
+        success: false,
+        error: 'Private IP address - geolocation not available',
+      }
+    }
+    
     // Try multiple services for redundancy
     const services = [
       // Primary: ipapi.co (free, no API key required)
@@ -78,8 +87,11 @@ export async function getCountryFromIP(ipAddress?: string): Promise<GeolocationR
           console.log('IP geolocation successful:', result)
           return result
         }
-      } catch (error) {
-        console.warn('Geolocation service failed:', error)
+      } catch (error: any) {
+        // Only log warning for non-private IP errors
+        if (!error?.message?.includes('Reserved IP') && !error?.message?.includes('reserved range')) {
+          console.warn('Geolocation service failed:', error)
+        }
         // Continue to next service
       }
     }
@@ -133,4 +145,52 @@ export function isDetectedCountrySupported(countryCode: string): boolean {
   ]
   
   return supportedCodes.includes(countryCode.toUpperCase())
+}
+
+/**
+ * Check if an IP address is private/localhost
+ */
+function isPrivateIP(ip: string): boolean {
+  // Check for localhost
+  if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
+    return true
+  }
+  
+  // Check for private IPv4 ranges
+  const parts = ip.split('.')
+  if (parts.length === 4) {
+    const first = parseInt(parts[0])
+    const second = parseInt(parts[1])
+    
+    // 10.0.0.0/8
+    if (first === 10) return true
+    
+    // 172.16.0.0/12
+    if (first === 172 && second >= 16 && second <= 31) return true
+    
+    // 192.168.0.0/16
+    if (first === 192 && second === 168) return true
+    
+    // 169.254.0.0/16 (link-local)
+    if (first === 169 && second === 254) return true
+    
+    // 127.0.0.0/8 (loopback)
+    if (first === 127) return true
+  }
+  
+  // Check for private IPv6 ranges
+  if (ip.includes(':')) {
+    const lowerIP = ip.toLowerCase()
+    
+    // Link-local
+    if (lowerIP.startsWith('fe80:')) return true
+    
+    // Unique local
+    if (lowerIP.startsWith('fc') || lowerIP.startsWith('fd')) return true
+    
+    // Loopback
+    if (lowerIP === '::1') return true
+  }
+  
+  return false
 }

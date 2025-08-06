@@ -30,12 +30,16 @@ export async function middleware(req: NextRequest) {
     "/dashboard",
     "/borrower",
     "/lender",
-    "/admin",
-    "/super-admin",
-    "/personal-admin",
     "/profile",
     "/notifications",
     "/messages",
+  ]
+  
+  // Admin routes that require special authentication
+  const adminRoutes = [
+    "/admin",
+    "/super-admin",
+    "/personal-admin",
   ]
 
   // Auth routes that should redirect if already logged in
@@ -49,8 +53,37 @@ export async function middleware(req: NextRequest) {
   ]
 
   const isProtectedRoute = protectedRoutes.some((route) => url.pathname.startsWith(route))
+  const isAdminRoute = adminRoutes.some((route) => url.pathname.startsWith(route))
   const isAuthRoute = authRoutes.some((route) => url.pathname.startsWith(route))
+  const adminSecretRoute = process.env.ADMIN_SECRET_ROUTE || 'sys-auth-2024'
+  const isSecureAdminPortal = url.pathname === `/${adminSecretRoute}`
 
+  // Special handling for secure admin portal - allow access without session
+  if (isSecureAdminPortal) {
+    return res
+  }
+  
+  // Block admin routes from normal access - must use secure portal
+  if (isAdminRoute) {
+    // Check if user came from secure admin portal
+    const adminVerified = req.headers.get('cookie')?.includes('admin_verified')
+    
+    if (!adminVerified && session) {
+      // Check if user has admin role
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("auth_user_id", session.user.id)
+        .single()
+        
+      if (profile && ['admin', 'super_admin', 'country_admin'].includes(profile.role)) {
+        // Admin trying to access directly - redirect to secure portal
+        url.pathname = `/${adminSecretRoute}`
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+  
   // If accessing protected route without session, redirect to signin
   if (isProtectedRoute && !session) {
     url.pathname = "/auth/signin"
@@ -153,26 +186,24 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(url)
       }
 
-      // Handle root path redirect based on role
+      // Handle root path redirect based on role - don't redirect admins
       if (url.pathname === "/") {
         switch (profile.role) {
           case "borrower":
             url.pathname = "/borrower/dashboard"
-            break
+            return NextResponse.redirect(url)
           case "lender":
             url.pathname = "/lender/dashboard"
-            break
+            return NextResponse.redirect(url)
           case "admin":
           case "super_admin":
-            url.pathname = "/super-admin/dashboard"
-            break
           case "country_admin":
-            url.pathname = "/admin/country"
-            break
+            // Don't auto-redirect admins - let them use the normal site
+            return res
           default:
             url.pathname = "/dashboard"
+            return NextResponse.redirect(url)
         }
-        return NextResponse.redirect(url)
       }
     }
   }

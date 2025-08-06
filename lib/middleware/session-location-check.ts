@@ -108,12 +108,14 @@ export async function checkSessionLocation(
       // Medium risk - monitor closely
       requiresAction = 'monitor'
       
-      // Log for monitoring
-      console.warn('Medium risk session:', {
-        userId: profile.id,
-        riskScore: locationVerification.riskScore,
-        flags: locationVerification.flags
-      })
+      // Only log for non-localhost IPs
+      if (!ipAddress || !isLocalhost(ipAddress)) {
+        console.warn('Medium risk session:', {
+          userId: profile.id,
+          riskScore: locationVerification.riskScore,
+          flags: locationVerification.flags
+        })
+      }
     }
     
     // Log the verification
@@ -193,4 +195,16 @@ export async function enforceSessionLocation(
   }
   
   return null // Continue with request
+}
+
+/**
+ * Check if an IP is localhost/private
+ */
+function isLocalhost(ip: string): boolean {
+  return ip === '127.0.0.1' || 
+         ip === '::1' || 
+         ip === 'localhost' ||
+         ip?.startsWith('192.168.') ||
+         ip?.startsWith('10.') ||
+         ip?.startsWith('172.')
 }
