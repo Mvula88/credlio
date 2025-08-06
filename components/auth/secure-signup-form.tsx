@@ -192,6 +192,8 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
 
       
       // Create auth user - Supabase will handle confirmation email via Resend SMTP
+      console.log('Starting signup process for:', formData.email)
+      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -206,12 +208,30 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
       })
 
       if (authError) {
-        console.error('Auth signup error:', authError)
+        console.error('Auth signup error:', {
+          message: authError.message,
+          status: authError.status,
+          code: authError.code,
+          details: authError
+        })
+        
+        // More specific error messages
         if (authError.message.includes('already registered')) {
           throw new Error('This email is already registered. Please sign in instead.')
+        } else if (authError.message.includes('Invalid email')) {
+          throw new Error('Please enter a valid email address.')
+        } else if (authError.message.includes('Password')) {
+          throw new Error('Password must be at least 6 characters.')
+        } else if (authError.message.includes('not enabled')) {
+          throw new Error('User signups are currently disabled. Please contact support.')
+        } else if (authError.message.includes('rate limit')) {
+          throw new Error('Too many signup attempts. Please try again later.')
         }
-        throw authError
+        
+        throw new Error(`Signup failed: ${authError.message}`)
       }
+      
+      console.log('Auth signup successful, user:', authData.user?.id)
 
       if (authData.user) {
         try {
@@ -230,8 +250,16 @@ export function SecureSignupForm({ role, selectedCountry }: SecureSignupFormProp
             })
 
           if (profileError) {
-            console.error('Profile creation/update error:', profileError)
-            // Continue anyway - profile might be created by trigger
+            console.error('Profile creation/update error:', {
+              message: profileError.message,
+              code: profileError.code,
+              details: profileError.details,
+              hint: profileError.hint
+            })
+            // Log but don't throw - profile might be created by trigger
+            console.log('Profile creation failed, will rely on trigger')
+          } else {
+            console.log('Profile created/updated successfully:', profileData)
           }
 
           // Get the profile ID
