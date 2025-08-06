@@ -326,7 +326,7 @@ export function LenderOverview({
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm">Short-term (< 30 days)</span>
+                      <span className="text-sm">Short-term (&lt; 30 days)</span>
                       <span className="text-sm font-medium">35%</span>
                     </div>
                     <Progress value={35} className="h-2" />
@@ -340,7 +340,7 @@ export function LenderOverview({
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm">Long-term (> 90 days)</span>
+                      <span className="text-sm">Long-term (&gt; 90 days)</span>
                       <span className="text-sm font-medium">20%</span>
                     </div>
                     <Progress value={20} className="h-2" />
