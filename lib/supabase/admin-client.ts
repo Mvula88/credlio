@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import type { Database } from "@/lib/types/database"
+import { createFetchWithTimeout } from "./fetch-with-timeout"
 
 // ⚠️ NEVER import this file in components or pages that get compiled for the frontend
 // Only use in server actions, API routes, and backend utilities
@@ -13,4 +14,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
   auth: { persistSession: false },
+  global: {
+    fetch: createFetchWithTimeout(30000), // 30 second timeout
+  },
 })

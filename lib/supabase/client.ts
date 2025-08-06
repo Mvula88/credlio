@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr"
+import { createFetchWithTimeout } from "./fetch-with-timeout"
 
 export const createSupabaseClient = () => {
   // Clear any corrupted cookies on the client side
@@ -20,6 +21,9 @@ export const createSupabaseClient = () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: {
+        fetch: createFetchWithTimeout(30000), // 30 second timeout
+      },
       cookies: {
         get(name: string) {
           if (typeof window === 'undefined') return ''
