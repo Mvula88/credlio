@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server-client';
+import { createServerSupabaseClient } from '@/lib/supabase/server-client';
 import { ChatContainer } from '@/components/chat/chat-container';
 
 export default async function MessagesPage() {
-  const supabase = await createClient();
+  const supabase = createServerSupabaseClient();
   
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   

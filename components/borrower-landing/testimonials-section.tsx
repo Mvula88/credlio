@@ -66,7 +66,7 @@ export function BorrowerTestimonialsSection() {
       content: "The verification process was quick and easy. I love how transparent everything is - I can see exactly how lenders view my profile.",
       rating: 5,
       avatar: "MC",
-      location: "Singapore",
+      location: "South Africa",
     },
     {
       name: "Amara Okonkwo",
