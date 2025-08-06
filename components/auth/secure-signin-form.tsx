@@ -50,6 +50,8 @@ export function SecureSigninForm() {
       // These can be done after successful authentication
 
       // Sign in with password
+      console.log("Attempting sign in for:", credentials.email)
+      
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: credentials.email,
         password: credentials.password
@@ -57,6 +59,9 @@ export function SecureSigninForm() {
 
       if (authError) {
         console.error("Auth Error:", authError)
+        if (authError.message.includes("Email not confirmed")) {
+          throw new Error("Please confirm your email before signing in. Check your inbox for the confirmation link.")
+        }
         throw new Error("Invalid email or password")
       }
 
@@ -64,12 +69,47 @@ export function SecureSigninForm() {
         throw new Error("Failed to sign in")
       }
 
-      // Get user profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id, role, country_id")
-        .eq("auth_user_id", data.user.id)
-        .single()
+      console.log("Auth successful, user ID:", data.user.id)
+
+      // Get user profile with retry logic
+      let profile = null
+      let retries = 3
+      
+      while (retries > 0 && !profile) {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, role, country_id")
+          .eq("auth_user_id", data.user.id)
+          .single()
+        
+        if (profileError) {
+          console.error("Profile fetch error:", profileError)
+          retries--
+          if (retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, 500))
+            continue
+          }
+        }
+        
+        profile = profileData
+      }
+      
+      if (!profile) {
+        console.error("No profile found for user:", data.user.id)
+        // Create basic profile if missing
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .insert({
+            auth_user_id: data.user.id,
+            email: data.user.email,
+            role: 'borrower', // Default role
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+        
+        profile = newProfile
+      }
 
       // Device fingerprint already generated above
       
@@ -84,31 +124,41 @@ export function SecureSigninForm() {
           })
       }
 
-      // Check if country is set
+      // Show success toast first
+      toast.success("Successfully signed in!")
+      
+      // Small delay to ensure session is properly set
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      // Determine redirect path
+      let redirectPath = "/dashboard"
+      
       if (!profile?.country_id) {
-        router.push("/auth/select-country")
+        redirectPath = "/auth/select-country"
       } else {
-        // Redirect based on role
         switch (profile?.role) {
           case "borrower":
-            router.push("/borrower/dashboard")
+            redirectPath = "/borrower/dashboard"
             break
           case "lender":
-            router.push("/lender/dashboard")
+            redirectPath = "/lender/dashboard"
             break
           case "admin":
           case "super_admin":
-            router.push("/super-admin/dashboard")
+            redirectPath = "/super-admin/dashboard"
             break
           case "country_admin":
-            router.push("/admin/country")
+            redirectPath = "/admin/country"
             break
           default:
-            router.push("/dashboard")
+            redirectPath = "/dashboard"
         }
       }
       
-      toast.success("Successfully signed in!")
+      console.log("Redirecting to:", redirectPath, "Role:", profile?.role)
+      
+      // Use window.location for more reliable redirect after auth
+      window.location.href = redirectPath
       return
 
     } catch (error: any) {
