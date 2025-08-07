@@ -1,5 +1,6 @@
-import { EnhancedCountryAdminDashboard } from "@/components/admin/enhanced-country-admin-dashboard"
+import { redirect } from "next/navigation"
 
-export default function CountryAdminDashboard() {
-  return <EnhancedCountryAdminDashboard />
+export default function CountryPage() {
+  // Redirect to the country dashboard
+  redirect("/admin/country/dashboard")
 }

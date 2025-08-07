@@ -2,6 +2,7 @@ import { getCurrentUserProfile } from "@/lib/supabase/auth-helpers"
 import { createServerSupabaseClient } from "@/lib/supabase/server-client"
 import { redirect } from "next/navigation"
 import { BorrowerOverview } from "@/components/borrower/dashboard/overview"
+import { RiskyStatusNotification } from "@/components/borrower/risky-status-notification"
 
 export const dynamic = "force-dynamic"
 
@@ -115,14 +116,20 @@ export default async function BorrowerDashboard() {
   }
 
   return (
-    <BorrowerOverview
-      profile={profile}
-      metrics={metrics}
-      activeLoans={activeLoans || []}
-      recentPayments={recentPayments || []}
-      pendingRequests={pendingRequests || []}
-      notifications={notifications || []}
-      creditHistory={creditHistory || []}
-    />
+    <div className="space-y-6">
+      {/* Risky Status Notification - Shows only if borrower is listed as risky */}
+      <RiskyStatusNotification borrowerId={profile.id} />
+      
+      {/* Main Dashboard */}
+      <BorrowerOverview
+        profile={profile}
+        metrics={metrics}
+        activeLoans={activeLoans || []}
+        recentPayments={recentPayments || []}
+        pendingRequests={pendingRequests || []}
+        notifications={notifications || []}
+        creditHistory={creditHistory || []}
+      />
+    </div>
   )
 }

@@ -103,6 +103,12 @@ export function LenderOverview({
           </p>
         </div>
         <div className="flex gap-3">
+          <Link href="/lender/report-defaulter">
+            <Button variant="destructive" size="lg" className="gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Report Defaulter
+            </Button>
+          </Link>
           <Link href="/lender/dashboard/borrowers/search">
             <Button variant="outline" size="lg" className="gap-2">
               <Search className="h-5 w-5" />
@@ -504,8 +510,8 @@ export function LenderOverview({
                 Browse Marketplace
               </Button>
             </Link>
-            <Link href="/lender/dashboard/risk/blacklist">
-              <Button variant="outline" className="w-full justify-start gap-2">
+            <Link href="/lender/report-defaulter">
+              <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:border-red-300">
                 <Shield className="h-4 w-4" />
                 Report Default
               </Button>

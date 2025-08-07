@@ -24,8 +24,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Ban, Search, AlertTriangle, User, Calendar, DollarSign, Loader2, Plus } from "lucide-react"
+import { Ban, Search, AlertTriangle, User, Calendar, DollarSign, Loader2, Plus, CheckCircle, FileText } from "lucide-react"
 import type { Blacklist, BorrowerReputation } from "@/lib/types/bureau"
+import { DeregisterBorrowerDialog } from "@/components/lender/deregister-borrower-dialog"
+import { useRouter } from "next/navigation"
 
 interface BlacklistManagementProps {
   lenderId: string
@@ -40,6 +42,8 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [connectedBorrowers, setConnectedBorrowers] = useState<any[]>([])
   const [addingBlacklist, setAddingBlacklist] = useState(false)
+  const [selectedForDeregistration, setSelectedForDeregistration] = useState<any>(null)
+  const [showDeregisterDialog, setShowDeregisterDialog] = useState(false)
   const [formData, setFormData] = useState({
     borrower_id: "",
     reason: "missed_payments" as const,
@@ -48,6 +52,7 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
   })
 
   const supabase = createClientComponentClient()
+  const router = useRouter()
 
   useEffect(() => {
     fetchData()
@@ -64,8 +69,8 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
 
   async function fetchData() {
     try {
-      // Fetch all blacklists (not just own)
-      const { data: blacklistData } = await supabase
+      // Try to fetch from blacklists table first
+      let { data: blacklistData, error } = await supabase
         .from("blacklists")
         .select(
           `
@@ -78,15 +83,70 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
           blacklisted_by_profile:profiles!blacklisted_by(
             id,
             full_name,
-            email
+            email,
+            company_name
           )
         `
         )
         .eq("status", "active")
         .order("created_at", { ascending: false })
 
-      setBlacklists(blacklistData || [])
-      setFilteredBlacklists(blacklistData || [])
+      // If blacklists table doesn't exist or has an error, try blacklisted_borrowers
+      if (error && error.code === '42P01') {
+        const { data: altData } = await supabase
+          .from("blacklisted_borrowers")
+          .select(
+            `
+            *,
+            borrower:profiles!borrower_profile_id(
+              id,
+              full_name,
+              email
+            ),
+            lender:profiles!lender_profile_id(
+              id,
+              full_name,
+              email,
+              company_name
+            )
+          `
+          )
+          .eq("deregistered", false)
+          .order("created_at", { ascending: false })
+
+        // Map the alternative structure to match expected format
+        blacklistData = altData?.map(item => ({
+          ...item,
+          borrower_id: item.borrower_profile_id,
+          blacklisted_by: item.lender_profile_id,
+          blacklisted_by_profile: item.lender,
+          status: 'active',
+          total_amount_defaulted: item.amount_owed,
+          evidence: {
+            reason_details: item.additional_notes
+          }
+        }))
+      }
+
+      // Group blacklists by borrower to count how many lenders reported each
+      const borrowerReportCounts = new Map()
+      blacklistData?.forEach(entry => {
+        const borrowerId = entry.borrower_id
+        if (!borrowerReportCounts.has(borrowerId)) {
+          borrowerReportCounts.set(borrowerId, new Set())
+        }
+        borrowerReportCounts.get(borrowerId).add(entry.blacklisted_by)
+      })
+
+      // Add report count to each entry
+      const enrichedData = blacklistData?.map(entry => ({
+        ...entry,
+        totalReports: borrowerReportCounts.get(entry.borrower_id)?.size || 1,
+        reportingLenders: Array.from(borrowerReportCounts.get(entry.borrower_id) || [])
+      }))
+
+      setBlacklists(enrichedData || [])
+      setFilteredBlacklists(enrichedData || [])
 
       // Fetch connected borrowers for add dialog
       const { data: connections } = await supabase
@@ -204,11 +264,11 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Ban className="h-5 w-5" />
-                Blacklist Management
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                Risky/Bad Borrowers List
               </CardTitle>
               <CardDescription>
-                View and manage blacklisted borrowers across the platform
+                View borrowers reported as risky or bad by lenders and the system
               </CardDescription>
             </div>
             <Button onClick={() => setShowAddDialog(true)} size="sm">
@@ -242,17 +302,44 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-                          <User className="h-5 w-5 text-red-600" />
+                          <AlertTriangle className="h-5 w-5 text-red-600" />
                         </div>
-                        <div>
-                          <p className="font-medium">{entry.borrower?.full_name || "Unknown"}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <p className="font-medium text-lg">{entry.borrower?.full_name || "Unknown"}</p>
+                            
+                            {/* PROMINENT WARNING BADGE */}
+                            <Badge className={`px-3 py-1 text-sm font-bold ${
+                              entry.totalReports > 2 ? 'bg-red-600 text-white' :
+                              entry.totalReports > 1 ? 'bg-orange-500 text-white' :
+                              'bg-yellow-500 text-white'
+                            }`}>
+                              ⚠️ RISKY/BAD BORROWER - Listed by {entry.totalReports} {entry.totalReports === 1 ? 'lender' : 'lenders'}
+                            </Badge>
+                          </div>
                           <p className="text-sm text-gray-600">{entry.borrower?.email}</p>
                         </div>
                       </div>
 
+                      {/* Warning Box */}
+                      <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded">
+                        <p className="text-sm font-semibold text-red-900">
+                          ⚠️ This borrower has been reported as risky/bad by:
+                        </p>
+                        <p className="text-sm text-red-800 mt-1">
+                          {entry.auto_generated ? (
+                            "System (Automatic detection based on payment history)"
+                          ) : (
+                            `${entry.blacklisted_by_profile?.company_name || entry.blacklisted_by_profile?.full_name} ${
+                              entry.totalReports > 1 ? `and ${entry.totalReports - 1} other lender(s)` : ''
+                            }`
+                          )}
+                        </p>
+                      </div>
+
                       <div className="flex flex-wrap gap-2">
                         {getReasonBadge(entry.reason)}
-                        {entry.auto_generated && <Badge variant="secondary">Auto-Generated</Badge>}
+                        {entry.auto_generated && <Badge variant="secondary">System Generated</Badge>}
                         <Badge variant="outline" className="text-xs">
                           <Calendar className="mr-1 h-3 w-3" />
                           {formatDate(entry.created_at)}
@@ -260,9 +347,9 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
                       </div>
 
                       {entry.total_amount_defaulted && (
-                        <div className="flex items-center gap-1 text-sm text-red-700">
+                        <div className="flex items-center gap-1 text-sm text-red-700 font-semibold">
                           <DollarSign className="h-3 w-3" />
-                          <span className="font-medium">
+                          <span>
                             {formatCurrency(entry.total_amount_defaulted)} defaulted
                           </span>
                         </div>
@@ -270,16 +357,42 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
 
                       {entry.evidence?.reason_details && (
                         <p className="mt-2 text-sm text-gray-700">
-                          {entry.evidence.reason_details}
+                          <strong>Details:</strong> {entry.evidence.reason_details}
                         </p>
                       )}
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">Reported by</p>
-                      <p className="text-sm font-medium">
-                        {entry.blacklisted_by_profile?.full_name || "System"}
-                      </p>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">Reported by</p>
+                        <p className="text-sm font-medium">
+                          {entry.auto_generated ? (
+                            <span className="text-blue-600">System</span>
+                          ) : (
+                            entry.blacklisted_by_profile?.company_name || entry.blacklisted_by_profile?.full_name
+                          )}
+                        </p>
+                      </div>
+                      
+                      {/* Deregister Button - Only show if this lender reported them or it's system-generated */}
+                      {(entry.blacklisted_by === lenderId || entry.auto_generated) && !entry.deregistered && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                          onClick={() => {
+                            setSelectedForDeregistration({
+                              blacklistId: entry.id,
+                              borrowerName: entry.borrower?.full_name || "Unknown",
+                              amountOwed: entry.total_amount_defaulted || entry.amount_owed || 0
+                            })
+                            setShowDeregisterDialog(true)
+                          }}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Remove from List
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -290,20 +403,33 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
           <Alert className="mt-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Note:</strong> Blacklist entries are visible to all lenders on the platform.
+              <strong>Note:</strong> Risky/bad borrower reports are visible to all lenders on the platform.
+              The system also automatically flags borrowers based on payment history.
               Only add entries for serious violations with proper evidence.
             </AlertDescription>
           </Alert>
+
+          {/* View Deregistration Requests Button */}
+          <div className="flex justify-end mt-4">
+            <Button
+              variant="outline"
+              onClick={() => router.push("/lender/deregistration-requests")}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              View Deregistration Requests
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Add Blacklist Dialog */}
+      {/* Add Risky Borrower Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Blacklist Entry</DialogTitle>
+            <DialogTitle>Report Risky/Bad Borrower</DialogTitle>
             <DialogDescription>
-              Report a borrower for serious violations. This will be visible to all lenders.
+              Report a borrower who has defaulted or shown risky behavior. This will be visible to all lenders.
             </DialogDescription>
           </DialogHeader>
 
@@ -391,6 +517,21 @@ export function BlacklistManagement({ lenderId, subscriptionTier }: BlacklistMan
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Deregister Borrower Dialog */}
+      {selectedForDeregistration && (
+        <DeregisterBorrowerDialog
+          blacklistId={selectedForDeregistration.blacklistId}
+          borrowerName={selectedForDeregistration.borrowerName}
+          amountOwed={selectedForDeregistration.amountOwed}
+          open={showDeregisterDialog}
+          onOpenChange={setShowDeregisterDialog}
+          onSuccess={() => {
+            fetchData()
+            setSelectedForDeregistration(null)
+          }}
+        />
+      )}
     </>
   )
 }
