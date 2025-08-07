@@ -69,7 +69,7 @@ export function useBorrowerRisk(borrowerId?: string | null, borrowerEmail?: stri
 
 // Component to display risk warning
 export function BorrowerRiskWarning({ email }: { email: string }) {
-  const { risk, loading } = useBorrowerRisk(email)
+  const { risk, loading } = useBorrowerRisk(null, email)
 
   if (loading) {
     return (
@@ -98,7 +98,7 @@ export function BorrowerRiskWarning({ email }: { email: string }) {
     <div className="space-y-2">
       {/* Main Warning Badge */}
       <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getBadgeColor()}`}>
-        ⚠️ {risk.message || "RISKY BORROWER"}
+        <span>⚠️</span> {risk.message || "RISKY BORROWER"}
       </div>
 
       {/* Detailed Warning Box */}
@@ -112,10 +112,10 @@ export function BorrowerRiskWarning({ email }: { email: string }) {
               Risk Assessment Warning
             </p>
             <ul className="mt-1 text-xs text-red-700 space-y-1">
-              <li>• Risk Score: {risk.risk_score}/100</li>
-              <li>• Total Reports: {risk.report_count}</li>
-              <li>• Reporting Lenders: {risk.reporting_lenders}</li>
-              <li>• Risk Level: {risk.risk_level.toUpperCase()}</li>
+              <li>Risk Score: {risk.risk_score}/100</li>
+              <li>Total Reports: {risk.report_count}</li>
+              <li>Reporting Lenders: {risk.reporting_lenders}</li>
+              <li>Risk Level: {risk.risk_level.toUpperCase()}</li>
             </ul>
           </div>
         </div>
