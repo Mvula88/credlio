@@ -226,6 +226,7 @@ export function LenderOverview({
         <TabsList>
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           <TabsTrigger value="portfolio">Portfolio Overview</TabsTrigger>
+          <TabsTrigger value="features">Risk & Verification</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="notifications">
             Notifications
@@ -401,6 +402,182 @@ export function LenderOverview({
           </div>
         </TabsContent>
 
+        <TabsContent value="features" className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Document Verification */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Document Verification</CardTitle>
+                    <CardDescription>
+                      Verify borrower documents before approval
+                    </CardDescription>
+                  </div>
+                  <Shield className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Advanced document verification system to ensure authenticity of borrower documents.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      ID/Passport Verification
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Proof of Income Validation
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Bank Statement Analysis
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      WhatsApp Call Verification
+                    </li>
+                  </ul>
+                  <Link href="/lender/new-verification">
+                    <Button className="w-full mt-4">Start Verification</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Blacklist Management */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Blacklist System</CardTitle>
+                    <CardDescription>
+                      Manage risky and defaulted borrowers
+                    </CardDescription>
+                  </div>
+                  <XCircle className="h-8 w-8 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Comprehensive blacklist system to protect your investments.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      Auto-blacklist after 7 days default
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      Risk score tracking
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      Cross-lender reporting
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      Deregistration requests
+                    </li>
+                  </ul>
+                  <Link href="/lender/dashboard/risk/blacklist">
+                    <Button variant="destructive" className="w-full mt-4">Manage Blacklist</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Loan Agreement Generation */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Loan Agreements</CardTitle>
+                    <CardDescription>
+                      Generate legally binding agreements
+                    </CardDescription>
+                  </div>
+                  <FileText className="h-8 w-8 text-purple-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Create professional loan agreements with strong legal protection.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Customizable terms & conditions
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Digital signature support
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Auto-blacklist warnings
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Legal action clauses
+                    </li>
+                  </ul>
+                  <Link href="/lender/requests">
+                    <Button variant="outline" className="w-full mt-4">View Loan Requests</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Loan Approval Checklist */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Approval Checklist</CardTitle>
+                    <CardDescription>
+                      Comprehensive verification before approval
+                    </CardDescription>
+                  </div>
+                  <Target className="h-8 w-8 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Complete checklist system to ensure safe lending decisions.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Identity verification
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Credit history check
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      WhatsApp call recording
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Risk assessment score
+                    </li>
+                  </ul>
+                  <Link href="/lender/approve/pending">
+                    <Button variant="outline" className="w-full mt-4">Review Pending Approvals</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
         <TabsContent value="analytics" className="space-y-4">
           <Card>
             <CardHeader>
@@ -491,7 +668,31 @@ export function LenderOverview({
           <CardDescription>Common tasks and tools</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+            <Link href="/lender/new-verification">
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <Shield className="h-4 w-4" />
+                Document Verification
+              </Button>
+            </Link>
+            <Link href="/lender/dashboard/risk/blacklist">
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <XCircle className="h-4 w-4" />
+                Blacklist Management
+              </Button>
+            </Link>
+            <Link href="/lender/approve/pending">
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Loan Approvals
+              </Button>
+            </Link>
+            <Link href="/lender/deregistration-requests">
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <UserPlus className="h-4 w-4" />
+                Deregistration Requests
+              </Button>
+            </Link>
             <Link href="/lender/dashboard/borrowers/search">
               <Button variant="outline" className="w-full justify-start gap-2">
                 <FileText className="h-4 w-4" />
@@ -510,10 +711,22 @@ export function LenderOverview({
                 Browse Marketplace
               </Button>
             </Link>
+            <Link href="/lender/loans/generate-agreement">
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <FileText className="h-4 w-4" />
+                Generate Agreement
+              </Button>
+            </Link>
+            <Link href="/lender/watchlist">
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <Target className="h-4 w-4" />
+                Manage Watchlist
+              </Button>
+            </Link>
             <Link href="/lender/report-defaulter">
               <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:border-red-300">
-                <Shield className="h-4 w-4" />
-                Report Default
+                <AlertCircle className="h-4 w-4" />
+                Report Defaulter
               </Button>
             </Link>
           </div>
