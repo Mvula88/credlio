@@ -13,9 +13,11 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
 
 export function HeroSection() {
   const router = useRouter()
+  const { user, loading } = useAuth()
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50">
@@ -73,26 +75,28 @@ export function HeroSection() {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Button 
-              size="lg" 
-              className="group px-8 py-6 text-lg shadow-lg transition-all hover:shadow-xl"
-              onClick={() => router.push("/auth/signup")}
-            >
-              <Users className="mr-2 h-5 w-5" />
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="px-8 py-6 text-lg"
-              onClick={() => router.push("/auth/signin")}
-            >
-              <FileSearch className="mr-2 h-5 w-5" />
-              Sign In
-            </Button>
-          </div>
+          {!loading && !user && (
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Button 
+                size="lg" 
+                className="group px-8 py-6 text-lg shadow-lg transition-all hover:shadow-xl"
+                onClick={() => router.push("/auth/signup")}
+              >
+                <Users className="mr-2 h-5 w-5" />
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="px-8 py-6 text-lg"
+                onClick={() => router.push("/auth/signin")}
+              >
+                <FileSearch className="mr-2 h-5 w-5" />
+                Sign In
+              </Button>
+            </div>
+          )}
 
           {/* Trust Indicators */}
           <div className="mt-16 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-gray-600">

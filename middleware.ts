@@ -31,16 +31,17 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req, res })
 
   // Define routes
-  const publicRoutes = ["/", "/auth/signin", "/auth/signup", "/borrower", "/lender-disclaimer", "/borrower-disclaimer"]
+  const publicRoutes = ["/borrower", "/lender-disclaimer", "/borrower-disclaimer"]
   const authRoutes = ["/auth/signin", "/auth/signup", "/signup/borrower", "/signup/lender", "/login/borrower", "/login/lender"]
   const protectedPrefixes = ["/dashboard", "/settings", "/profile", "/notifications", "/messages", "/borrower/dashboard", "/lender/dashboard", "/admin", "/super-admin"]
   
+  const isLandingPage = url.pathname === "/"
   const isPublicRoute = publicRoutes.includes(url.pathname)
   const isAuthRoute = authRoutes.some(route => url.pathname.startsWith(route))
   const isProtectedRoute = protectedPrefixes.some(prefix => url.pathname.startsWith(prefix))
   
-  // Allow public routes without session check
-  if (isPublicRoute && !isProtectedRoute) {
+  // Allow public routes and landing page without session check
+  if ((isPublicRoute || isLandingPage) && !isProtectedRoute) {
     return res
   }
 

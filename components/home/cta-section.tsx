@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
 
 export function CTASection() {
   const router = useRouter()
+  const { user, loading } = useAuth()
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 py-24">
@@ -42,25 +44,27 @@ export function CTASection() {
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col justify-center gap-4 sm:flex-row">
-          <Button 
-            size="lg" 
-            variant="secondary" 
-            className="group px-8 py-6 text-lg font-semibold shadow-xl transition-all hover:shadow-2xl"
-            onClick={() => router.push("/auth/signup")}
-          >
-            Get Started Free
-            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-white/30 bg-white/10 px-8 py-6 text-lg font-semibold text-white backdrop-blur transition-all hover:bg-white/20"
-            onClick={() => router.push("/pricing")}
-          >
-            View Pricing Plans
-          </Button>
-        </div>
+        {!loading && !user && (
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="group px-8 py-6 text-lg font-semibold shadow-xl transition-all hover:shadow-2xl"
+              onClick={() => router.push("/auth/signup")}
+            >
+              Get Started Free
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white/30 bg-white/10 px-8 py-6 text-lg font-semibold text-white backdrop-blur transition-all hover:bg-white/20"
+              onClick={() => router.push("/pricing")}
+            >
+              View Pricing Plans
+            </Button>
+          </div>
+        )}
 
         {/* Trust Badge */}
         <div className="mt-12">
