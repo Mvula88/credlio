@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -30,7 +30,7 @@ export function LoanBehaviorHistory({ borrowerId }: LoanBehaviorHistoryProps) {
   const [completedLoans, setCompletedLoans] = useState<LoanTracker[]>([])
   const [repaymentHistory, setRepaymentHistory] = useState<Repayment[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     fetchLoanData()

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -60,7 +60,7 @@ export function BorrowerProfile({ profile, stats }: BorrowerProfileProps) {
   const [copied, setCopied] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
   const router = useRouter()
 
   const [editData, setEditData] = useState({

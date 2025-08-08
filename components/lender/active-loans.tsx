@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,7 +18,7 @@ export function ActiveLoansSection({ lenderId }: { lenderId: string }) {
   const [selectedLoan, setSelectedLoan] = useState<ActiveLoan | null>(null)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [showChecklistDialog, setShowChecklistDialog] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     async function fetchLoans() {

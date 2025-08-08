@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -45,7 +45,7 @@ export function BorrowerReportsSection({
   const [showCalculator, setShowCalculator] = useState(false)
   const [calculatorBorrowerId, setCalculatorBorrowerId] = useState<string | null>(null)
   const [reportUsage, setReportUsage] = useState({ used: 0, limit: 0 })
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     fetchBorrowers()

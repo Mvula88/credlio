@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import {
   AlertCircle,
   Search,
@@ -69,7 +69,7 @@ export function UsersSection() {
     email: "",
     role: "",
   })
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     async function fetchUsers() {

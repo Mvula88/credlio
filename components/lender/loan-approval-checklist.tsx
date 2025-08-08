@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -106,7 +106,7 @@ export function LoanApprovalChecklist({
   const [whatsappCallRecorded, setWhatsappCallRecorded] = useState(false)
   const [documentHashes, setDocumentHashes] = useState<Record<string, string>>({})
   
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   // Initialize verification categories with all required documents
   const [verificationCategories, setVerificationCategories] = useState<VerificationCategory[]>([

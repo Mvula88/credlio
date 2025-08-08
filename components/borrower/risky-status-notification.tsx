@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -51,7 +51,7 @@ export function RiskyStatusNotification({ borrowerId }: { borrowerId: string }) 
   const [selectedEntry, setSelectedEntry] = useState<RiskyStatusEntry | null>(null)
   const [showRequestDialog, setShowRequestDialog] = useState(false)
   
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     if (borrowerId) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,7 +25,7 @@ export function MakeOfferForm({ loanRequest, lenderId, onSuccess }: MakeOfferFor
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const supabase = createClientComponentClient()
+  const supabase = getSupabaseClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

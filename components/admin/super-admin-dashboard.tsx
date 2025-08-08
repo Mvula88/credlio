@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Shield, Globe, Users, BarChart3, Settings } from "lucide-react"
 import { CountryAdminManagement } from "./country-admin-management"
 import { AdminUsersSection } from "./users-section"
@@ -29,7 +29,7 @@ export function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     fetchStats()

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { Search, Plus, Trash2, Edit, Globe, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -88,7 +88,7 @@ export function CountryAdminManagement() {
     },
   })
 
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     fetchData()

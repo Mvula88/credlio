@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { AlertCircle, CheckCircle, Search, Eye, Filter, MoreHorizontal } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -50,7 +50,7 @@ export function AdminBlacklistSection() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "resolved">("all")
   const [selectedEntry, setSelectedEntry] = useState<any>(null)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     async function fetchBlacklistEntries() {

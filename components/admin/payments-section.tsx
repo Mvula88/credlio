@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { getSupabaseClient } from "@/lib/supabase/singleton-client"
 import { AlertCircle, Search, CheckCircle, XCircle, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -26,7 +26,7 @@ export function PaymentsSection() {
   const [error, setError] = useState<string | null>(null)
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false)
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getSupabaseClient()
 
   useEffect(() => {
     async function fetchPayments() {
