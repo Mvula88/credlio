@@ -148,31 +148,17 @@ export function Header() {
                 </DropdownMenu>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline">
-                        Sign In <ChevronDown className="ml-1 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem asChild>
-                        <Link href="/auth/signin">Sign In</Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button>
-                        Sign Up <ChevronDown className="ml-1 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem asChild>
-                        <Link href="/auth/signup">Sign Up</Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button 
+                    variant="outline"
+                    onClick={() => router.push("/auth/signin")}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => router.push("/auth/signup")}
+                  >
+                    Sign Up
+                  </Button>
                 </div>
               )}
             </div>
