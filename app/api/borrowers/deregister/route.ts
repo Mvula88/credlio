@@ -249,17 +249,17 @@ export async function GET(request: Request) {
       .from("deregistration_requests")
       .select(`
         *,
-        borrower:profiles!deregistration_requests_borrower_profile_id_fkey(
+        borrower:borrower_profile_id(
           id,
           full_name,
           email
         ),
-        lender:profiles!deregistration_requests_lender_profile_id_fkey(
+        lender:lender_profile_id(
           id,
           full_name,
           company_name
         ),
-        blacklist:blacklisted_borrowers!deregistration_requests_blacklist_entry_id_fkey(
+        blacklist:blacklist_entry_id(
           id,
           reason,
           amount_owed

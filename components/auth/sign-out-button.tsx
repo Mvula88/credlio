@@ -11,9 +11,31 @@ export function SignOutButton() {
   const supabase = createClientComponentClient<Database>()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
+    try {
+      // Call the signout API to clear server-side session
+      await fetch('/api/auth/signout', { 
+        method: 'POST',
+        credentials: 'include'
+      })
+      
+      // Clear client-side auth
+      await supabase.auth.signOut()
+      
+      // Clear any cached data
+      if (typeof window !== 'undefined') {
+        // Clear localStorage
+        localStorage.clear()
+        // Clear sessionStorage  
+        sessionStorage.clear()
+      }
+      
+      // Force hard navigation to clear all client-side state
+      window.location.href = "/"
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Fallback to hard redirect even if there's an error
+      window.location.href = "/"
+    }
   }
 
   return (
