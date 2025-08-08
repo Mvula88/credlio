@@ -3,8 +3,16 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import type { Database } from "@/lib/types/database"
 
+// Type for cached profile data
+type CachedProfile = {
+  id: string
+  role: string
+  country_id: string | null
+  email_confirmed?: boolean
+}
+
 // Cache for user profiles to reduce database calls
-const profileCache = new Map<string, { profile: any; timestamp: number }>()
+const profileCache = new Map<string, { profile: CachedProfile; timestamp: number }>()
 const CACHE_TTL = 30000 // 30 seconds cache
 
 export async function middleware(req: NextRequest) {
@@ -52,7 +60,7 @@ export async function middleware(req: NextRequest) {
     const now = Date.now()
     
     // Check cache first
-    let profile = null
+    let profile: CachedProfile | null = null
     const cached = profileCache.get(userId)
     
     if (cached && (now - cached.timestamp) < CACHE_TTL) {
@@ -65,7 +73,7 @@ export async function middleware(req: NextRequest) {
         .eq("auth_user_id", userId)
         .single()
       
-      profile = data
+      profile = data as CachedProfile | null
       
       // Update cache
       if (profile) {
